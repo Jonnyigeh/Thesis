@@ -1,0 +1,62 @@
+\documentclass[UKenglish]{uiomasterthesis}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,graphicx, braket}
+\usepackage{babel, csquotes, textcomp, uiomasterfp, varioref}
+\usepackage{algorithm, algpseudocode}
+\usepackage[hidelinks, hypertexnames=false]{hyperref}
+\usepackage{listings}
+\usepackage{subfiles}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{color, xcolor}
+\usepackage[style=numeric-comp, backend=biber]{biblatex}
+
+\newcommand{\qedsymbol}{\rule{0.7em}{0.7em}}
+\lstset{ %
+inputpath=,
+backgroundcolor=\color{white!88!black},
+basicstyle={\ttfamily\scriptsize},
+commentstyle=\color{magenta},
+language=Python,
+morekeywords={True,False},
+tabsize=4,
+stringstyle=\color{green!55!black},
+frame=single,
+keywordstyle=\color{blue},
+showstringspaces=false,
+columns=fullflexible,
+keepspaces=true}
+
+\title{Time-evolution of quantum dots using the Multi-Configuration Time-Dependent Hartree-Fock method}
+\subtitle{A venture into the world of quantum computing by use of quantum dots}
+\author{Jonny Aarstad Igeh}
+\addbibresource{ref.bib}
+
+
+\begin{document}
+\uiomasterfp[
+    dept={Department of Physics},
+    program={Computational Science: Physics},
+    supervisors={Morten Hjorth-Jensen \and Oskar Mathias Leinonen},
+    long,
+    color=gray,
+    date={Spring 2025},
+    image={figs/quntum_lol.jpg}
+]
+\frontmatter{}
+\subfile{sections/abstract}
+\subfile{sections/xabstract}
+\tableofcontents
+\subfile{sections/preface}
+
+\mainmatter{}
+
+
+
+
+\backmatter{}
+\nocite{*}
+\printbibliography
+\appendix
+
+\end{document}
