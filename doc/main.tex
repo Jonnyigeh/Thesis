@@ -10,6 +10,14 @@
 \geometry{a4paper, margin=1in}
 \usepackage{color, xcolor}
 \usepackage[style=numeric-comp, backend=biber]{biblatex}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}%
+\fancyhead[R]{ \nouppercase{\rightmark}}
+\fancyhead[L]{ \nouppercase{\leftmark}}
+\fancyfoot[R]{ \thepage}
+\renewcommand{\headrulewidth}{0.1pt}
+
 
 \newcommand{\qedsymbol}{\rule{0.7em}{0.7em}}
 \lstset{ %
@@ -50,7 +58,9 @@ keepspaces=true}
 \subfile{sections/preface}
 
 \mainmatter{}
-
+\subfile{chapters/chap1.tex}
+\subfile{chapters/chap2.tex}
+\subfile{chapters/chap3.tex}
 
 
 

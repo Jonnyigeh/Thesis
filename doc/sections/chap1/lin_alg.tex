@@ -1,0 +1,69 @@
+\documentclass{subfiles}
+\begin{document}
+%% lina
+\section{Linear Algebra}
+Before we dig in to our main course, quantum mechanics, an appetizer is in order. We should revisit some basic linear algebra to set the tone of what we will see further on in this section.
+In short terms, quantum mechanics is built upon the physics of waves and linear algebra, and a strong fundation in these will let us gain a deeper understanding of the intricacies within quantum mechanics.
+In this thesis, we will be dealing with n-dimensional complex vector spaces, expressed in Dirac notation, which is a compact and powerful notation for linear algebra in quantum mechanics.
+%% hey paul
+\subsection*{Dirac notation}
+Introduced and named by the famous physicist Paul Dirac in his paper 'A new notation for quantum mechanics' \cite{dirac_1939}, this notation allows for linear algebra in quantum mechanics to be performed in a neat and compact way. Any $n$-dimensional complex vector in the vector space $V$ is represented as a ket, $\ket{\psi}$, and its conjugate transpose as a bra, $\bra{\psi}$. The inner of two vectors is then defined as:
+\begin{align*}
+        \braket{\psi|\phi} = \int \psi^*(x)\phi(x) dx
+\end{align*} 
+and any generic vector $\ket{i}$ can be written in terms of a basis set $\{\ket{i}\}$ as:
+\begin{align}
+    \ket{c} = \sum_i c_i \ket{i} = \sum_i \ket{i}\braket{i|c} 
+\end{align}
+where $c_i$ are the coefficients of the expansion. This naturally introduces the completeness relation, where the following holds:
+\begin{equation}
+    I = \sum_i \ket{i}\bra{i}
+\end{equation}
+where $I$ is the identity operator. This relation guarantees that the basis set $\{\ket{i}\}$ spans the entire vector space $V$.
+
+%% Ops
+\subsection*{Operators}
+A linear operator is a mathematical object that maps elements from one vector space $V$ to another space $W$. Meaning it is a mapping $\hat O: V \rightarrow W$, and has the following linearity properties:
+\begin{align*}
+    \hat O(\alpha \mathbf{x} + \beta\mathbf{y}) = \alpha \hat O\mathbf{x} + \beta \hat O\mathbf{y}
+\end{align*}
+for any $\mathbf{x}$, $\mathbf{y}$ in $V$ and $\alpha, \beta\in \mathbb{C}$. In the dirac notation then, we can write the following to show how an operator $\hat O$ acts on kets $\ket{i}$ in our space
+\begin{align*}
+    \hat O\ket{i} = \alpha \ket{j}
+\end{align*}
+We can also define the adjoint of this operator, $\hat O^\dagger$, which acts on the dual-vectors, the bras, in the same space
+\begin{align*}
+    \bra{i}\hat O^\dagger = \alpha^* \bra{j}
+\end{align*}
+One of the most useful properties of linear operators, is that given a basis $\{\ket{i}\}$, we can express the operators as matrices, where the matrix elements are as follows
+\begin{align*}
+    O_{ij} = \bra{i}\hat O\ket{j} = \sum_k\braket{i|k}O_{kj}
+\end{align*}
+and we can identify the action of the operator on the vector in this basis, as a matrix-vector product
+\begin{align*}
+    \hat O\ket{i} = \sum_j \ket{j}O_{ji}
+\end{align*}
+In quantum mechanics, there are some operators that are fundamental which need to be emphasized specifically. What these operators represent physically we will come back to in the section covering quantum mechanics, but there are some important mathematical properties of such operators.
+\begin{itemize}
+    \item \textbf{Unitary:} 
+    \item \textbf{Self-adjoint:}
+\end{itemize}
+
+%% mr hilbert
+\subsection*{Hilbert spaces}
+The concept of a Hilbert space is fundamental to quantum mechanics, as it provides the mathematical framework for which quantum states and operators are defined. A Hilbert space is a generalization of Euclidiean space, which allows for linear algerba and calculus to be applied to infinite-dimensional spaces. More formally, a Hilbert space is a complex complete inner product space, which means that it adhers to the following properties:
+\begin{itemize}
+    \item \textbf{Completeness:} Every Cauchy sequence in the space converges to a limit in the space.
+    \item \textbf{Positivity:} The inner product of a vector with itself is always positive, and zero if and only if the vector is the zero vector.
+    \item \textbf{Multiplicativity:} The inner product is linear in the second argument and conjugate linear in the first argument, meaning:
+    \begin{equation}
+        \braket{\beta\phi|\alpha_1\psi_1 + \alpha_2\psi_2} = \alpha_1\beta^*\braket{\phi|\psi_1} + \alpha_2\beta^*\braket{\phi|\psi_2} 
+    \end{equation}
+\end{itemize}
+The choice for conjugate linearity in the first agrument is by convention in many physics textbooks. Vectors living in Hilbert space is in quantum mechanics often coined state-vectors. \\ As we mentioned, a Hilbert space is an inner product space, and we define the inner product on the space $V$ as
+\begin{align*}
+    \braket{\phi|\psi} = \int \phi^* \psi dx
+\end{align*}
+for the complex-valued, continuous, state vectors $\ket{\phi}, \ket{\psi} \in V$. \\ We can use this inner product to define \emph{orthogonality} in the Hilbert space
+
+\end{document}
