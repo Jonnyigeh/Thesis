@@ -24,6 +24,7 @@ tqdm = "^4.66.5"
 quantum-systems = {path = "../quantum-systems", develop = true}
 matplotlib = "^3.9.2"
 seaborn = "^0.13.2"
+opt-einsum = "^3.4.0"
 
 
 [build-system]
