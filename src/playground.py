@@ -156,7 +156,7 @@ if __name__ == "__main__":
 
         h_old = basis.h
         u_old = basis.u
-        h_l_transf = c_l.conj().T @ h_r @ c_r
+        h_l_transf = c_l.conj().T @ h_l @ c_r
         h_r_transf = c_l.conj().T @ h_r @ c_r
         u_lr_transf = c_l.conj().T @ u_lr @ c_r
         h = np.kron(h_l_transf, np.eye(*h_l_transf.shape)) + np.kron(np.eye(*h_r_transf.shape), h_r_transf)
