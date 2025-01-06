@@ -23,6 +23,12 @@ class TDHF_Solver:
         self.system = system
         self.potential = potential
         self.verbose = verbose
+        try:
+            self.omega = self.potential.omega
+        except: 
+            self.omega = 0.25
+        self.h = self.system.h
+        self.u = self.system.u
     
     def fill_fock_matrix(self, C, t=0):
         """Fill the Fock matrix.
@@ -40,14 +46,14 @@ class TDHF_Solver:
         density_matrix = self.create_density_matrix(C)
         fock = np.einsum('ij, aibj->ab', density_matrix, self.system.u, dtype=np.complex128)        # Compute the two-body operator potential
         fock += self.system.h                                                                       # Add the one-body operator hamiltonian
-        fock += self.system.position[0] * self.laser_source(t)                                      # Add laser term
+        # fock += self.system.position[0] * self.laser_source(t)                                      # Add laser term
         
         return fock
     
     def laser_source(self, t=0, epsilon0=1.0):
         """Laser source term."""
 
-        return epsilon0 * np.sin(8 * self.potential.omega * t)
+        return epsilon0 * np.sin(8 * self.omega * t)
     
     def create_density_matrix(self, C):
         """Create the density matrix for the system.
@@ -78,7 +84,7 @@ class TDHF_Solver:
         """
         density_matrix = self.create_density_matrix(C)
         obd = np.zeros(len(self.system.grid))
-        obd = np.einsum('mi,mn,ni->i', self.system.spf, density_matrix, self.system.spf, dtype=np.complex128)
+        obd = np.einsum('mi,mn,ni->i', np.conj(self.system.spf), density_matrix, self.system.spf, dtype=np.complex128)
         
         return obd
 
@@ -94,7 +100,7 @@ class TDHF_Solver:
 
         return C_dot
     
-    def _solve_TIHF(self,t0=0.0, max_iters=100, epsilon=1e-6):
+    def _solve_TIHF(self,t0=0.0, max_iters=1000, epsilon=1e-18):
         """Solve the time-independent Hartree-Fock equations.
         
         Procedure:
@@ -116,16 +122,29 @@ class TDHF_Solver:
         energy, C = scipy.linalg.eigh(np.eye(self.system.h.shape[0]))
         fock = self.fill_fock_matrix(C, t=t0)
         converged=False
-        for i in tqdm.tqdm(range(max_iters)):
-            energy_new, C_ = scipy.linalg.eigh(fock)
-            if np.linalg.norm(energy_new - energy) / self.system.l < epsilon:
-                if self.verbose:
-                    print(f"Converged in {i} iterations.")
-                converged=True
-                break
-            C = C_
-            energy = energy_new
-            fock = self.fill_fock_matrix(C, t=t0)
+        delta_E = 0.0
+        e_list = []
+        with tqdm.tqdm(total=max_iters,
+                desc=rf"[Minimization progress, $\Delta E$ = {delta_E:.8f}]",
+                position=0,
+                colour="green",
+                leave=True) as pbar:
+            for i in range(max_iters):
+                energy_new, C_ = scipy.linalg.eigh(fock)
+                e_list.append(energy_new[0])
+                delta_E = np.linalg.norm(energy_new - energy) / self.system.l
+                pbar.set_description(
+                    rf"[Optimization progress, $\Delta E$ = {delta_E:.8f}]"
+                )
+                pbar.update(1)
+                if delta_E < epsilon:
+                    if self.verbose:
+                        print(f"Converged in {i} iterations.")
+                    converged=True
+                    break
+                C = C_
+                energy = energy_new
+                fock = self.fill_fock_matrix(C, t=t0)
 
         if not converged:
             if self.verbose:
@@ -140,7 +159,7 @@ class TDHF_Solver:
 
         return overlap
     
-    def solve(self, dt=0.001, t0=0.0):
+    def solve(self, dt=0.001, t0=0.0, epsilon=1e-6):
         """Solve the time-dependent Hartree-Fock equations
 
         Solves the time-dependent Hartree-Fock equations by integrating the right-hand side of the differential equation for the C-matrix using Runge-Kutta 4 (5) (scipy.integrate.RK45).
@@ -150,10 +169,10 @@ class TDHF_Solver:
             dt (float): Time step.
             t0 (float): Initial time.
         """
-        t_final = 2 * np.pi / self.potential.omega
+        t_final = 2 * np.pi / self.omega
         if self.verbose:
             print(f"Finding the inital state..")
-        energy, C0 = self._solve_TIHF(t0=t0)
+        energy, C0 = self._solve_TIHF(t0=t0, epsilon=epsilon)
         self.C0 = C0
         ground_state_overlap = []
         if self.verbose:
@@ -170,7 +189,7 @@ class TDHF_Solver:
                            colour='green'):
             integrator.step()
             C = integrator.y
-            C = np.matrix(np.reshape(C, self.system.h.shape))
+            C = np.matrix(np.reshape(C, self.h.shape))
             ground_state_overlap.append(self.ground_state_overlap(C))
         
         onebody_density = self.find_obd(C)
@@ -210,6 +229,5 @@ if __name__ == "__main__":
     system = qs.GeneralOrbitalSystem(n=2, basis_set=basis, anti_symmetrize=True)
     tdhf_solver = TDHF_Solver(system, potential)
     overlap, obd, C, t = tdhf_solver.solve()
-    breakpoint()
     tdhf_solver.visualize(obd=obd, overlap=overlap, t=t / (2 * np.pi))
     breakpoint()

@@ -19,12 +19,21 @@ where $\nabla^2$ is the Laplacian operator, and $V(\mathbf{r})$ is the potential
 
 This equation gives the equation of motion for the wavefunction, and describes how the wavefunction evolves in time.
 \subsection*{Second Quantization}
-As the earliest formulations of quantum mechanics introduced the ground-breaking concepts of quantized properties like energy, momentum and angular momentum, we can think of this formulation as a "first quantization". As quantum mechanics matured, it became clear that first quantization was not sufficient to describe many-body systems - especially systems where particles are created or annihilated. Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in state $i$?". As such, second quantization is often referred to as the "occupation number representation" of quantum mechanics. This moves the focus from the individual particles to the orbitals they occupy. This reformulation also reduces much of the manipulation of the wavefunction to algebraic operations, which makes numerical implementations much more efficient, and easy to understand.\ref{helgaker2013molecular}.
-\\ \\ In second quantization, we introduce a set of creation and annihilation operators, $a^\dagger$ and $a$, which create and annihilate particles in a given state. These operators satisfy the following commutation relations:
+As the earliest formulations of quantum mechanics introduced the ground-breaking concepts of quantized properties like energy, momentum and angular momentum, we can think of this formulation as a "first quantization". Here the observables are represented as operators with real eigenvalues and wavefunctions are assigned to individual particles.
+As quantum mechanics matured, it became clear that first quantization was not sufficient to describe many-body systems - especially systems with indistinguishable particles, such as fermionic structures, or systems where particles are created or annihilated, such as in chemical reactions, or in the study of elementary particles.\\  
+Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles, and makes the statefunction also expressed in terms of operators. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in \emph{state} $i$?". 
+As such, second quantization is often referred to as the "occupation number representation" of quantum mechanics. This moves the focus from the individual particles to the orbitals they occupy. This reformulation also reduces much of the manipulation of the wavefunction to algebraic operations, which makes numerical implementations much more efficient, and easy to understand.\ref{helgaker2013molecular}.
+\\ \\ In second quantization, we introduce a set of creation and annihilation operators, $a^\dagger$ and $a$, which create and annihilate particles in a given state. An important thing to note, is that these operators differ depending on the type of particles. For bosons, these operators satisfy the following commutation relations:
 \begin{align*}
     [a_i, a_j] = [a^\dagger_i, a^\dagger_j] = 0, \quad [a_i, a^\dagger_j] = \delta_{ij}
-\end{align*} 
-where $[A, B] = AB - BA$ 
+\end{align*}
+where $[A, B] = AB - BA$, and for fermions, the \emph{anti-}commutation relations are:
+\begin{align*}
+    \{a_i, a_j\} = \{a^\dagger_i, a^\dagger_j\} = 0, \quad \{a_i, a^\dagger_j\} = \delta_{ij}
+\end{align*}
+where $\{A, B\} = AB + BA$.
+\subsection{Fock Space}
+The vectors 
 \subsection*{Hartree-Fock}
 \subsection*{Morse potential}
 

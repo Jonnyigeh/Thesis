@@ -28,10 +28,9 @@ class BipartiteHartreeSolver:
         # Find the density matrices of the system
         D_l = np.einsum('pi, qi -> pq', c_l, c_l.conj())
         D_r = np.einsum('pi, qi -> pq', c_r, c_r.conj())
-
         # Calculate, and return the fock matrix.
         return (
-            h_l + np.diag(np.einsum('ijab, ab->ij', u_lr, D_r)),
+            h_l + np.diag(np.einsum('ijab, ab->ij', u_lr, D_r)), # Why ijab and not iajb? TODO: Check this
             h_r + np.diag(np.einsum('ijab, ab->ij', u_lr, D_l)),
         )
 
@@ -47,7 +46,7 @@ class BipartiteHartreeSolver:
 
         return h_l + h_r + u
 
-    def solve(self, max_iter=1000, tol=1e-10):
+    def solve(self, max_iter=10_000, tol=1e-10):
         for i in range(max_iter):
             f_l, f_r = self.construct_fock_matrices(
                 self.h_l, self.h_r, self.u_lr, self.c_l, self.c_r

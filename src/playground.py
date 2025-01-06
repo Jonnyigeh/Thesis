@@ -144,7 +144,7 @@ if __name__ == "__main__":
             k_b=9.0,
             d=15.0
         )
-        basis = qs.ODMorse(l=4, grid_length=1.25 * potential.d, num_grid_points=1001, _a=0.25, alpha=1.0, potential=potential)
+        basis = qs.ODMorse(l=8, grid_length=1.25 * potential.d, num_grid_points=1001, _a=0.25, alpha=1.0, potential=potential)
         grid = basis.grid
         u_lr = basis._ulr
         h_l = basis.h_l
@@ -156,9 +156,10 @@ if __name__ == "__main__":
 
         h_old = basis.h
         u_old = basis.u
-        h_l_transf = c_l.conj().T @ h_l @ c_r
-        h_r_transf = c_l.conj().T @ h_r @ c_r
-        u_lr_transf = c_l.conj().T @ u_lr @ c_r
+        h_l_transf = c_l.conj().T @ h_l @ c_l
+        h_r_transf = c_l.conj().T @ h_r @ c_l
+        # u_lr_transf = c_l.conj().T @ u_lr @ c_r
+        u_lr_transf = np.einsum('ai, bj, ijkl, kc, ld -> abcd', c_l.conj(), c_r.conj(), basis._ulr, c_l, c_r)
         h = np.kron(h_l_transf, np.eye(*h_l_transf.shape)) + np.kron(np.eye(*h_r_transf.shape), h_r_transf)
         u = u_lr_transf.reshape(*h.shape)
         H = h + u
@@ -166,6 +167,7 @@ if __name__ == "__main__":
         print(eps)
         breakpoint()
 
+        exit()
         lmbda = basis.a_lmbda
         a = basis.a
         b = basis.b
