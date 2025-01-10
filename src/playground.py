@@ -1,16 +1,105 @@
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning) # Ignores a warnings due to scipy.special version dislike of current python3.10 installation
+
 import numpy as np
 import scipy.special
 import matplotlib.pyplot as plt
 import matplotlib
+import numba
+import tqdm
 import seaborn as sns
 import scipy
 
 
 # from quantum-system package
 import quantum_systems as qs
-print('\n')
 from TDHF import TDHF_Solver
 from bipartite_hartree import BipartiteHartreeSolver
+
+@numba.njit
+def _shielded_coulomb(x_1, x_2, alpha, a):
+    return alpha / np.sqrt((x_1 - x_2) ** 2 + a**2)
+
+def TIHF(h, u, num_func, n_particles, max_iters=10_000, epsilon=1e-12, verbose=True):
+        """Solve the time-independent Hartree-Fock equations.
+        
+        Procedure:
+        Set an initial guess for the eigenvectors. Here we've used the identity matrix, so the initial guess is the standard computational basis. [1, 0, 0, 0, ...] etc.
+        Loop over the following steps:
+        - Compute the Fock matrix using the initial guess, where a density matrix is created from the eigenvectors, and used to solve the one- and two-body matrix elements.
+        - Diagonalize the Fock matrix to find the new eigenvectors.
+        - Check for convergence, and if the convergence criterion is not met, repeat the procedure with the new eigenvectors. 
+
+        args:
+            t0          (float): Initial time.
+            max_iters   (float): Maximum number of iterations.
+            epsilon     (float): Convergence tolerance.
+
+        returns: 
+            energy (np.nparray): The energy of the system, i.e the eigenvalues of the system Hamiltonian.
+            C (np.ndarray): The eigenvectors of the system Hamiltonian.
+        """
+        # Fock matrix
+        def fill_fock_matrix(C):
+            """Fill the Fock matrix.
+            
+            Computes the fock-operator matrix by usage of the one- and two-body matrix elements stored in quantum_system.GeneralOrbitalSystem,
+            with the density matrix containing the eigenvectors found in the "C"-matrix.
+
+            args:
+                C  (np.ndarray): Matrix of (current) eigenvectors
+            
+            returns:
+                fock (np.ndarray): Fock-operator matrix.
+            """
+            fock = np.zeros(h.shape, dtype=np.complex128)
+            density_matrix = np.zeros((h.shape[0],h.shape[0]), dtype=np.complex128)
+            for i in range(n_particles):
+                density_matrix += np.outer(np.conj(C[:, i]), C[:, i])
+            fock = np.einsum('ij, aibj->ab', density_matrix, u, dtype=np.complex128)        # Compute the two-body operator potential
+            fock += h                                                                       # Add the one-body operator hamiltonian
+
+            return fock, density_matrix
+
+        # energy, C = scipy.linalg.eigh(np.eye(h.shape[0]))#, subset_by_index=[0, num_func - 1])
+        energy, C = scipy.linalg.eigh(h)#, subset_by_index=[0, num_func - 1])
+        fock, density_matrix = fill_fock_matrix(C)
+        converged=False
+        delta_E = 0.0
+        e_list = []
+        with tqdm.tqdm(total=max_iters,
+                desc=rf"[Minimization progress, $\Delta E$ = {delta_E:.10f}]",
+                position=0,
+                colour="green",
+                leave=True) as pbar:
+            for i in range(max_iters):
+                energy_new, C_ = scipy.linalg.eigh(fock)#, subset_by_index=[0, num_func - 1])
+                e_list.append(energy_new[0])
+                delta_E = np.linalg.norm(energy_new - energy) / len(energy)
+                pbar.set_description(
+                    rf"[Optimization progress, $\Delta E$ = {delta_E:.10f}]"
+                )
+                pbar.update(1)
+                if delta_E < epsilon:
+                    if verbose:
+                        print(f"Converged in {i} iterations.")
+                    converged=True
+                    break
+                C = C_
+                energy = energy_new
+                # Update with damping
+                _, density_matrix_new = fill_fock_matrix(C)
+                density_matrix = alpha * density_matrix_new + (1 - alpha) * density_matrix
+                fock = np.einsum('ij, aibj-> ab', density_matrix, u, dtype=np.complex128) + h
+
+
+
+        if not converged:
+            # pass
+            if verbose:
+                raise RuntimeError(f"The solver failed to converged after maximum number (iters={max_iters}) of iterations was reached.")
+            
+        return energy, C, e_list
 
 def normalization(n, lmbda, c):
         return (
@@ -135,7 +224,7 @@ if __name__ == "__main__":
 
 
 
-    morse = True
+    morse = False
     if morse:
         potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
             D_a=15.0,
@@ -274,58 +363,117 @@ if __name__ == "__main__":
 
     # TODO: Finn ut relasjon mellom D, c og n-gridpoints for å få optimal struktur. Må finne en form som gir god mixing.
     
-    ho = False
+    ho = True
     if ho:
-        potential = qs.quantum_dots.one_dim.one_dim_potentials.DWPotential(
-            omega = 0.25,
-            l = 5.0
-        )
+        # potential = qs.quantum_dots.one_dim.one_dim_potentials.DWPotential(
+        #     omega = 0.25,
+        #     l = 5.0
+        # )
         # from quantum_systems.quantum_dots.one_dim.one_dim_qd import _compute_orbital_integrals, _compute_inner_integral ,_shielded_coulomb, _trapz_prep
-        length = 5
-        sep = 1
-        n_points = 201
-        grid_left = np.linspace(-length, length, n_points)
-        grid_right = np.linspace(-length + sep, length + sep, n_points)
-        basis1 = qs.quantum_dots.one_dim.one_dim_qd.ODHO(l = 8, grid_length=length, num_grid_points=n_points, grid=grid_left)
-        basis2 = qs.quantum_dots.one_dim.one_dim_qd.ODHO(l = 8, grid_length=length, num_grid_points=n_points, grid=grid_right)
-        spf_l = basis1.spf
-        spf_r = basis2.spf
-        grid = basis1.grid
-        alpha = basis1.alpha
-        _a = basis1.a
-        l=basis1.l
-        num_grid_points = basis1.num_grid_points
-        spf_unified = np.zeros((l * l, num_grid_points), dtype=np.complex128)
-        idx = 0
-        for i in range(l):
-            for j in range(l):
-                spf_unified[idx, :] = spf_l[i,:] * spf_r[j,:]
-                idx += 1
-        
-        inner_integral = qs.quantum_dots.one_dim.one_dim_qd._compute_inner_integral(
-        spf_unified,
-        l,
-        num_grid_points,
-        grid,
-        alpha,
-        _a
-        )   
+        length = 200
+        num_grid_points = 10_001
+        grid = np.linspace(-length, length, num_grid_points)
+        seps = [3, 5, 10, 15, 20, 30, 50, 200]
+        l = 5
+        _a = 0.25
+        alpha = 0.1#1.0
+        for sep in seps:
+            x_l = -int(sep/2)
+            x_r = int(sep/2)
+            basis1 = qs.quantum_dots.one_dim.one_dim_qd.ODHO(l=l, grid_length=length, num_grid_points=num_grid_points, grid=grid, x0=x_l, a=_a, alpha=alpha)
+            basis2 = qs.quantum_dots.one_dim.one_dim_qd.ODHO(l=l, grid_length=length, num_grid_points=num_grid_points, grid=grid, x0=x_r, a=_a, alpha=alpha)
+            spf_l = basis1.spf
+            spf_r = basis2.spf
 
-        u = qs.quantum_dots.one_dim.one_dim_qd._compute_orbital_integrals(
+            spf_unified = np.zeros((l * l, num_grid_points), dtype=np.complex128)
+            idx = 0
+            for i in range(l):
+                for j in range(l):
+                    spf_unified[idx, :] = spf_l[i,:] * spf_r[j,:]
+                    idx += 1
+            
+            inner_integral = qs.quantum_dots.one_dim.one_dim_qd._compute_inner_integral(
             spf_unified,
             l,
-            inner_integral,
-            grid
-        )  
-        h_l = basis1.h
-        h_r = basis2.h
-        u_lr = u
-        num_basis_l = l
-        num_basis_r = l
+            num_grid_points,
+            grid,
+            alpha,
+            _a
+            )   
 
-        bipartite_solver = BipartiteHartreeSolver(h_l, h_r, u_lr, num_basis_l, num_basis_r)
-        eps_l, c_l, eps_r, c_r = bipartite_solver.solve()
-        print(eps_l, eps_r)
+            u = qs.quantum_dots.one_dim.one_dim_qd._compute_orbital_integrals(
+                spf_unified,
+                l,
+                inner_integral,
+                grid
+            )  
+            h_l = basis1.h
+            h_r = basis2.h
+            u_lr = u
+            num_basis_l = l
+            num_basis_r = l
+
+            bipartite_solver = BipartiteHartreeSolver(h_l, h_r, u_lr, num_basis_l, num_basis_r)
+            eps_l, c_l, eps_r, c_r = bipartite_solver.solve()
+            h_l_transf = c_l.conj().T @ h_l @ c_l
+            h_r_transf = c_r.conj().T @ h_r @ c_r
+            u_lr_transf = np.einsum('ia, jb, ijkl, kc, ld -> abcd', c_l.conj(), c_r.conj(), u_lr, c_l, c_r)
+            h = np.kron(h_l_transf, np.eye(*h_l_transf.shape)) + np.kron(np.eye(*h_r_transf.shape), h_r_transf)
+            ulr = u_lr_transf.reshape(*h.shape)
+            eps, C = np.linalg.eigh(h + ulr)
+            # print("distinguishable")
+            # print(eps_l, eps_r)
+            print(eps)
+
+        # Fermionic system
+        print("indistinguishable")
+        l = l ** 2
+        n_particles = 2
+        # cap = 10
+        # V_func = lambda x, cap: np.clip(0.5 * 0.25 **2 * (x - int(sep/2))**2,0,cap) + np.clip(0.5 * 0.25 ** 2 * (x + int(sep/2)) ** 2,0,cap)
+        # V = V_func(grid[1:-1], cap)
+        for sep in seps:
+            V_l = 0.5 * 0.25 **2 * (grid[1:-1] + int(sep/2))**2
+            V_r = 0.5 * 0.25 ** 2 * (grid[1:-1] - int(sep/2))**2
+            V = np.minimum(V_l, V_r) # combine the two potentials
+            # mid_region = (grid[1:-1] > -int(sep/4)) & (grid[1:-1] < int(sep/4))         # Define the region where the potentials overlap
+            # V[mid_region] = 1_000_000      # Set the overlapping region to infinity
+            dx = grid[1] - grid[0]
+            h_diag = 1 / (dx**2) + V
+            h_off_diag = - 1 / (2 * dx**2) * np.ones(num_grid_points - 3)
+            eps, C = scipy.linalg.eigh_tridiagonal(h_diag, h_off_diag, select="i", select_range=(0, l - 1))
+            spf = np.zeros((l, num_grid_points), dtype=np.complex128)
+            spf[:, 1:-1] = C.T / np.sqrt(dx)
+            eigen_energies = eps
+            h = np.diag(eps)
+            
+            # coulomb = np.zeros((num_grid_points, num_grid_points), dtype=np.complex128)
+            # for i in range(num_grid_points):
+            #     coulomb[i] = _shielded_coulomb(grid[i], grid, alpha, _a)
+            # ulr_ind = np.einsum('ix, jy, xy, kx, ly -> ijkl', spf.conj(), spf.conj(), coulomb, spf, spf, optimize=True) - np.einsum('ix, jy, xy, ky, lx -> ijkl', spf.conj(), spf.conj(), coulomb, spf, spf, optimize=True)
+            coulomb = _shielded_coulomb(
+                grid[None, 1:-1], grid[1:-1, None], alpha, _a
+            )
+            ulr_ind = np.einsum(
+                "pa, qb, pc, qd, pq -> abcd", C, C, C, C, coulomb, optimize=True
+            )
+            # plt.plot(grid[1:-1], np.clip(V,0,0.5), grid, np.abs(spf[0])**2, grid, np.abs(spf[1])**2, grid, np.abs(spf[2])**2)
+            # plt.show()
+            n_particles=2
+            ind_eps, ind_C, e_list = TIHF(h, ulr_ind, num_func=l, n_particles=n_particles, verbose=False)
+            rho = np.zeros((l,l), dtype=np.complex128)
+            for i in range(n_particles):
+                rho += np.outer(ind_C[:,i], np.conj(ind_C[:,i]).T)
+            # Find total HF energy
+            E_2body = 0
+            for i in range(l):
+                for j in range(l):
+                    E_2body += 0.5 * rho[i, i] * rho[j, j] * (ulr_ind[i, j, i, j] - ulr_ind[i, j, j, i])
+            E_1body = np.sum(np.einsum('ij,ij->ij', h, rho))
+            E = E_1body + E_2body
+
+            print(ind_eps[:6])
+            print(E)
         breakpoint()
     
     # basis = qs.ODQD(l=15, grid_length=10, num_grid_points=201, a=0.25, alpha=1.0, potential=potential)

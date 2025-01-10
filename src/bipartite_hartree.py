@@ -35,6 +35,7 @@ class BipartiteHartreeSolver:
         )
 
     def compute_energy(self, c_l, c_r):
+        # Each particle in the ground state of each well. This gives us 2 particles.
         h_l = c_l[:, 0].conj() @ self.h_l @ c_l[:, 0]
         h_r = c_r[:, 0].conj() @ self.h_r @ c_r[:, 0]
         ## Must be changed

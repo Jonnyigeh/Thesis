@@ -12,7 +12,7 @@ import scipy
 import quantum_systems as qs        # Quantum systems library, will be swapped out with the new library at a later stage
 from bipartite_hartree import BipartiteHartreeSolver as BHS
 
-def TIHF(h, u, num_func, n_particles, max_iters=1000, epsilon=1e-18, verbose=True):
+def TIHF(h, u, num_func, n_particles, max_iters=10_000, epsilon=1e-10, verbose=True):
         """Solve the time-independent Hartree-Fock equations.
         
         Procedure:
@@ -50,25 +50,26 @@ def TIHF(h, u, num_func, n_particles, max_iters=1000, epsilon=1e-18, verbose=Tru
                 density_matrix += np.outer(np.conj(C[:, i]), C[:, i])
             fock = np.einsum('ij, aibj->ab', density_matrix, u, dtype=np.complex128)        # Compute the two-body operator potential
             fock += h                                                                       # Add the one-body operator hamiltonian
-            breakpoint()
-            return fock
 
-        energy, C = scipy.linalg.eigh(np.eye(h.shape[0]), subset_by_index=[0, num_func - 1])
-        fock = fill_fock_matrix(C)
+            return fock, density_matrix
+
+        energy, C = scipy.linalg.eigh(np.eye(h.shape[0]))#, subset_by_index=[0, num_func - 1])
+        # energy, C = scipy.linalg.eigh(h)#, subset_by_index=[0, num_func - 1])
+        fock, density_matrix = fill_fock_matrix(C)
         converged=False
         delta_E = 0.0
         e_list = []
         with tqdm.tqdm(total=max_iters,
-                desc=rf"[Minimization progress, $\Delta E$ = {delta_E:.8f}]",
+                desc=rf"[Minimization progress, $\Delta E$ = {delta_E:.10f}]",
                 position=0,
                 colour="green",
                 leave=True) as pbar:
             for i in range(max_iters):
-                energy_new, C_ = scipy.linalg.eigh(fock)
+                energy_new, C_ = scipy.linalg.eigh(fock)#, subset_by_index=[0, num_func - 1])
                 e_list.append(energy_new[0])
                 delta_E = np.linalg.norm(energy_new - energy) / len(energy)
                 pbar.set_description(
-                    rf"[Optimization progress, $\Delta E$ = {delta_E:.8f}]"
+                    rf"[Optimization progress, $\Delta E$ = {delta_E:.10f}]"
                 )
                 pbar.update(1)
                 if delta_E < epsilon:
@@ -78,7 +79,11 @@ def TIHF(h, u, num_func, n_particles, max_iters=1000, epsilon=1e-18, verbose=Tru
                     break
                 C = C_
                 energy = energy_new
-                fock = fill_fock_matrix(C)
+                fock, _ = fill_fock_matrix(C)
+                # Update with damping
+                # _, density_matrix_new = fill_fock_matrix(C)
+                # density_matrix = alpha * density_matrix_new + (1 - alpha) * density_matrix
+                # fock = np.einsum('ij, aibj-> ab', density_matrix, u, dtype=np.complex128) + h
 
         if not converged:
             if verbose:
@@ -116,7 +121,6 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     grid = disting_basis.grid
     num_l = num_func
     num_r = num_func
-    breakpoint()
     disting_bhs = BHS(
         h_l=disting_basis.h_l,
         h_r=disting_basis.h_r,
@@ -134,7 +138,6 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     
     disting_H = disting_h + disting_u
     disting_eps, disting_C = np.linalg.eigh(disting_H)
-
     # Anti-symmetric WF 
     indisting_basis = qs.ODMorse(
         l=l,
@@ -145,46 +148,40 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
         potential=potential,
         anti_symmetric=True
     )
-    # indisting_bhs = BHS(
-    #     h_l=indisting_basis.h_l,
-    #     h_r=indisting_basis.h_r,
-    #     u_lr=indisting_basis._ulr,
-    #     num_basis_l=num_l,
-    #     num_basis_r=num_r,
-    # )
-    # indisting_eps_l, indisting_c_l, indisting_eps_r, indisting_c_r = indisting_bhs.solve()
-    # indisting_h_l = indisting_c_l.conj().T @ indisting_basis.h_l @ indisting_c_l
-    # indisting_h_r = indisting_c_r.conj().T @ indisting_basis.h_r @ indisting_c_r
-    # indisting_u_lr = np.einsum('ia, jb, ijkl, kc, ld -> abcd', indisting_c_l.conj(), indisting_c_r.conj(), indisting_basis._ulr, indisting_c_l, indisting_c_r)
-    # indisting_h = np.kron(indisting_h_l, np.eye(*indisting_h_l.shape)) - np.kron(np.eye(*indisting_h_l.shape), indisting_h_l)  + np.kron(np.eye(*indisting_h_r.shape), indisting_h_r) - np.kron(indisting_h_r, np.eye(*indisting_h_r.shape))
-    # indisting_u = indisting_u_lr.reshape(*indisting_h.shape)
-    # indisting_H = indisting_h + indisting_u
-    # indisting_eps, indisting_C = np.linalg.eigh(indisting_H)
+    indisting_eps, indisting_C = TIHF(indisting_basis.h, indisting_basis.u, num_func=l, n_particles=n_particles)
+    rho = np.zeros((indisting_basis.l,indisting_basis.l), dtype=np.complex128)
+    for i in range(n_particles):
+        rho += np.outer(indisting_C[:,i], np.conj(indisting_C[:,i]).T)
+    # Find total HF energy
+    E_2body = 0
+    for i in range(indisting_basis.l):
+        for j in range(indisting_basis.l):
+            E_2body += 0.5 * rho[i, i] * rho[j, j] * (indisting_basis.u[i, j, i, j] - indisting_basis.u[i, j, j, i])
+    E_1body = np.sum(np.einsum('ij,ij->ij', indisting_basis.h, rho))
+    E = E_1body + E_2body
 
-    indisting_eps, indisting_C = TIHF(indisting_basis.h, indisting_basis.u, num_func=num_func, n_particles=n_particles)
-
-    # shift zero
-    disting_eps -= disting_eps[0]
-    indisting_eps -= indisting_eps[0]
-    # compare the two
-    print("Distinguishable particle system energy levels:", disting_eps[:6])
-    print("Indistinguishable particle system energy levels:", indisting_eps[:6])
-    print("Difference:", np.linalg.norm(disting_eps - indisting_eps))
-    breakpoint()
+    print(f"Distinguishable energies: {disting_eps[:6]}")
+    print(f"Indistuinguishable energies: {indisting_eps[:6]}")
+    print(f"HF energy: {E}")
+    print(f"Deviation in ground state estimate: {np.abs(disting_eps[0] - E)}")
 if __name__ == "__main__":
-    potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
-            D_a=35.0,
-            D_b=35.0,
-            k_a=15.0,
-            k_b=15.0,
-            d=35.0
-        )
+    separations = [20, 30, 50, 60, 70, 80, 100, 200, 300]
     alpha = 1.0
     a = 0.25
-    num_grid_points = 1_001#1_001
-    grid_length = 1.25 * potential.d
-    l = 4
+    num_grid_points = 1_001 #1_001
+    l = 5
     n = 2 # Number of particles
     num_func = 5
+    grid_length = 400   
+    for d in separations:    
+        print(f"Separation: {d}")
+        potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
+                D_a=35.0,
+                D_b=35.0,
+                k_a=15.0,
+                k_b=15.0,
+                d=d
+            )
 
-    make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
+        make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
+        print("\n")

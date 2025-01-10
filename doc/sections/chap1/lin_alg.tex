@@ -49,7 +49,7 @@ In quantum mechanics, certain operators play a fundamental role due to their spe
     \item \textbf{Hermitian:} A matrix $U$ is hermitian if $U = U^\dagger$, meaning the matrix is equal to its conjugate transpose. This is a special case of self-adjoint operators, living in a \emph{complex} Hilbert space, where the eigenvalues are real and the eigenvectors are orthogonal. These matrices are used to represent physical observables in quantum mechanics.
 \end{itemize}
 %% mr hilbert
-\subsection*{Hilbert spaces}
+\subsection*{Hilbert spaces}\label{sec:Hilbert_space}
 The concept of a Hilbert space is fundamental to quantum mechanics, as it provides the mathematical framework for which quantum states and operators are defined. A Hilbert space is a generalization of Euclidiean space, which allows for linear algerba and calculus to be applied to infinite-dimensional spaces. More formally, a Hilbert space is a complex complete inner product space, which means that it adhers to the following properties:
 \begin{itemize}
     \item \textbf{Completeness:} Every Cauchy sequence in the space converges to a limit in the space.
@@ -67,5 +67,5 @@ for the complex-valued, continuous, state vectors $\ket{\phi}, \ket{\psi} \in V$
 \begin{align*}
     \braket{\psi_i|\psi_j} = \delta_{ij}
 \end{align*}
-where $\delta_{ij}$ is the Kronecker delta. This orthogonality relation is crucial in quantum mechanics, as it allows us to define a basis set of vectors that are orthogonal to each other.
+where $\delta_{ij}$ is the Kronecker delta. This orthogonality relation is crucial in quantum mechanics, as it allows us to define a basis set of vectors that are orthogonal to each other. As elegant as this framework may be, the challenge of quantum many-body systems lies in the exponential scaling of the Hilbert space with the number of particles and degrees of freedom. For a system of $N$ particles, with $d$ degrees of freedom, the dimension of the Hilbert space is $d^N$, which quickly becomes intractable for classical computers. This rapid growth makes exact solutions for interacting many-body systems computationally infeasible, even in low-dimensional systems. 
 \end{document}
