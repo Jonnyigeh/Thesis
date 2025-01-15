@@ -168,7 +168,7 @@ if __name__ == "__main__":
     separations = [20, 30, 50, 60, 70, 80, 100, 200, 300]
     alpha = 1.0
     a = 0.25
-    num_grid_points = 1_001 #1_001
+    num_grid_points = 1_001
     l = 5
     n = 2 # Number of particles
     num_func = 5

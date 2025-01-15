@@ -15,6 +15,7 @@ import scipy
 import quantum_systems as qs
 from TDHF import TDHF_Solver
 from bipartite_hartree import BipartiteHartreeSolver
+from entropy_analysis import visualize
 
 @numba.njit
 def _shielded_coulomb(x_1, x_2, alpha, a):
@@ -373,10 +374,11 @@ if __name__ == "__main__":
         length = 200
         num_grid_points = 10_001
         grid = np.linspace(-length, length, num_grid_points)
-        seps = [3, 5, 10, 15, 20, 30, 50, 200]
+        # seps = [3, 5, 10, 15, 20, 30, 50, 200]
+        seps = [25]
         l = 5
         _a = 0.25
-        alpha = 0.1#1.0
+        alpha = 1.0#1.0
         for sep in seps:
             x_l = -int(sep/2)
             x_r = int(sep/2)
@@ -424,7 +426,7 @@ if __name__ == "__main__":
             # print("distinguishable")
             # print(eps_l, eps_r)
             print(eps)
-
+        breakpoint()
         # Fermionic system
         print("indistinguishable")
         l = l ** 2
