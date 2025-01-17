@@ -10,7 +10,7 @@ The dynamics of the wavefunction is governed by the \emph{Time-dependent Schröd
     i\frac{\partial}{\partial t}\ket{\Psi(x, t)} = H(x,t)\ket{\Psi(x, t)}\label{eq:_tdse}
 \end{equation}
 where $H$ a linear hermitian operator often referred to as the \emph{Hamiltonian}. Here $x$ is the position of the particle, and $t$ is the time. 
-This operator describes the total energy of the system, and is given by (in atomic units)
+This operator describes the total energy of the system, and is given by (in atomic units) \textcolor{red}{(Add more about the Hamiltonian, also see chapter 2.1.1 in Szabo Ostlund for material on atomic units. This is probably needed for results (to have proper discussions, and a real sense of "distance" in the results section). In the book, atomic units are as follows: length $=0.52918$ (Å), energy $=27.211$ (eV), dipole-moment (two charges at distance $a_0$) $=2.5418$ Debyes (D). There is also a conversion table that could prove useful.)}
 \begin{align*}
     H = -\nabla^2 + V(\mathbf{r})
 \end{align*}
@@ -45,10 +45,78 @@ For instance, the state $\ket{n_1, n_2, ...}$ informs that $n_1$ particles occup
 From this, these operators can describe particle interactions, transitions and dynamics in a many-body system. As the Fock space is constructed by direct sums, two states of different particle numbers are inherently orthogonal 
 \\\\ 
 For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \ref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \ref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation.
-\subsection*{Hartree-Fock}
-Accurately solving the Schödinger equation for many-body systems is a formidable challenge, even in seemingly simple cases such as a one-dimensional system with few interacting, indistinguishable particles. The inherent complexity arise from the interactions between particles, the Pauli exclusion principle, and the indistinguishability of particles. As we mentioned in the section on Hilbert spaces\ref{sec:Hilbert_space}, the dimension of the Hilbert space grows exponentially with the number of particles, making exact solutions computationally infeasible. 
+\subsection*{Hartree-Fock}\label{sec:HF_theory}
+Accurately solving the Schödinger equation for many-body systems is a formidable challenge, even in seemingly simple cases such as a one-dimensional system with few interacting, indistinguishable particles. The inherent complexity arise from the interactions between particles, the Pauli exclusion principle, and the indistinguishability of particles. As we mentioned in the section on Hilbert spaces\ref{sec:Hilbert_space}, the dimension of the Hilbert space grows exponentially with the number of particles, making exact solutions computationally infeasible. In many cases, such a molecular dynamics and solid-state physics, the Hilbert space is reduced dramatically by imposing the Born-Oppenheimer approximation, which separates the electronic and nuclear motion, effectively disregarding the degrees of freedom of the nuclei by treating the nuclei as fixed. Even so, the many-body problem remains an intractable problem for classical computers, and finding approximate solutions to the Schrödinger equation is therefore necessary. The \emph{Hartree-Fock} method is a fundamental approach for solving the many-body problem in quantum chemistry. In this section, we will examine the theory behind the method in detail, beginning with essential concepts from quantum many-body theory, setting the stage for the method to be presented in later sections. \\ \\
+
+%% Many-body concepts
+In any many-electron system, the indistinguishability of particles introduce a fundamental contraint on the wavefunction, namely that is must be anti-symmetric under the exchange of any two particles. i.e 
+\begin{align*}
+    \Psi(\mathbf{r}_1, \mathbf{r}_2, ..., \mathbf{r}_N) = -\Psi(\mathbf{r}_2, \mathbf{r}_1, ..., \mathbf{r}_N)
+\end{align*}
+This constraint is known as the \emph{Pauli exclusion principle}, which require that no two electrons can occupy the same quantum state. A common way to incorporate this mathematically is to construct wavefunctions using Slater determinants of single-particle orbitals (functions). These orbitals are our basis set of choice $\{\phi_i\}$, and a slater determinant is constructed as follows:
+\begin{align*}
+    \Psi(\mathbf{r}_1, \mathbf{r}_2, ..., \mathbf{r}_N) = \frac{1}{\sqrt{N!}}\begin{vmatrix}
+        \phi_1(\mathbf{r}_1) & \phi_2(\mathbf{r}_1) & \cdots & \phi_N(\mathbf{r}_1)\\
+        \phi_1(\mathbf{r}_2) & \phi_2(\mathbf{r}_2) & \cdots & \phi_N(\mathbf{r}_2)\\
+        \vdots & \vdots & \ddots & \vdots\\
+        \phi_1(\mathbf{r}_N) & \phi_2(\mathbf{r}_N) & \cdots & \phi_N(\mathbf{r}_N)
+    \end{vmatrix}
+\end{align*}
+The mathematical nature of the determinant incorporates the anti-symmetry under particle exchange, as by swapping two columns in a determinant, the sign changes. The Slater determinant are a linear combination of \emph{Hartree products} built from the single-particle orbitals, which are products of spatial orbitals with (or without) the spin orbitals where the spin part is often omitted for simplicity. These single-particle orbitals are the solution of the one-electron Schrödinger equation, 
+\begin{align*}
+    \hat{h}\phi_i = \epsilon_i\phi_i
+\end{align*}
+where the full Hamiltonian (for a non-interacting) system would be 
+\begin{align*}
+    H = \sum_{i=1}^N \hat{h}_i
+\end{align*}
+which has the solution eigenvector
+\begin{align}
+    \Psi = \phi_1(\mathbf{r}_1)\phi_2(\mathbf{r}_2)...\phi_N(\mathbf{r}_N)\label{eq:hartree_product}
+\end{align}
+with corresponding eigenvalue $E = \epsilon_1 + \epsilon_2 + ... + \epsilon_N$, i.e. the sum of single-particle energies. Eq. \ref{eq:hartree_procut} is the Hartree product, and it is the simplest possible wavefunction for a many-body system of non-interacting particles. As is evident, this Hartree product is not anti-symmtric, nor indistinguishable, as the particles are designated a specific orbital to occupy and thus they are distinguishable, which is why the Slater determinant builds linear combinations of such products. In our study, we will make use of both - as our system can be constructed to both exhibit distinguishable and indistinguishable behaviour.\\ \\
+Another important concept is the \emph{variational principle}, which states that, for any quantum system, the expectation value of the energy is always greater than, or equal to, the true ground state energy. 
+\begin{align}
+    E[\Psi] = \frac{\braket{\Psi|H|\Psi}}{\braket{\Psi|\Psi}} \geq E_0 \label{eq:variational_principle}
+\end{align}
+where $\Psi$ is the trial wavefunction, $H$ is the Hamiltonian operator, and $E_0$ is the true ground state energy of our system. The trial wavefunction in question could be a slater determinant, built from an initial guess for a "good" basis. As previously explained, we may transform this basis using unitary matrices to find a "better" basis, which in this case, would make our energy estimate \emph{lower}. This is the essence of the Hartree-Fock method, where we iteratively improve our basis set to minimize the energy of the system by use of the variational method. For more material and details on the variational method, we refer the reader to chapter 1.3 in \cite{szabo1996modern}.
+\\\\
+To arrive at the Hartree-Fock equations, we start at the variational principle
+\begin{align*}
+    E_0 \leq E^{HF} = \bra{\psi^{HF}}H\ket{\psi^{HF}}
+\end{align*}
+where $\ket{\psi^{HF}}$ is the Hartree-Fock wavefunction, which is a single Slater determinant, and it is normalized so we can omit the denominator in the expectation value. This basis is related to a chosen initial basis by a unitary transformation.
+\begin{align*}
+    \psi^{HF}_p = \sum_qC_qp\psi_q
+\end{align*}
+where the unitary matrix is expressed by its matrix elements. The Hamiltonian in question is the sum of the kinetic energy operator and the electron-electron repulsion operator, and the energy is given by
+\begin{align*}
+    E^{HF} = \sum_{pq}C^*_pC_qh_{pq} + \frac{1}{2}\sum_{pqrs}C^*_pC^*_qC_rC_su_{pqrs}
+\end{align*}
+here expressed in terms of the one- and two-electron integrals, in the initial basis. The Hartree-Fock equations are derived by minimizing the energy with respect to the coefficients $C_p$. We take the derivative w.r.t $C_p^*$ which gives us the Hartree-Fock equations
+\begin{align*}
+    \sum_qh_{pq}C_q + \sum_{rs}C_rC_su_{pqrs}C_q = \epsilon_pC_p
+\end{align*}
+\textcolor{red}{Continue the derivation of the Hartree-Fock equations. Figure out how rigorous I want to do this. Maybe just refer to the book, and give a brief overview of the method.}
 
 
+
+
+
+
+
+
+
+
+
+\begin{itemize}
+    \item Born-Oppenheimer approximation, herein lies the separation of electronic and nuclear motion and mean-field approximation comes in naturally.
+    \item Slater Determinants
+    \item Hartree products
+    \item Link in orbitals?
+    \item Variational principle should be mentioned
+    \item 
+\end{itemize}
 
 
 \subsection*{Morse potential}

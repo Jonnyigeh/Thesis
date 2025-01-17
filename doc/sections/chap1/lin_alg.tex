@@ -46,7 +46,7 @@ and we can identify the action of the operator on the vector in this basis, as a
 In quantum mechanics, certain operators play a fundamental role due to their specific mathematical properties. These operators represent key physical observables and transformations, which we will explore in detail in the quantum mechanics section. However, some of their defining mathematical characteristics are crucial to emphasize:
 \begin{itemize}
     \item \textbf{Unitary:} A matrix $U$ is unitary if $U^*U = I$, meaning the inverse of the matrix $U$ is it's conjugate transpose. This property of unitary matrices is such that they preserve the inner product of vectors, e.g $\braket{\psi|\phi} = \braket{U\psi|U\phi}$, and the unitary matrices also preserve the vector norm. Unitary matrices are used to represent time-evolution operators in quantum mechanics.
-    \item \textbf{Hermitian:} A matrix $U$ is hermitian if $U = U^\dagger$, meaning the matrix is equal to its conjugate transpose. This is a special case of self-adjoint operators, living in a \emph{complex} Hilbert space, where the eigenvalues are real and the eigenvectors are orthogonal. These matrices are used to represent physical observables in quantum mechanics.
+    \item \textbf{Hermitian:} A matrix $U$ is hermitian if $U = U^\dagger$, meaning the matrix is equal to its conjugate transpose. This is a special case of self-adjoint operators, living in a \emph{complex} Hilbert space, where the eigenvalues are real and the eigenvectors are orthogonal. These matrices are used to represent physical observables in quantum mechanics, like the Hamiltonian operator, which represents the total energy of a quantum mechanical system.
 \end{itemize}
 %% mr hilbert
 \subsection*{Hilbert spaces}\label{sec:Hilbert_space}
@@ -68,4 +68,28 @@ for the complex-valued, continuous, state vectors $\ket{\phi}, \ket{\psi} \in V$
     \braket{\psi_i|\psi_j} = \delta_{ij}
 \end{align*}
 where $\delta_{ij}$ is the Kronecker delta. This orthogonality relation is crucial in quantum mechanics, as it allows us to define a basis set of vectors that are orthogonal to each other. As elegant as this framework may be, the challenge of quantum many-body systems lies in the exponential scaling of the Hilbert space with the number of particles and degrees of freedom. For a system of $N$ particles, with $d$ degrees of freedom, the dimension of the Hilbert space is $d^N$, which quickly becomes intractable for classical computers. This rapid growth makes exact solutions for interacting many-body systems computationally infeasible, even in low-dimensional systems. 
+\subsection*{Basis transformations}
+How we express the state-vectors in a Hilbert space is not unique, and we are free to choose basis sets to represent the vectors that spans our Hilbert space (or any space for that matter). This is a powerful tool in quantum mechanics, as it allows us to choose the basis that best suits the problem at hand, and clever choices can simplify problems significantly. Many modern many-body methods are built upon this principle, where the choice of basis set can make the difference between a computationally infeasible problem and a tractable one. Furthermore, by finding a basis that diagonalizes the Hamiltonian matrix, we can directly solve for the energy eigenvalues and eigenstates. This principle underlies many techniques, such as using harmonic oscillator eigenfunctions for bound systems or plane waves for periodic potentials. The search for an optimal basis is often guided by the specific features of the system under study, such as symmetry or localization, making it a central consideration in both theoretical and computational approaches to quantum mechanics. \\ \\ This means we often have to change between different basis sets, and the transformation between two basis sets $\{\ket{i}\}$ and $\{\ket{j}\}$ is given by the unitary transformation matrix $U$:
+\begin{align*}
+    \ket{\alpha} = \sum_i U_{\alpha i}\ket{i}
+\end{align*}
+where the matrix elements of $U$ are given by the inner product of the basis vectors:
+\begin{align*}
+    U_{\alpha i} = \braket{\alpha|i}
+\end{align*}
+here assuming the basis sets are complete, meaning the following holds:
+\begin{align*}
+    \sum_i \ket{i}\bra{i} = \sum_\alpha \ket{\alpha}\bra{\alpha} = I
+\end{align*}
+This is powerful, and we can also investigate how the matrix representation of an operator change under a basis transformation between complete orthonormal basis sets.\cite{szabo1996modern} \\
+Assume that $\hat O$ is an operator in the basis $\{\ket{i}\}$, and $\hat O'$ is the same operator expressed in the basis $\{\ket{\alpha}\}$, then the transformation between the two operators is given by:
+\begin{align*}
+    O'_{\alpha\beta} = \braket{\alpha|\hat O|\beta} = \sum_{ij}\bra{\alpha}\ket{i}\bra{i}\hat O\ket{j}\bra{j}\ket{\beta} = \sum_{ij}U_{\alpha i}O_{ij}U^\dagger_{j\beta}
+\end{align*}
+And thus, we have the following transformation rule for operators under a basis transformation:
+\begin{align*}
+    \hat O' &= U\hat OU^\dagger \\
+    \hat O &= U^\dagger\hat O'U
+\end{align*}
+
 \end{document}

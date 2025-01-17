@@ -1,0 +1,19 @@
+\documentclass{subfiles}
+\begin{document}
+\subsection{Hartree-Fock}
+As mentioned in the theory section\ref{sec:HF_theory}, the Hartree-Fock mentioned is an iterative method to obtain optimal basis functions (single particle orbitals) that would minimize the energy, and by the variational method, converge towards the true ground state energy. This is inherently an approximaton, where we imagine that the electrons occupy the lowest possible single-particle orbitals, and it has been proven many times that this is a rather accurate approximation for many systems. 
+We will now outline the method without much information, before diving into each step in more detail and provide insights into the computational aspects of the method.
+\begin{itemize}
+    \item Construct an initial guess for the single-particle orbitals, $\{\phi_i\}$, often using atomic orbitals or other basis sets.
+    \item Diagonalize the Fock matrix to obtain a new set of orbitals, $\{\phi_i\}$, and calculate Hartree-Fock energy, $E_{HF}$.
+    \item Repeat the process until the energy converges, i.e. the change in energy between iterations is below a certain threshold.
+    \item Calculate the total energy of the system, and the electron density, and use this to calculate other properties of the system.
+\end{itemize}
+The first step is to define an initial ansatz for our trial wavefunction, and we do so by defining our initial basis set. The trial wavefunction will then be set according to the system, but in most cases would be a Slater determinant as we've previously introduced. Finding this initial basis is a non-trivial task, and often requires a deep understanding of the problem at hand - and a clever choice of initial basis will simplify the numerical calculations significantly. A poor choice may even result in the method failing to converge. Non-trivial it may be, but this is still an essential step in successful usage of the Hartree-Fock method. There are a multitude of basis sets to choose from, and the choice is guided by the nature of the system. For instance, in quantum dots systems with strong confinement, the quantum harmonic oscillator basis sets are often used to great success\cite{Yuan_2017}. A different procedure to using pre-defined basis sets, is to solve the Schrödinger equation for the non-interacting system, and use these single-particle orbitals as the initial basis set. The latter may often yield quicker convergence due to the functions being specifically tailored for the potential, but at the cost of more computational resources, and in some cases may not even be possible. 
+\\
+\\ With the initial basis, we construct the Fock matrix, which is a matrix representation of the Hamiltonian in the basis of the single-particle orbitals. The Fock matrix is given by
+\begin{align*}
+    F_{ij} = h_{ij} + \sum_{k=1}^N\left(2J_{ik} - K_{ik}\right)
+\end{align*}
+
+\end{document}

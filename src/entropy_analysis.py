@@ -10,13 +10,11 @@ import scipy
 
 # Local imports
 import quantum_systems as qs        # Quantum systems library, will be swapped out with the new library at a later stage
-from bipartite_hartree import BipartiteHartreeSolver as BHS
-
-def find_entropies():
-    pass
+from bipartite_hartree import BipartiteHartreeSolver as BHS   
+    
 
 
-def entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha=1.0, a=0.25, verbose=False):
+def entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha=1.0, a=0.25, potential = None, verbose=False):
     """Analyse the entropy of the system as a function of separation.
     
     args:
@@ -26,13 +24,14 @@ def entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha=1.0, a=
         entropy (np.ndarray): The Von Neumann entropy of the system.
     """
     # System parameters
-    potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
-                D_a=35.0,
-                D_b=35.0,
-                k_a=15.0,
-                k_b=15.0,
-                d=d,
-            )
+    if potential is None:
+        potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
+                    D_a=50.0,
+                    D_b=39.0,
+                    k_a=10.0,
+                    k_b=15.0,
+                    d=d,
+                )
     basis = qs.ODMorse(
         l=l,
         grid_length=grid_length,
@@ -67,12 +66,12 @@ def entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha=1.0, a=
         rho = np.einsum('p, q -> pq', C[i], C[i].conj().T).reshape(num_func, num_func, num_func, num_func)
         # Trace out the subsystems
         rho_l = np.trace(rho, axis1=0, axis2=2)
-        rho_r = np.trace(rho, axis1=1, axis2=3)
+        # rho_r = np.trace(rho, axis1=1, axis2=3)
         # Compute entropies
         eigs_l = np.linalg.eigvalsh(rho_l)
-        eigs_r = np.linalg.eigvalsh(rho_r)
+        # eigs_r = np.linalg.eigvalsh(rho_r)
         entropy_l = -np.sum(eigs_l * np.log(eigs_l + 1e-15))
-        entropy_r = -np.sum(eigs_r * np.log(eigs_r + 1e-15))
+        # entropy_r = -np.sum(eigs_r * np.log(eigs_r + 1e-15))
         entropies.append(entropy_l)
         if verbose:
             print(f"State {i}: {np.real(C[i])**2}")
@@ -108,22 +107,69 @@ def visualize(C_, num_func, entropy, tol=1e-8):
         # ax.spines['top'].set_visible(False)
 
     fig.colorbar(im, ax=axs, orientation="horizontal", label="Probability")
-    plt.show(block=False)
-    plt.pause(4.0)
-    plt.close()
+    plt.show()
+    # plt.show(block=False)
+    # plt.pause(4.0)
+    # plt.close()
 
 if __name__ == "__main__":
-    separations = [5, 25, 50, 75, 100, 200]
-    # separations = [100]
+    # separations = [5, 25, 50, 75, 100, 200]
+    separations = [50]
     grid_length = 400
     num_grid_points = 4_001
     l = 15
-    num_func = 4
+    num_func = 3
     alpha = 1.0
     a = 0.01
     en = []
     Cs = []
     eps = []
+    DL = [30,31,32,33,34,35]
+    DR = [30,31,32,33,34,35]
+    kL = [10,11,12,13,14,15]
+    kR = [10,11,12,13,14,15]
+    d = 50
+    ep, C, ent = entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha, a, verbose=False)
+    breakpoint()
+    import json
+    save_data = []
+    for d in separations:
+        for dl in tqdm.tqdm(DL):
+            for dr in tqdm.tqdm(DR, leave=False):
+                for kl in tqdm.tqdm(kL, leave=False):
+                    for kr in tqdm.tqdm(kR, leave=False):
+                        potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
+                            D_a=dl,
+                            D_b=dr,
+                            k_a=kl,
+                            k_b=kr,
+                            d=d,
+                        )
+                        ep, C, ent = entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha, a, potential=potential, verbose=False)
+                        save_data.append({
+                            "separation": d,
+                            "DL": dl,
+                            "DR": dr,
+                            "kL": kl,
+                            "kR": kr,
+                            "entropies": ent,
+                            "energies": ep,
+                            "C": C,
+                        })
+                        # print(f"Separation: {d}, DL: {dl}, DR: {dr}, kL: {kl}, kR: {kr}")
+                        # print(f"Entropies: {ent}")
+                        # print('\n')
+                        # en.append(ent)
+                        # Cs.append(C)
+                        # eps.append(ep)
+                        # # print('\n')
+                        # visualize(C, num_func, entropy=ent)
+    # try:
+    #     with open("data/entropies_various_params_150125.json", "w") as f:
+    #         json.dump(save_data, f, indent=4)
+    # except:
+    #     breakpoint()
+    exit()    
     for d in separations:
         # print(f"Separation: {d}")
         ep, C, ent = entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha, a, verbose=False)
@@ -133,11 +179,4 @@ if __name__ == "__main__":
         # print('\n')
     
         visualize(C, num_func, entropy=ent)
-    breakpoint()
     exit()
-
-    plt.plot(separations, en)
-    plt.xlabel("Separation")
-    plt.ylabel("Entropy")
-    plt.show()
-

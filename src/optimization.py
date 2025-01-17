@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning) # Ignores a warnings due to scipy.special version dislike of current python3.10 installation
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
@@ -14,15 +16,18 @@ class Optimizer:
     """
         
     def __init__(self,
-                l=10,
-                grid_length=15,
-                num_grid_points=2001,
+                l=15,
+                num_func=4,
+                grid_length=400,
+                num_grid_points=4_001,
                 a=0.25,
                 alpha=1.0,
-                max_iter=1000,
+                max_iter=1_000,
                 tol=1e-10,
+                n_particles=2,
                 verbose=True,
-                params=None
+                params=None,
+                config='I'
     ):
         """
         Parameters:
@@ -44,20 +49,29 @@ class Optimizer:
             Print information during optimization
         """
         self.l = l
+        self.num_func = num_func
         self.grid_length = grid_length
         self.num_grid_points = num_grid_points
         self.a = a
         self.alpha = alpha 
         self.max_iter = max_iter
         self.tol = tol
+        self.n_particles = n_particles
         self.verbose = verbose
-        if params is None:
-            params = [15.0, 15.0, 9.0, 9.0, 15.0]
         self.params = params
-        self.potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
-            *self.params,
-        )
-        
+        self.config = config
+        if self.config == 'I':
+            self.target = np.zeros(num_func)
+        elif self.config == 'II':
+            self.target = np.zeros(num_func)
+            self.target[1] = 1.0
+            self.target[2] = 1.0
+        # if params is None:
+        #     params = [15.0, 15.0, 9.0, 9.0, 15.0]
+        # self.params = params
+        # self.potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
+        #     *self.params,
+        # )
 
     def _initialize_basis(self):
         self.basis = qs.ODMorse(
@@ -72,62 +86,34 @@ class Optimizer:
 
 
     def _transform_basis(self, basis, c_l, c_r):
-        shape = c_l.shape[0]
-        new_u = np.einsum('ai, bj, ijkl, kc, ld -> abcd', c_l.conj(), c_r.conj(), basis.u.reshape(shape,shape,shape,shape), c_l, c_r)
+        new_u = np.einsum('ia, jb, ijkl, kc, ld -> abcd', c_l.conj(), c_r.conj(), basis._ulr, c_l, c_r)
         h_l = c_l.conj().T @ basis.h_l @ c_l
         h_r = c_r.conj().T @ basis.h_r @ c_r
         new_h = np.kron(h_l, np.eye(*h_l.shape)) + np.kron(np.eye(*h_r.shape), h_r)
+        new_u = new_u.reshape(*new_h.shape)
 
-        basis.h = new_h
-        basis.u = new_u
-
-    def _find_overlap_matrix(self, old_basis, new_basis):
-        S = np.zeros((old_basis.num_basis, new_basis.num_basis), dtype=np.complex128)
-        for i in range(old_basis.num_basis):
-            for j in range(new_basis.num_basis):
-                # S[i,j] = np.sum(old_basis.spf[:,i] * new_basis.spf[:,j])
-                S[i,j] = np.vdot(old_basis.spf[:,i], new_basis.spf[:,j])
-        
-        return S
-
-    def _transform_coefficients(self, c, S):
-        return c @ S
-   
-    def _find_VN_entropies(self, rho=None):
-        if rho is None:
-            rho = self._rho
-        eigs = np.linalg.eigvalsh(rho)
-        return -np.sum(eigs * np.log(eigs + 1e-15))    
-        
-    
-    # @property
-    # def entropy(self):
-    #     return self._entropy
-    
-
-    # def _make_density_matrix(self, C):
-    #     self._rho = np.outer(C, C.conj().T)
-    
-
-    @property
-    def rho(self):
-        return self._rho
+        basis._h = new_h
+        basis._u = new_u
 
 
-    def _constraint(self, params, l):
+    def _constraint(self, params):
         """Constraint for the optimization problem
         We need to make sure that the parameters are such that we can still fit our basis functions within the potential wells.
         """
         D_l, D_r, k_l, k_r = params
-        left_constraint = 2 * D_l / np.sqrt(k_l) - np.ceil(l + 0.5)
-        right_constraint = 2 * D_r / np.sqrt(k_r) - np.ceil(l + 0.5)
+        left_constraint = 2 * D_l / np.sqrt(k_l) - np.ceil(self.l + 0.5)
+        right_constraint = 2 * D_r / np.sqrt(k_r) - np.ceil(self.l + 0.5)
 
         return min(left_constraint, right_constraint)
 
 
-    def _solve(self):
-        num_l = 2
-        num_r = 2
+    def _solve(self, params):
+        self.potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
+            *params,
+        )
+        self._initialize_basis()
+        num_l = self.num_func
+        num_r = self.num_func
         bhs = BHS(
             h_l=self.basis.h_l,
             h_r=self.basis.h_r,
@@ -135,42 +121,58 @@ class Optimizer:
             num_basis_l=num_l,
             num_basis_r=num_r,
         )
+        
         eps_l, c_l, eps_r, c_r = bhs.solve()
         self._transform_basis(self.basis, c_l, c_r)
-        H = self.basis.h + self.basis.u
+        H = self.basis._h + self.basis._u
         eps, C = np.linalg.eigh(H)
 
         self.eigen_energies = eps
-        self.coefficients = C
-
-    def _update_basis(self, params):
-        new_potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
-            *params
-        )
-        self.basis.potential = new_potential
+        return eps, C
 
 
-    def _loss(self):
-        # Make density matrix and calculate entropies
-        self._make_density_matrix(self.coefficients)
-        self._find_VN_entropies()
-        n_states = len(self.eigen_energies)
-        entropies = np.zeros(n_states)
-        for i in range(n_states):
-            rho = np.outer(self.coefficients[:,i], self.coefficients[:,i].conj().T)
-            entropies[i] = self._find_VN_entropies(rho)
-
+    def _find_VN_entropies(self, rho):
+        """Find entropy from reduced density matrix"""
+        eigs = np.linalg.eigvalsh(rho)
+        return -np.sum(eigs * np.log(eigs + 1e-15))    
     
+
+    def _make_density_matrix(self, C):
+        self._rho = np.zeros((self.num_func ** 2, self.num_func ** 2), dtype=np.complex128)
+        for n in range(self.n_particles):
+            self._rho += np.outer(C[:, n], np.conj(C[:, n]).T)
+
     def _objective(self, params):
-        self.potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
-            *params,
+        eps, C = self._solve(params)
+        # find reduced density matrix
+        self._make_density_matrix(C)
+        rho = np.trace(self._rho.reshape(self.num_func, self.num_func, self.num_func, self.num_func), axis1=0, axis2=2)
+        # and then entropy
+        S = self._find_VN_entropies(rho)
+        
+        return np.linalg.norm(S - self.target)
+
+    def optimize(self):
+        constraints = [
+            {'type': 'ineq', 'fun': lambda params: self._constraint(params)}
+        ]
+
+        result = minimize(
+            self._objective,
+            self.params,
+            method='SLSQP',
+            constraints=constraints,
+            options={'disp': self.verbose, 'maxiter': self.max_iter}
         )
-        self._update_basis()
-        self._solve()
+        self.params = result.x
+        return result
 
-        return self._loss()
-
-
-    def _run_optimization(self):
-        # Initial calculations
-        self._initialize_basis()
+if __name__ == '__main__':
+    D_l = 35.0
+    D_r = 35.0
+    k_l = 15.0
+    k_r = 15.0
+    params = [D_l, D_r, k_l, k_r]
+    optimizer = Optimizer(params=params)
+    res = optimizer.optimize()
+    breakpoint()
