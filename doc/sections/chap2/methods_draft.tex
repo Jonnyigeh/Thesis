@@ -1,7 +1,7 @@
 \documentclass{subfiles}
 \begin{document}
 \subsection{Hartree-Fock}
-As mentioned in the theory section\ref{sec:HF_theory}, the Hartree-Fock mentioned is an iterative method to obtain optimal basis functions (single particle orbitals) that would minimize the energy, and by the variational method, converge towards the true ground state energy. This is inherently an approximaton, where we imagine that the electrons occupy the lowest possible single-particle orbitals, and it has been proven many times that this is a rather accurate approximation for many systems. 
+As mentioned in the theory section\ref{sec:HF_theory}, the Hartree-Fock method is an iterative method to obtain optimal basis functions (single particle orbitals) that would minimize the energy, and by the variational method, converge towards the true ground state energy. This is inherently an approximaton, where we imagine that the electrons occupy the lowest possible single-particle orbitals, and it has been proven many times that this is a rather accurate approximation for many systems. \textcolor{red}{(Cite some sources here)}.
 We will now outline the method without much information, before diving into each step in more detail and provide insights into the computational aspects of the method.
 \begin{itemize}
     \item Construct an initial guess for the single-particle orbitals, $\{\phi_i\}$, often using atomic orbitals or other basis sets.
@@ -9,11 +9,36 @@ We will now outline the method without much information, before diving into each
     \item Repeat the process until the energy converges, i.e. the change in energy between iterations is below a certain threshold.
     \item Calculate the total energy of the system, and the electron density, and use this to calculate other properties of the system.
 \end{itemize}
-The first step is to define an initial ansatz for our trial wavefunction, and we do so by defining our initial basis set. The trial wavefunction will then be set according to the system, but in most cases would be a Slater determinant as we've previously introduced. Finding this initial basis is a non-trivial task, and often requires a deep understanding of the problem at hand - and a clever choice of initial basis will simplify the numerical calculations significantly. A poor choice may even result in the method failing to converge. Non-trivial it may be, but this is still an essential step in successful usage of the Hartree-Fock method. There are a multitude of basis sets to choose from, and the choice is guided by the nature of the system. For instance, in quantum dots systems with strong confinement, the quantum harmonic oscillator basis sets are often used to great success\cite{Yuan_2017}. A different procedure to using pre-defined basis sets, is to solve the Schrödinger equation for the non-interacting system, and use these single-particle orbitals as the initial basis set. The latter may often yield quicker convergence due to the functions being specifically tailored for the potential, but at the cost of more computational resources, and in some cases may not even be possible. 
+The first step in the Hartree-Fock procedure is to define an initial ansatz for the trial wavefunction, which is typically represented as a Slater determinant, as discussed earlier. This ansatz requires an initial choice of basis set, which plays a crucial role in the overall success of the method. The initial basis set serves as a starting point for constructing orbitals and significantly influences the convergence of the self-consistent field (SCF) procedure.\\  
+\\ Choosing an appropriate basis set is a nuanced and complex task. A well-chosen basis can simplify numerical calculations and accelerate convergence, whereas a poor choice may lead to slow convergence or even failure to converge. 
+
+
+
+There are a multitude of basis sets to choose from, and the choice is guided by the nature of the system. For instance, in quantum dots systems with strong confinement, the quantum harmonic oscillator basis sets are often used to great success\cite{Yuan_2017}. A different procedure to using pre-defined basis sets, is to solve the Schrödinger equation for the non-interacting system, and use these single-particle orbitals as the initial basis set. The latter may often yield quicker convergence due to the functions being specifically tailored for the potential, but at the cost of more computational resources, and in some cases may not even be possible. 
 \\
-\\ With the initial basis, we construct the Fock matrix, which is a matrix representation of the Hamiltonian in the basis of the single-particle orbitals. The Fock matrix is given by
+\\ With the initial basis, we construct the Fock matrix, which is a matrix representation of the Fock operator in the basis of the single-particle orbitals. The Fock matrix is given by
 \begin{align*}
-    F_{ij} = h_{ij} + \sum_{k=1}^N\left(2J_{ik} - K_{ik}\right)
+    F_{pq} = h_{pq} + \sum_{i}^N u_{piqi}
 \end{align*}
 
+
+\subsection{Study of indistinguishability}
+One of the core features of our system - and the foundation of our qubit design -is that the two particles confined in our potential trap act as \emph{distinguishable} particles. As we are looking to trap electrons, indistinguishable particles, we are dealing with fermions, and the Pauli exclusion principle states clearly that two fermions cannot occupy the same quantum state. This fundamental principle would normally prevnt us from constructing product states, as the quantum state of any fermionic system must be anti-symmetric under particle exchange.
+\\ However, we are assuming that the potential trap is constructed such that there are minimal correlations between the two particles, and that the wavefunction can be approximated as a product state. In this analysis we shall look at how "distinguishable" our system actually is, and find a distance between wells where we can safely assume the particles to be distinguishable. \\ \\
+To make an assessment of the systems distinguishability we will firstly look at the eigen-energies of the system given that we either:
+\begin{itemize}
+    \item Assume the particles to be distinguishable: \\ We construct the wavefunction as a product state,
+    \begin{align*}
+        \Psi(\mathbf{r}_1, \mathbf{r}_2) = \phi_L(\mathbf{r}_1)\otimes\phi_R(\mathbf{r}_2)
+    \end{align*} 
+    where $\phi_L$ and $\phi_R$ are the single-particle functions located in the left and right well respectivley. We then calculat the energy by diagonalizing the Hamiltonian matrix for this product state system. In such a product state system the Hamiltonian matrix becomes
+    \begin{align*}
+        H = H_L \otimes I + I \otimes H_R + V
+    \end{align*}
+    where $H_L$ and $H_R$ are the single-particle Hamiltonians for the left and right well, and $V$ is the interaction term between the two particles.
+    \item Assume the particles to be indistinguishable, and construct a Slater determinant that we solve using Hartree-Fock theory.
+\end{itemize}
+
+
+If we are successful, we should find that for a certain distance between the wells, the "true" distinguishable energy will overlap with the indistinguishable HF-energy. Should this be the case, we can safely assume that the particles behave as distinguishable particles for our intents and purposes. 
 \end{document}

@@ -30,8 +30,8 @@ class BipartiteHartreeSolver:
         D_r = np.einsum('pi, qi -> pq', c_r, c_r.conj())
         # Calculate, and return the fock matrix.
         return (
-            h_l + np.diag(np.einsum('ijab, ab->ij', u_lr, D_r)), # Why ijab and not iajb? TODO: Check this
-            h_r + np.diag(np.einsum('ijab, ab->ij', u_lr, D_l)),
+            h_l + np.diag(np.einsum('ijkl, jl -> ik', u_lr, D_r)), # Why ijab and not iajb? TODO: Check this. After checking, we changed it. Ref app. D in Leinonen paper (Helium)
+            h_r + np.diag(np.einsum('ijkl, ik -> jl', u_lr, D_l)),
         )
 
     def compute_energy(self, c_l, c_r):

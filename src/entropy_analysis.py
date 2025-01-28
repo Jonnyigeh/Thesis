@@ -66,6 +66,7 @@ def entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha=1.0, a=
         rho = np.einsum('p, q -> pq', C[i], C[i].conj().T).reshape(num_func, num_func, num_func, num_func)
         # Trace out the subsystems
         rho_l = np.trace(rho, axis1=0, axis2=2)
+        breakpoint()
         # rho_r = np.trace(rho, axis1=1, axis2=3)
         # Compute entropies
         eigs_l = np.linalg.eigvalsh(rho_l)

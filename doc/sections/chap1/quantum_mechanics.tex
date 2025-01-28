@@ -87,27 +87,27 @@ To arrive at the Hartree-Fock equations, we start at the variational principle
 \end{align*}
 where $\ket{\psi^{HF}}$ is the Hartree-Fock wavefunction, which is a single Slater determinant, and it is normalized so we can omit the denominator in the expectation value. This basis is related to a chosen initial basis by a unitary transformation.
 \begin{align*}
-    \psi^{HF}_p = \sum_qC_qp\psi_q
+    \psi^{HF}_p = \sum_qC_{qp}\psi_q
 \end{align*}
-where the unitary matrix is expressed by its matrix elements. The Hamiltonian in question is the sum of the kinetic energy operator and the electron-electron repulsion operator, and the energy is given by
+where the unitary matrix is expressed by its matrix elements. The Hamiltonian in question is the sum of the kinetic energy operator and the electron-electron repulsion operator, and the energy is given, expressed in the initial basis with the coefficients $C_p$, as
 \begin{align*}
-    E^{HF} = \sum_{pq}C^*_pC_qh_{pq} + \frac{1}{2}\sum_{pqrs}C^*_pC^*_qC_rC_su_{pqrs}
+    E^{HF} = \sum_i\sum_{pq}C^*_{ip}C_{i}qh_{pq} + \frac{1}{2}\sum_{ij}\sum_{pqrs}C^*_{ip}C^*_{jq}C_{ir}C_{j}su_{pqrs}
 \end{align*}
-here expressed in terms of the one- and two-electron integrals, in the initial basis. The Hartree-Fock equations are derived by minimizing the energy with respect to the coefficients $C_p$. We take the derivative w.r.t $C_p^*$ which gives us the Hartree-Fock equations
+here expressed in terms of the one- and two-electron integrals, in the initial basis. The Hartree-Fock equations are derived by minimizing the energy with respect to the coefficients $C_{ip}$. We take the derivative w.r.t $C_{i}p^*$ which gives us the Hartree-Fock equations
 \begin{align*}
-    \sum_qh_{pq}C_q + \sum_{rs}C_rC_su_{pqrs}C_q = \epsilon_pC_p
+    \sum_qh_{pq}C_{iq} + \sum_j\sum_{qrs}C^*_{jr}C_{js}u_{pqrs}C_{iq} = \epsilon^{HF}_{ip}C_{ip}.
 \end{align*}
-\textcolor{red}{Continue the derivation of the Hartree-Fock equations. Figure out how rigorous I want to do this. Maybe just refer to the book, and give a brief overview of the method.}
+By assumption, the summation over $r$ and $s$ is over all the occupied orbitals (below the Fermi level), as these are the only ones that contribute in the (mean-field) interaction matrix. As a result, the indices reduce to a summation over the occupied orbitals only. This simplification modifies the two-body integrals into $u_{piqi}$, where $i$ runs over orbitals below the Fermi level, while $p,q$ remains the orbitals being varied. This simplification reflects the mean-field approximation central in Hartree-Fock theory, as only interactions with occupied orbitals are considereed. With this, we can now define the Fock operator as
+\begin{align*}
+    f_{pq} = h_{pq} + \sum_{i<F}C^*_{i}C_{i}u_{piqi}
+\end{align*}
+and the Hartree-Fock equations can be written as
+\begin{align*}
+    f_{pq}C_{iq} = \epsilon^{HF}_{ip}C_{ip}
+\end{align*}
+which is now a pseduo-eigenvalue equation that we need to solve iteratively. To solve this equation we employ the \emph{Self-Consistent Field} (SCF) procedure, an iterative method designed to converge to the ground-state energy of the system. This procedure starts with an initial guess for the coefficients $C_{ip}^{(0)}$, which defines the initial guess for the molecular orbitals. With this guess, the Fock operator is constructed, and the Hartree-Fock equations are solved. This yields a new set of coefficients $C_{ip}^{(1)}$, and the process is repeated until the HF-energies $\epsilon^{HF}$ converge within a set threshold, or the change in coefficients $C_{ip}$ becomes negligable. A more thorough presentation of the SCF method applied to the Hartree-Fock equations will be presented in later sections. \textcolor   
 
-
-
-
-
-
-
-
-
-
+\textcolor{red}{Maybe add some more references. What about showing explicitly the integrals? Also the coulomb and exchange terms, maybe these would be good to show. SHould we talk about the Roothan-Hall equations?? No clue what that even is, but sounds cool perhaps. Also would be easier to cite.}
 
 \begin{itemize}
     \item Born-Oppenheimer approximation, herein lies the separation of electronic and nuclear motion and mean-field approximation comes in naturally.
@@ -120,5 +120,53 @@ here expressed in terms of the one- and two-electron integrals, in the initial b
 
 
 \subsection*{Morse potential}
+To build our qubit system, we need to define some form of potential trap that we can confine our particles within. In modern quantum computing many different potentials are used, tested and theorized. One of the most common potentials are the quantum harmonic oscillator potential (QHO), a very well known potential in quantum mechanics. This potential has been studied in great detail and has been used in many different quantum systems, and is very often used as a benchmark for more advanced symmetric potentials. \textcolor{red}{(Cite some sources here)}. The QHO basis sets are widely employed to study quantum dot systems\cite{Yuan_2017}, and are often used in quantum chemistry to describe molecular vibrations. In our study, we will also employ the QHO potential to test our implementations and to compare our results with other studies.\textcolor{red}{will we?}
+\\ \\ One could think that using the QHO potential for our qubit would be a natural choice, but there are some nuances necessary to consider. The QHO double well potential is perfectly symmetric, meaning the energy levels are uniformly spaced, and equal across both wells. This in not ideal for our realization of the iSwap gate, as we need more control over eneregy levels in both wells. \\ \\ To achieve this, we will instead use the Morsee potential, first introduced by Philip M. Morse in 1929 as a solution to the Schrödinger equation representing the motion of the nuclei in a diatomic molecule\cite{morse1929diatomic}. This potential has non-uniform energy levels, and more parameters, and is widely used in quantum mechanics to describe anharmonic oscillators. An extension of the Morse potential, Morse/Long-rangee potential is one of the most popular potentials to model potential energy surfaces used for spectroscopy\cite{zhai2018constructing}. Given that this potential has already seen alot of study within quantum dot systems, and molecular systems in general, it is natural to belive that this potential, should we succeed in our study, prove to be a good candidate for a room-temperature qubit system. \\ \\ 
 
+The Morse potential is given, first proposed by Morse, as
+\begin{align*}
+    V(r) = De^{-2a(r-r_0)} - 2De^{-a(r-r_0)}
+\end{align*}
+This function has a minima of $-D$ at $r = r_0$, and goes asymptotically towards zero at $r=\infty$, and tends towards large values for $r\rightarrow0$. In our study, we will rewrite the potential somewhat, to make it more computationally efficient to make multiple evaluations. As the zero-point of a potential is arbitrary, we can subtract or add any scalar valuee without loss of generality. We will therefore rewrite the Morse potential, adding the zero-point energy $D$ to the potential, and factor out a $D$ to simplify the expression. This gives us
+\begin{align*}
+    V(r) &= De^{-2a(r-r_0)} - 2De^{-a(r-r_0)} + D \\
+    &= D(e^{-2a(r-r_0)} - 2e^{-a(r-r_0)} + 1)
+\end{align*}
+which yields a simpler form, by factorization using the square binomial formula,
+\begin{align}
+    &= D(e^{-a(r-r_0)} - 1)^2
+\end{align}
+where now, computationally, we need only evaluate the exponential function once, and the rest of the potential is simple algebraic operations. This makes our computations more efficient, as the evaluation of the expoenntial function is computationally expensive\cite{sauce?}, and algebraic operations are much faster. Expanding a Taylor series about the well minima, we can see that the potential is approximativly harmonic. From this, we can identify Hookes law, and also identify a new parameter. Expanding around $r_0$
+\begin{align*}
+    V(r) = V(r_0) + V'(r_0)(r-r_0) + \frac{1}{2}V''(r_0)(r-r_0)^2 + ...
+\end{align*}
+Since we are operating about the minima, higher order terms can be neglected as they become very small. As $r_0$ is now the zero-point of the potential (after shifting), we have $V(r_0) = 0$. Furthermore, as $r_0$ is a minima of the potential, $V'(r_0) = 0$, as the slope of the potential function is flat at this point. This simplifies our expression to
+\begin{align*}
+    V(r) = \frac{1}{2}V''(r_0)(r-r_0)^2
+\end{align*}
+which we identify as the harmonic oscillator potential, with the spring constant $k = V''(r_0)$, and if we, by differentiation w.r.t $r$, use it to find the force on a particle we indentify Hooke's Law. This gives us a new parameter to control the width of the well, and the curvature of the potential, which is expressed as
+\begin{align*}
+    V' &= 2D(1 - e^{-a(r-r_0)})a \\
+    V'' &= 2Da^2e^{-a(r-r_0)} \\
+    V''(r_0) &= 2Da^2 \\
+    k &= 2Da^2 \rightarrow a = \sqrt{\frac{k}{2D}}
+\end{align*} 
+%% Double well
+\\ \\Now, we would like to make a potential trap for \emph{two} separate particles, as our qubit system will be a two-particle system. To do so, we construct a double Morse potential well, simply by adding two Morse potentials together. We flip the right potential well, so that the minima are at the same position, and the potential is symmetric (given symmetric parameters). This gives us the double Morse potential as
+\begin{equation}
+    V(r) = D_L(e^{-c_L(r-r_{0,L})} - 1)^2 + D_R(e^{c_R(r-r_{0,R})} - 1)^2
+\end{equation}
+where the subscripts L and R correspond to left and right well, respectively. The parameter $D$ controls the depth of the potential well, whilst $c$ has some control over the width of the well, through the steepness of the exponential functions decay (and thus the curvature, and width, of the well). A smaller $c$ parameter constitues a wider well as the function would then decay slowly. The parameter $r_0$ is the position of the well minima. 
+
+
+
+\begin{itemize}
+    \item Presentation of the actual potential
+    \item Why it is used, and where
+    \item Connection to the long-range morse that is very popular
+    \item Why we use it
+    \item Form of the potential
+    \item our construction of a double Morse potential well
+    \item Some plots of the potential, and it's energy levels (show that they are quantized, but not equally spaced)
+\end{itemize}
 \end{document}

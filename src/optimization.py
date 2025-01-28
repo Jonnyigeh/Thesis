@@ -3,6 +3,7 @@ warnings.filterwarnings('ignore', category=UserWarning) # Ignores a warnings due
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
+from scipy.linalg import svdvals
 
 # Local imports
 import quantum_systems as qs
@@ -20,11 +21,13 @@ class Optimizer:
                 num_func=4,
                 grid_length=400,
                 num_grid_points=4_001,
+                d=100,
                 a=0.25,
                 alpha=1.0,
-                max_iter=1_000,
-                tol=1e-10,
+                max_iter=2_000,
+                tol=1e-4,
                 n_particles=2,
+                scaling=1e-1,
                 verbose=True,
                 params=None,
                 config='I'
@@ -53,19 +56,23 @@ class Optimizer:
         self.grid_length = grid_length
         self.num_grid_points = num_grid_points
         self.a = a
+        # self.d = d
         self.alpha = alpha 
         self.max_iter = max_iter
         self.tol = tol
         self.n_particles = n_particles
         self.verbose = verbose
-        self.params = params
+        self.scaling = scaling
+        self.params = np.asarray(params)
         self.config = config
         if self.config == 'I':
             self.target = np.zeros(num_func)
         elif self.config == 'II':
             self.target = np.zeros(num_func)
+            self.target[0] = 0.0
             self.target[1] = 1.0
             self.target[2] = 1.0
+            self.target[3] = 0.0
         # if params is None:
         #     params = [15.0, 15.0, 9.0, 9.0, 15.0]
         # self.params = params
@@ -100,16 +107,20 @@ class Optimizer:
         """Constraint for the optimization problem
         We need to make sure that the parameters are such that we can still fit our basis functions within the potential wells.
         """
-        D_l, D_r, k_l, k_r = params
+        try:
+            D_l, D_r, k_l, k_r, d = params
+        except:
+            D_l, D_r, k_l, k_r = params
         left_constraint = 2 * D_l / np.sqrt(k_l) - np.ceil(self.l + 0.5)
         right_constraint = 2 * D_r / np.sqrt(k_r) - np.ceil(self.l + 0.5)
 
         return min(left_constraint, right_constraint)
-
+    
 
     def _solve(self, params):
         self.potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
             *params,
+            # d=self.d
         )
         self._initialize_basis()
         num_l = self.num_func
@@ -121,12 +132,16 @@ class Optimizer:
             num_basis_l=num_l,
             num_basis_r=num_r,
         )
-        
         eps_l, c_l, eps_r, c_r = bhs.solve()
+        self.w_l = eps_l[1] - eps_l[0]
+        self.w_r = eps_r[1] - eps_r[0]
+        self.trans_energies = np.array([self.w_l, self.w_r])
+        self.eps_l = eps_l - eps_l[0]
+        self.eps_r = eps_r - eps_r[0]
+        self.hartree_energies = np.abs(self.eps_l - self.eps_r)
         self._transform_basis(self.basis, c_l, c_r)
         H = self.basis._h + self.basis._u
         eps, C = np.linalg.eigh(H)
-
         self.eigen_energies = eps
         return eps, C
 
@@ -134,45 +149,138 @@ class Optimizer:
     def _find_VN_entropies(self, rho):
         """Find entropy from reduced density matrix"""
         eigs = np.linalg.eigvalsh(rho)
-        return -np.sum(eigs * np.log(eigs + 1e-15))    
+        return -np.sum(eigs * np.log2(eigs + 1e-15))    
+    
+    def _find_svd_entropies(self, C):
+        """Find entropy from SVD of coefficient matrix"""
+        entropies = np.zeros(self.num_func)
+        for i in range(self.num_func):
+            vals = (svdvals(C[:,i].reshape(self.num_func,self.num_func))) **2
+            entropies[i] = - np.sum(vals * np.log2(vals + 1e-15))
+        return entropies
+
     
 
     def _make_density_matrix(self, C):
-        self._rho = np.zeros((self.num_func ** 2, self.num_func ** 2), dtype=np.complex128)
-        for n in range(self.n_particles):
-            self._rho += np.outer(C[:, n], np.conj(C[:, n]).T)
+        # self._rho = np.zeros((self.num_func ** 2, self.num_func ** 2), dtype=np.complex128)
+        # for n in range(self.n_particles):
+        #     self._rho += np.outer(C[n], np.conj(C[n]).T)
+        self._rho = np.outer(C, np.conj(C).T)
+
 
     def _objective(self, params):
-        eps, C = self._solve(params)
+        eps, C = self._solve(params / self.scaling)
         # find reduced density matrix
-        self._make_density_matrix(C)
-        rho = np.trace(self._rho.reshape(self.num_func, self.num_func, self.num_func, self.num_func), axis1=0, axis2=2)
-        # and then entropy
-        S = self._find_VN_entropies(rho)
+        self.S = np.zeros(self.num_func)
+        for i in range(self.num_func):
+            self._make_density_matrix(C[:,i]) # Each column is the energy eigenstates
+            rho = np.trace(self._rho.reshape(self.num_func, self.num_func, self.num_func, self.num_func), axis1=0, axis2=2)
+            # and then entropy
+            self.S[i] = self._find_VN_entropies(rho)
         
-        return np.linalg.norm(S - self.target)
+        self.svd_entropy = self._find_svd_entropies(C)
+        energy_penalty = 0
+        detuning_penalty = 0
+        self.ZZ = np.abs(eps[4] - eps[2] - eps[1] + eps[0])
+        if self.config == 'I':
+            detuning_penalty = -min(0.5, np.abs(self.w_l - self.w_r))
+        
+        if self.config == 'II':
+            detuning_penalty = np.abs(self.w_l - self.w_r)
+        
+        return np.linalg.norm(self.S - self.target) + self.ZZ + detuning_penalty
+
 
     def optimize(self):
+        def _callback(params):
+            """Callback function for optimization"""
+            if self.counter % 100 == 0:
+                print(f"Iteration: {self.counter}")
+                print(f"Parameters: {params / self.scaling}")
+                print(f"Objective: {self._objective(params)}")
+                print(f"ZZ param: {self.ZZ}")
+                print(f"Energies: {self.eigen_energies[:6]}")
+                print(f"HF energies: {self.hartree_energies}")
+                print(f"Transition energies: {self.trans_energies}")
+                print(f"Entropy: {self.S}")
+            self.counter += 1
+            self.entropies.append(self.S[0])
         constraints = [
-            {'type': 'ineq', 'fun': lambda params: self._constraint(params)}
+            {'type': 'ineq', 'fun': lambda params: self._constraint(params / self.scaling)}
         ]
-
+        # bounds = [(15, 100),  # D_l must be positive
+        #   (15, 100),  # D_r must be positive
+        #   (5, 75),  # k_l must be positive
+        #   (5, 75)]  # k_r must be positive
+        bounds = [(10 * self.scaling, 100 * self.scaling),  # D_l must be positive
+            (10 * self.scaling, 100 * self.scaling),  # D_r must be positive
+            (5 * self.scaling, 100 * self.scaling),  # k_l must be positive
+            (5 * self.scaling, 100 * self.scaling),
+            (50 * self.scaling, 300 * self.scaling)]  # k_r must be positive
+        self.counter = 0
+        self.entropies = []
         result = minimize(
             self._objective,
-            self.params,
-            method='SLSQP',
+            self.params * self.scaling,
+            method='COBYQA',
+            bounds=bounds,
             constraints=constraints,
-            options={'disp': self.verbose, 'maxiter': self.max_iter}
-        )
-        self.params = result.x
+            callback=_callback,
+            tol=self.tol,
+            options={'disp': self.verbose, 'maxiter': self.max_iter, 'final_tr_radius': self.tol}
+        ) 
+        self.params = result.x / self.scaling
         return result
 
 if __name__ == '__main__':
-    D_l = 35.0
-    D_r = 35.0
-    k_l = 15.0
-    k_r = 15.0
-    params = [D_l, D_r, k_l, k_r]
-    optimizer = Optimizer(params=params)
-    res = optimizer.optimize()
+    D_l = 51.0
+    D_r = 51.0
+    k_l = 40.0
+    k_r = 40.0
+    d= 100.0
+    params = [D_l, D_r, k_l, k_r, d]
+    params =  [45,  55,  35,  45, 100,] # Somehow has very low ZZ-parameter? Start for finding config I - honestly seems to be the perfect parameters.
+    # params = [54.45858763, 52.22857398, 46.33965297, 42.62224946, 101.49667289] # Found by optimizing for configuration I, start for finding config II
+    ins = Optimizer(params=params, tol=1e-8, verbose=False, config='II')
+    res = ins.optimize()
+    breakpoint()
+    # Randomly initialized parameters
+    info = {}
+    score = 100
+    for i in range(25):
+        D_l = np.random.randint(10, 100)
+        D_r = np.random.randint(10, 100)
+        k_l = np.random.randint(5, 100)
+        k_r = np.random.randint(5, 100)
+        d = np.random.randint(80, 300)
+        params = [D_l, D_r, k_l, k_r, d]
+        ins = Optimizer(params=params, tol=1e-10, verbose=False, config='I')
+        res = ins.optimize()
+        info[i] = {
+            'initial_params': params,
+            'parameters': ins.params.tolist(),
+            'entropy': ins.entropies,
+            'S': ins.S.tolist(),
+            'result': res.fun,
+            'energies': ins.eigen_energies.tolist()
+        }
+        if res.fun < score:
+            score = res.fun
+            best_params = ins.params.tolist()
+            iteration = i
+    info['best'] = {
+        'parameters': best_params,
+        'score': score,
+        'iteration': iteration,
+        'targets': ins.target.tolist()
+    }
+    print(f"Best parameters: {best_params}")
+    print(f"Best iteration: {iteration}")
+    print(f"Best score: {score}")
+    import json
+    try:
+        with open('data/optimization_results_280125_measurementconfig.json', 'w') as f:
+            json.dump(info, f, indent=4)
+    except:
+        breakpoint()
     breakpoint()
