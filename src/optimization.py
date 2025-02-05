@@ -133,16 +133,20 @@ class Optimizer:
             num_basis_r=num_r,
         )
         eps_l, c_l, eps_r, c_r = bhs.solve()
-        self.w_l = eps_l[1] - eps_l[0]
-        self.w_r = eps_r[1] - eps_r[0]
-        self.trans_energies = np.array([self.w_l, self.w_r])
         self.eps_l = eps_l - eps_l[0]
         self.eps_r = eps_r - eps_r[0]
-        self.hartree_energies = np.abs(self.eps_l - self.eps_r)
+        self.trans_energies = {
+            'w_l1': float(round(self.eps_l[1] / (2 * np.pi), 5)),
+            'w_r1': float(round(self.eps_r[1] / (2 * np.pi), 5)),
+            'w_L1 + w_R1': float(round((self.eps_l[1] + self.eps_r[1]) / (2 * np.pi), 5)),
+            'w_l2': float(round(self.eps_l[2] / (2 * np.pi), 5)),
+            'w_r2': float(round(self.eps_r[2] / (2 * np.pi), 5)),
+        }
         self._transform_basis(self.basis, c_l, c_r)
         H = self.basis._h + self.basis._u
         eps, C = np.linalg.eigh(H)
         self.eigen_energies = eps
+        
         return eps, C
 
 
@@ -157,6 +161,7 @@ class Optimizer:
         for i in range(self.num_func):
             vals = (svdvals(C[:,i].reshape(self.num_func,self.num_func))) **2
             entropies[i] = - np.sum(vals * np.log2(vals + 1e-15))
+        
         return entropies
 
     
@@ -183,10 +188,10 @@ class Optimizer:
         detuning_penalty = 0
         self.ZZ = np.abs(eps[4] - eps[2] - eps[1] + eps[0])
         if self.config == 'I':
-            detuning_penalty = -min(0.5, np.abs(self.w_l - self.w_r))
+            detuning_penalty = -min(0.5, np.abs(self.eps_l[1] - self.eps_r[1]))
         
         if self.config == 'II':
-            detuning_penalty = np.abs(self.w_l - self.w_r)
+            detuning_penalty = np.abs(self.eps_l[1] - self.eps_r[1])
         
         return np.linalg.norm(self.S - self.target) + self.ZZ + detuning_penalty
 
@@ -199,8 +204,7 @@ class Optimizer:
                 print(f"Parameters: {params / self.scaling}")
                 print(f"Objective: {self._objective(params)}")
                 print(f"ZZ param: {self.ZZ}")
-                print(f"Energies: {self.eigen_energies[:6]}")
-                print(f"HF energies: {self.hartree_energies}")
+                print(f"Energies: {self.eigen_energies[:6] / (2 * np.pi)}")
                 print(f"Transition energies: {self.trans_energies}")
                 print(f"Entropy: {self.S}")
             self.counter += 1
@@ -216,7 +220,7 @@ class Optimizer:
             (10 * self.scaling, 100 * self.scaling),  # D_r must be positive
             (5 * self.scaling, 100 * self.scaling),  # k_l must be positive
             (5 * self.scaling, 100 * self.scaling),
-            (50 * self.scaling, 300 * self.scaling)]  # k_r must be positive
+            (90 * self.scaling, 300 * self.scaling)]  # k_r must be positive
         self.counter = 0
         self.entropies = []
         result = minimize(
@@ -239,11 +243,16 @@ if __name__ == '__main__':
     k_r = 40.0
     d= 100.0
     params = [D_l, D_r, k_l, k_r, d]
-    params =  [45,  55,  35,  45, 100,] # Somehow has very low ZZ-parameter? Start for finding config I - honestly seems to be the perfect parameters.
-    # params = [54.45858763, 52.22857398, 46.33965297, 42.62224946, 101.49667289] # Found by optimizing for configuration I, start for finding config II
-    ins = Optimizer(params=params, tol=1e-8, verbose=False, config='II')
+    # params =  [45,  55,  35,  45, 100,] # Somehow has very low ZZ-parameter? Start for finding config I - honestly seems to be the perfect parameters.
+    params = [59.20710113, 59.44370983 , 32.42994617 ,45.31466205, 100.35488958] #Slightly better, found after optimize above params
+    # params = [75.27694031, 59.87547933, 18.5059748, 18.8518254, 107.10304619] # Old params from before normalization of spf_l & spf_r 
+    # params = [75, 60, 19, 19, 105] # To perform a search around this minima
+    # params = [99.99841511, 41.37852048, 16.36579386, 17.41846244, 111.66647596] # Found from optimizing config II from config I
+    # params = [100, 40, 16, 17, 110] # Found from optimizing config II from config I
+    ins = Optimizer(params=params, tol=1e-12, verbose=False, config='I')
     res = ins.optimize()
     breakpoint()
+    exit()
     # Randomly initialized parameters
     info = {}
     score = 100

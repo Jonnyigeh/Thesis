@@ -21,7 +21,6 @@ There are a multitude of basis sets to choose from, and the choice is guided by 
     F_{pq} = h_{pq} + \sum_{i}^N u_{piqi}
 \end{align*}
 
-
 \subsection{Study of indistinguishability}
 One of the core features of our system - and the foundation of our qubit design -is that the two particles confined in our potential trap act as \emph{distinguishable} particles. As we are looking to trap electrons, indistinguishable particles, we are dealing with fermions, and the Pauli exclusion principle states clearly that two fermions cannot occupy the same quantum state. This fundamental principle would normally prevnt us from constructing product states, as the quantum state of any fermionic system must be anti-symmetric under particle exchange.
 \\ However, we are assuming that the potential trap is constructed such that there are minimal correlations between the two particles, and that the wavefunction can be approximated as a product state. In this analysis we shall look at how "distinguishable" our system actually is, and find a distance between wells where we can safely assume the particles to be distinguishable. \\ \\
@@ -41,4 +40,34 @@ To make an assessment of the systems distinguishability we will firstly look at 
 
 
 If we are successful, we should find that for a certain distance between the wells, the "true" distinguishable energy will overlap with the indistinguishable HF-energy. Should this be the case, we can safely assume that the particles behave as distinguishable particles for our intents and purposes. 
+
+
+\subsection{Optimization of the potential parameters}
+As our goal is to realize single-qubit gates and the two-qubit iSwap gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we've discussed in earlier sections the two configurations we are looking for are:
+\begin{itemize}
+    \item Config I: The measurement configuration, where all energy levels are distinct and there are minimal correlations between the two subsystems (particles). This corresponds to keeping all Von Neumann entropies in our system as close to zero as possible. With this, we know that our two-body energy eigenstates will have a product state structure, and maximal overlap with the Hartree product states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$.
+    \item Config II: The entangled configuration, where we have a degeneracy in the energy levels of our system. This degeneracy will give rise to an avoided crossings in the energy spectrum for the first and second energy eigenstates. In this configuration, the 1st and 2nd energy eigenstates are maximally entangled, while the other energy eigenstates are kept as pure as possible (product states). This corresponds to an entropy equal to 1 for $\ket{\phi_1}$ and $\ket{\phi_2}$, and 0 for $\ket{\phi_0}$ and $\ket{\phi_4}$. 
+\end{itemize}
+As an initial search, we make a grid search over the potential parameters, mostly to map out the landscape of the potential and find regions where we expect to find the desired configuations. Our grid search will be over the following parameters:
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        Parameter & Range & Description \\
+        \hline
+        $D_l, D_r$ & [$D_{\text{min}}$, $D_{\text{max}}$] & The depth of the potential well \\
+        $k_l, k_r$ & [$k_{\text{min}}$, $k_{\text{max}}$] & The width of the potential well \\
+        $d$ & [$d_{\text{min}}$, $d_{\text{max}}$] & The distance between the two potential wells \\
+        \hline
+    \end{tabular}
+    \caption{The parameters we will search over in our grid search}
+\end{table}
+with the constraint that $2 * D / \sqrt(k) < l$ where $l$ are the number of basis functions allocated to each well, as we've discussed earlier. This is to ensure that the basis functions are well within the potential well, and that we do not have any basis functions that are cut off by the potential. This then becomes a \emph{constrained optimization problem}. To perform our optimization we will use the \texttt{scipy.optimize} package, and the \texttt{minimize} function. We will use the \texttt{COBYQA} method, which is a derivative-free optimization method that is well suited for constrained optimization problems. This method is built on the concept of \emph{sequential quadratic programming}, that solves constrained, non-linear problems. For more details on the method, see \cite{razh_cobyqa}. The optimization will be done as follows:
+\begin{itemize}
+    \item Randomize an initial configuration of the parameters within the specified ranges.
+    \item Run the optimization algorithm, with a high tolerance for convergence.
+    \item Log 'good' regions where we achive the desired configurations.
+    \item Initialize new configurations using the 'good' parameters found from the grid search.
+    \item Run the optimization algorithm again, with a lower tolerance for convergenece.
+\end{itemize}
 \end{document}

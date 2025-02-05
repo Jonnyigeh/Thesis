@@ -169,7 +169,7 @@ if __name__ == "__main__":
     alpha = 1.0
     a = 0.25
     num_grid_points = 1_001
-    l = 5
+    l = 10
     n = 2 # Number of particles
     num_func = 5
     grid_length = 400   

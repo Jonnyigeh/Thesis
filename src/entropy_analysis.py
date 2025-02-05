@@ -114,8 +114,8 @@ def visualize(C_, num_func, entropy, tol=1e-8):
     # plt.close()
 
 if __name__ == "__main__":
-    # separations = [5, 25, 50, 75, 100, 200]
-    separations = [50]
+    separations = [25, 50, 75, 100, 200]
+    # separations = [50]
     grid_length = 400
     num_grid_points = 4_001
     l = 15
@@ -125,10 +125,10 @@ if __name__ == "__main__":
     en = []
     Cs = []
     eps = []
-    DL = [30,31,32,33,34,35]
-    DR = [30,31,32,33,34,35]
-    kL = [10,11,12,13,14,15]
-    kR = [10,11,12,13,14,15]
+    DL = [40, 60, 80]
+    DR = [40, 60, 80]
+    kL = [20, 40, 60]
+    kR = [20, 40, 60]
     d = 50
     ep, C, ent = entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha, a, verbose=False)
     breakpoint()
