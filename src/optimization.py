@@ -66,7 +66,7 @@ class Optimizer:
         self.params = np.asarray(params)
         self.config = config
         if self.config == 'I':
-            self.target = np.zeros(num_func)
+            self.target = np.zeros(num_func) + 1e-8
         elif self.config == 'II':
             self.target = np.zeros(num_func)
             self.target[0] = 0.0
@@ -186,14 +186,17 @@ class Optimizer:
         self.svd_entropy = self._find_svd_entropies(C)
         energy_penalty = 0
         detuning_penalty = 0
+        config_2_penalty = 0
         self.ZZ = np.abs(eps[4] - eps[2] - eps[1] + eps[0])
         if self.config == 'I':
             detuning_penalty = -min(0.5, np.abs(self.eps_l[1] - self.eps_r[1]))
+            config_2_penalty = np.linalg.norm(self.params - np.array([ 55.58227514,  73.97731125,  20.18435971,  19.75699591,
+       100.        ]))
         
         if self.config == 'II':
             detuning_penalty = np.abs(self.eps_l[1] - self.eps_r[1])
         
-        return np.linalg.norm(self.S - self.target) + self.ZZ + detuning_penalty
+        return np.linalg.norm(self.S - self.target) + self.ZZ + detuning_penalty + config_2_penalty
 
 
     def optimize(self):
@@ -244,11 +247,17 @@ if __name__ == '__main__':
     d= 100.0
     params = [D_l, D_r, k_l, k_r, d]
     # params =  [45,  55,  35,  45, 100,] # Somehow has very low ZZ-parameter? Start for finding config I - honestly seems to be the perfect parameters.
-    params = [59.20710113, 59.44370983 , 32.42994617 ,45.31466205, 100.35488958] #Slightly better, found after optimize above params
     # params = [75.27694031, 59.87547933, 18.5059748, 18.8518254, 107.10304619] # Old params from before normalization of spf_l & spf_r 
     # params = [75, 60, 19, 19, 105] # To perform a search around this minima
     # params = [99.99841511, 41.37852048, 16.36579386, 17.41846244, 111.66647596] # Found from optimizing config II from config I
     # params = [100, 40, 16, 17, 110] # Found from optimizing config II from config I
+
+    # AFTER CHANGING BIPARTITE HARTREE SOLVER AND INTERACTION IS PROPER:
+    # params = [59.20710113, 59.44370983 , 32.42994617 ,45.31466205, 100.35488958] # Slightly better, found after optimize for config I
+    params = [55.58227515, 73.97731125, 20.18435972, 19.75699591, 99.9998964] # Found from optimizing config II from config I
+    # params = [ 55.58227514,  73.97731125,  20.18435971,  19.75699591, 100.]
+    # params = [55, 73, 20., 19, 97]
+    # conf1 = [ 60.90228786  76.41079666   9.88551909  18.58238756 104.81157016]
     ins = Optimizer(params=params, tol=1e-12, verbose=False, config='I')
     res = ins.optimize()
     breakpoint()

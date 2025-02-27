@@ -20,6 +20,20 @@ There are a multitude of basis sets to choose from, and the choice is guided by 
 \begin{align*}
     F_{pq} = h_{pq} + \sum_{i}^N u_{piqi}
 \end{align*}
+\textcolor{red}{not finished}
+\subsection{Bipartite Hartree}
+As presented in section \ref{sec:bipartite_H}, the Hartree method is also a self-consistent field method, where we solve the coupled eigenvalue equations for the two subsystems (particles) iteratively. The method is very similar to the Hartree-Fock method, and the main difference is that we do not include an exchange term and the wavefunction itself a single hartree product state. The general method is as follows:
+\begin{itemize}
+    \item Construct an initial guess for the single-particle orbitals, $\{\chi_i\}$.
+    \item Diagonalize the Hartree matrix to obtain a new set of orbitals, $\{\chi_i\}$, and calculate the energy.
+    \item Repeat the process until the energy converges, i.e. the change in energy between iterations is below a certain threshold.
+    \item Calculate the total energy of the system, and the electron density, and use this to calculate other properties of the system.
+end{itemize}
+The way we solve this SCF procedure is by constructing the Hartree matrix, which is a matrix representation of the Hartree operator in the basis of the single-particle orbitals. The Hartree matrix is given in eq. \ref{eq:bipartite_hartree}, with an initial choice for the Hartree matrix as \emph{only} the single-body hamiltonians, i.e 
+\begin{align*}
+    f_{\alpha\beta}^(M0) = h_{\alpha\beta}^M
+\end{align*}
+which will be our initial starting point for our iterative process. 
 
 \subsection{Study of indistinguishability}
 One of the core features of our system - and the foundation of our qubit design -is that the two particles confined in our potential trap act as \emph{distinguishable} particles. As we are looking to trap electrons, indistinguishable particles, we are dealing with fermions, and the Pauli exclusion principle states clearly that two fermions cannot occupy the same quantum state. This fundamental principle would normally prevnt us from constructing product states, as the quantum state of any fermionic system must be anti-symmetric under particle exchange.

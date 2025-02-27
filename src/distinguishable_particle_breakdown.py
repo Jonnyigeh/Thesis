@@ -163,23 +163,27 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     print(f"Distinguishable energies: {disting_eps[:6]}")
     print(f"Indistuinguishable energies: {indisting_eps[:6]}")
     print(f"HF energy: {E}")
-    print(f"Deviation in ground state estimate: {np.abs(disting_eps[0] - E)}")
+    print(f"Deviation in ground state estimate: {np.abs(disting_eps[0] - E):.5f}")
+    print(f'Relative error: {np.abs(disting_eps[0] - E) / E.real:.5f}')
 if __name__ == "__main__":
     separations = [20, 30, 50, 60, 70, 80, 100, 200, 300]
+    separations = [100]
     alpha = 1.0
     a = 0.25
-    num_grid_points = 1_001
+    num_grid_points = 4_001
     l = 10
     n = 2 # Number of particles
-    num_func = 5
+    num_func = 4
     grid_length = 400   
     for d in separations:    
         print(f"Separation: {d}")
+        # Should maybe test this also, and put in thesis for parameters in th emiddle of config I and config II?
+        # Currently use params found from config II
         potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
-                D_a=35.0,
-                D_b=35.0,
-                k_a=15.0,
-                k_b=15.0,
+                D_a=59.0,
+                D_b=59.0,
+                k_a=32.0,
+                k_b=45.0,
                 d=d
             )
 
