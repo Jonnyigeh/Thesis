@@ -47,7 +47,7 @@ def TIHF(h, u, num_func, n_particles, max_iters=10_000, epsilon=1e-10, verbose=T
             fock = np.zeros(h.shape, dtype=np.complex128)
             density_matrix = np.zeros((h.shape[0],h.shape[0]), dtype=np.complex128)
             for i in range(n_particles):
-                density_matrix += np.outer(np.conj(C[:, i]), C[:, i])
+                density_matrix += np.outer(C[:, i], np.conj(C[:, i]))
             fock = np.einsum('ij, aibj->ab', density_matrix, u, dtype=np.complex128)        # Compute the two-body operator potential
             fock += h                                                                       # Add the one-body operator hamiltonian
 

@@ -7,7 +7,7 @@ This function is a complex-valued function that gives a complete description of 
 
 The dynamics of the wavefunction is governed by the \emph{Time-dependent Schrödinger Equation} (TDSE),
 \begin{equation}
-    i\frac{\partial}{\partial t}\ket{\Psi(x, t)} = H(x,t)\ket{\Psi(x, t)}\label{eq:_tdse}
+    i\frac{\partial}{\partial t}\ket{\Psi(x, t)} = H(x,t)\ket{\Psi(x, t)}\label{eq:tdse}
 \end{equation}
 where $H$ a linear hermitian operator often referred to as the \emph{Hamiltonian}. Here $x$ is the position of the particle, and $t$ is the time. 
 This operator describes the total energy of the system, and is given by (in atomic units) \textcolor{red}{(Add more about the Hamiltonian, also see chapter 2.1.1 in Szabo Ostlund for material on atomic units. This is probably needed for results (to have proper discussions, and a real sense of "distance" in the results section). In the book, atomic units are as follows: length $=0.52918$ (Å), energy $=27.211$ (eV), dipole-moment (two charges at distance $a_0$) $=2.5418$ Debyes (D). There is also a conversion table that could prove useful.)}
@@ -103,9 +103,9 @@ By assumption, the summation over $r$ and $s$ is over all the occupied orbitals 
     f_{pq} = h_{pq} + \sum_{i<F}C^*_{i}C_{i}u_{piqi}
 \end{align*}
 and the Hartree-Fock equations can be written as
-\begin{align*}
-    f_{pq}C_{iq} = \epsilon^{HF}_{ip}C_{ip}
-\end{align*}
+\begin{align}
+    f_{pq}C_{iq} = \epsilon^{HF}_{ip}C_{ip}\label{eq:hf_equations}
+\end{align}
 which is now a pseduo-eigenvalue equation that we need to solve iteratively. To solve this equation we employ the \emph{Self-Consistent Field} (SCF) procedure, an iterative method designed to converge to the ground-state energy of the system. This procedure starts with an initial guess for the coefficients $C_{ip}^{(0)}$, which defines the initial guess for the molecular orbitals. With this guess, the Fock operator is constructed, and the Hartree-Fock equations are solved. This yields a new set of coefficients $C_{ip}^{(1)}$, and the process is repeated until the HF-energies $\epsilon^{HF}$ converge within a set threshold, or the change in coefficients $C_{ip}$ becomes negligable. A more thorough presentation of the SCF method applied to the Hartree-Fock equations will be presented in later sections. \textcolor   
 
 \textcolor{red}{Maybe add some more references. What about showing explicitly the integrals? Also the coulomb and exchange terms, maybe these would be good to show. SHould we talk about the Roothan-Hall equations?? No clue what that even is, but sounds cool perhaps. Also would be easier to cite.}
@@ -192,7 +192,8 @@ which we identify as the harmonic oscillator potential, with the spring constant
 
 
 %% Double well
-\\ \\Now, we would like to make a potential trap for \emph{two} separate particles, as our qubit system will be a two-particle system. To do so, we construct a double Morse potential well, simply by adding two Morse potentials together. We flip the right potential well, so that the minima are at the same position, and the potential is symmetric (given symmetric parameters). This gives us the double Morse potential as
+\\ \\
+Now, we would like to make a potential trap for \emph{two} separate particles, as our qubit system will be a two-particle system. To do so, we construct a double Morse potential well, simply by adding two Morse potentials together. We flip the right potential well, so that the minima are at the same position, and the potential is symmetric (given symmetric parameters). This gives us the double Morse potential as
 \begin{equation}
     V(r) = D_L(e^{-c_L(r-r_{0,L})} - 1)^2 + D_R(e^{c_R(r-r_{0,R})} - 1)^2
 \end{equation}
@@ -215,5 +216,62 @@ where the subscripts L and R correspond to left and right well, respectively. Th
     \item How do we measure it
     \item How do we create it
     \item How do we use it - avoided crossings, ref \cite{nazir2005anticrossings}
+\end{itemize}
+
+
+\subsection{Time evolution and numerical integration}
+\subsubsection{Time evolution operator}
+Simulating the dynamics of any quantum system is seen through the evolution of the quantum mechanical state representing the system at hand. The time evolution of a quantum state from time $t_0$ to $t$ is expressed by the linear unitary time-evolution operator $U(t, t_0)$, which is a solution to the time-dependent Schrödinger equation.\cite{sakurai1986modern} This operator should do the following
+\begin{equation}
+    \ket{\Psi(t)} = U(t, t_0)\ket{\Psi(t_0)}
+\end{equation}
+and it must satisfy the following critera:
+\begin{itemize}
+    \item Unitarity: $U(t, t_0)U^\dagger(t, t_0) = U^\dagger(t, t_0)U(t, t_0) = \mathbb{1}$, meaning it preserves the norm of the quantum mechanical state.
+    \item Composition property: $U(t_2, t_0) = U(t_2, t_1)U(t_1, t_0)$, meaning the time-evolution operator is a composition of smaller time-evolution operators that are time-ordered ($t_2>t_1>t_0$).
+    \item Continuity: $\lim_{dt\to 0}U(t_0 + dt, t_0) = \mathcal{1}$, meaning the time-evolution operator is continuous, and reduces to identity when the time difference is zero.
+\end{itemize}
+All these critera can be satisfied by 
+\begin{align*}
+    U(t_0 + dt, t_0) = 1 - i\Omega(t_0) dt
+\end{align*}
+where $\Omega$ is a Hermitian operator, and $dt$ is the infinitesimal time difference. The 4th criteria is satisfied naturally as $dt$ goes to zero, while the 1st and 2nd criteria is satisfied to first order 
+\begin{align*}
+    U^\dagger(t_0 + dt, t_0)U(t_0 + dt, t_0) = (1 + i\Omega(t_0)^\dagger)(1 - i\Omega(t_0)) = 1 + \mathcal{O}(dt^2) \approxeq 1
+\end{align*}
+and
+\begin{align*}
+    &U(t_0 + 2dt, t_0) = 1 - i2\Omega(t_0)dt, \\
+    &U(t_0 + 2dt, t_0 +dt)U(t_0 + dt, t_0) = 1 - 2i\Omega(t_0)dt + \mathcal{O}(dt^2)
+\end{align*}
+if we have a small enough time-step $dt$, where we can safely ignore higher order terms. But how to identify the operator $\Omega$? We identify from classical mechanics that the Hamiltonian operator is the propagator of the system \cite{sakurai1986modern}, 
+\begin{align*}
+    \Omega = \frac{H}{\hbar}
+\end{align*}
+meaning, 
+\begin{align*}
+    U = 1 - \frac{i}{\hbar}Hdt
+\end{align*}
+which we can see is the first order approximation of the exponential series
+\begin{align*}
+    e^{\frac{-i}{\hbar}Ht} = 1 - \frac{i}{\hbar}Ht + \frac{1}{2!}\bigg(\frac{-i}{\hbar}Ht\bigg)^2 + ...
+\end{align*}
+which is the full form of the time-evolution operator, often coined time-propagator, and is given by
+\begin{equation}
+    U(t, t_0) = \mathcal{T}\text{exp}\bigg(\frac{-i}{\hbar}\int_t_0^tH(t')dt'\bigg)\label{eq:time_evolution_operator}
+\end{equation}
+where the integral must be time-ordered, and swapped with the Dyson series expansion should the Hamiltonian be time-dependent, and non-commutative at different times (see chapter 2.1.2 in \cite{sakurai1986modern}). 
+\subsubsection{Numerical integration}
+The time-propagator in \eqref{eq:time_evolution_operator} involves a time-ordered exponential, which generally cannot be solved analytically for a time-dependent Hamiltonian $H(t)$. Therefore, we must look to numerical methods to approximate and solve the integral. Choice of method is crucial, and it depends on accuracy, computational cost and stability. The simplest approximative method is the \emph{Euler-Cromer} method, a first order method given by Taylor expansion of the time-evolution operator
+
+
+\begin{itemize}
+    \item Time evolution of a quantum system
+    \item Schrödinger equation
+    \item Time evolution operator
+    \item Different numerical integrators
+    \item Trotter-Suzuki decomposition?
+    \item How do we simulate time evolution
+    \item Time evolution of a qubit system
 \end{itemize}
 \end{document}
