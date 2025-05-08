@@ -17,15 +17,16 @@ class time_evolution:
                  params1,
                  params2,
                  l=25,
-                 num_lr=4,
+                 num_lr=2,
                  num_grid_points=400,
                  grid_length=200,
                  num_particles=2,
                  a=0.25,
                  alpha=1.0,
-                 dt=0.01,
+                 dt=0.1,
                  t_max=1.0,
                  ramp_time=0.2,
+                 stay_still_time=0.1,
                  ramp='cosine',
                  integrator='U',
                  hartree=False):
@@ -42,6 +43,8 @@ class time_evolution:
         self.dt = dt
         self.t_max = t_max
         self.ramp_time = ramp_time
+        self.t_start = stay_still_time
+        self.t_end = stay_still_time
         self.ramp = ramp
         self.t = np.arange(0, self.t_max, self.dt)
         self.num_steps = len(self.t)
@@ -54,10 +57,15 @@ class time_evolution:
         self.C0 = self.C.copy()
         self.E0 = self.E.copy()
         self.psi = (self.C0[:,1] + self.C0[:,2]) / np.sqrt(2)
+        psi = np.zeros(self.C0.shape[0], dtype=np.complex128)
+        # psi[1] = 1.0 / np.sqrt(2)
+        # psi[4] = 1.0 / np.sqrt(2)
+        psi[1] = 1.0
+        self.psi = self.C0 @ psi
     
     def set_system(self, params):
         # params = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, 42.47007681]
-        params = self.params2
+        # params = self.params2
         self.potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
             *params,
         )
@@ -89,32 +97,36 @@ class time_evolution:
         self.H = H + U
         self.E, self.C = np.linalg.eigh(self.H)
 
+
     
     def update_system(self, params):
         # Update one-body hamiltonian with new potential
         self.potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
-            *self.params2,
+            # *self.params2,
+            *params,
         )
         new_V_l = np.clip(self.potential.left_pot(self.basis.left_grid), 0, 100)
         new_V_r = np.clip(self.potential.right_pot(self.basis.right_grid), 0, 100)
-        self.h_l = self.basis.no_1bpot_h_l + np.diag(new_V_l) / self.basis.dx
-        self.h_r = self.basis.no_1bpot_h_r + np.diag(new_V_r) / self.basis.dx
-        self.u_lr = self.basis._ulr
+        newh_l = self.basis.no_1bpot_h_l + np.diag(new_V_l) / self.basis.dx
+        newh_r = self.basis.no_1bpot_h_r + np.diag(new_V_r) / self.basis.dx
+        # self.u_lr = self.basis._ulr
         # And solve new Hartree equations 
-        self.bhs = sinc_BHS(self.h_l, self.h_r, self.u_lr, self.num_l, self.num_r)
-        self.bhs.solve()
-        self.eps_l = self.bhs.eps_l
-        self.eps_r = self.bhs.eps_r
-        self.c_l = self.bhs.c_l
-        self.c_r = self.bhs.c_r
-        self.h_l = self.c_l.conj().T @ self.h_l @ self.c_l
-        self.h_r = self.c_r.conj().T @ self.h_r @ self.c_r
-        self.u_lr = np.einsum('ai, bj, ab, ak, bl -> ijkl', self.c_l.conj(), self.c_r.conj(), self.u_lr, self.c_l, self.c_r)
+        # self.bhs = sinc_BHS(self.h_l, self.h_r, self.u_lr, self.num_l, self.num_r)
+        # self.bhs.solve()
+        # self.eps_l = self.bhs.eps_l
+        # self.eps_r = self.bhs.eps_r
+        # self.c_l = self.bhs.c_l
+        # self.c_r = self.bhs.c_r
+        self.h_l = self.c_l.conj().T @ newh_l @ self.c_l
+        self.h_r = self.c_r.conj().T @ newh_r @ self.c_r
+        # self.u_lr = np.einsum('ai, bj, ab, ak, bl -> ijkl', self.c_l.conj(), self.c_r.conj(), self.u_lr, self.c_l, self.c_r)
         H = np.kron(self.h_l, np.eye(*self.h_l.shape)) + np.kron(np.eye(*self.h_r.shape), self.h_r) 
         U = self.u_lr.reshape(*H.shape)
         newH = H + U
         # self.H = self.C0.conj().T @ newH @ self.C0
+        self.commutator = self.H @ newH - newH @ self.H
         self.H = newH
+        # self.apply_pulse()
         self.E, _ = np.linalg.eigh(self.H)
         
     
@@ -125,7 +137,7 @@ class time_evolution:
         UdagU = U.conj().T @ U
         assert np.allclose(UUdag, np.eye(*UUdag.shape)), "U is not unitary"
         assert np.allclose(UdagU, np.eye(*UdagU.shape)), "Udag is not unitary"
-        # self.C = U @ self.C
+        self.C = U @ self.C
         self.psi = U @ self.psi
     
     def crank_nicolson_step(self, t=0):
@@ -134,21 +146,42 @@ class time_evolution:
         A = np.linalg.inv(I + 1j * self.dt / 2 * self.H) @ (I - 1j * self.dt / 2 * self.H)
         self.C = A @ self.C
     
-    def _lambda_t(self, t, t_upramp, t_downramp):
+    def _lambda_t(self, t):
         """Return the time-dependent parameter lambda."""
-        mask1 = t < t_upramp
-        mask2 = (t >= t_upramp) & (t <= t_downramp)
-        mask3 = t > t_downramp
+        # mask_start = t < self.t_start
+        # mask1 = (t < self.ramp_time ) & (t >= self.t_start)
+        # mask2 = (t >= self.ramp_time) & (t <= self.ramp_time)
+        # mask3 = (t > self.ramp_time - self.t_end) & (t <= self.t_end + self.ramp_time)
+        # mask_end = t > self.t_end + self.ramp_time
+
+        mask_start = t <= self.t_start
+        mask1 = (t > self.t_start) & (t <= self.ramp_time + self.t_start)
+        mask2 = (t > self.ramp_time + self.t_start) & (t <= self.t_max - self.t_end - self.t_end)
+        mask3 = (t > self.t_max - self.t_end - self.ramp_time) & (t <= self.t_max - self.t_end)
+        mask_end = t > self.t_max - self.t_end
 
         lmbda = np.zeros_like(t)
         if self.ramp=='cosine':
-            lmbda[mask1] = 0.5 * (1 - np.cos(np.pi * t[mask1] / t_upramp)) # Up-ramp from config I -> config II
+            lmbda[mask_start] = 0.0 # Stay still in config I
+            lmbda[mask1] = 0.5 * (1 - np.cos(np.pi * (t[mask1] - self.t_start) / self.ramp_time)) # Up-ramp from config I -> config II
             lmbda[mask2] = 1 # Stay a while in config II
-            lmbda[mask3] = 0.5 * (1 + np.cos(np.pi * (t[mask3] - t_downramp) / t_upramp)) # Down-ramp from config II -> config I
+            lmbda[mask3] = 0.5 * (1 + np.cos(np.pi * (t[mask3] - (self.t_max - self.t_end - self.ramp_time)) / self.ramp_time)) # Down-ramp from config II -> config I
+            lmbda[mask_end] = 0.0 # Stay still in config I
         else:
             raise NotImplementedError(f"Ramp {self.ramp} not implemented.")
+        
         return lmbda
-    
+    def apply_pulse(self, delta=0.5):
+                # H' in the C0 (logical/tensor product) basis
+                H_prime_C0 = np.zeros((self.C0.shape[0], self.C0.shape[0]), dtype=complex)
+                H_prime_C0[1, 4] = delta
+                H_prime_C0[4, 1] = delta  # Hermitian conjugate
+
+                # Map H' into DVR basis
+                H_prime = self.C0 @ H_prime_C0 @ self.C0.conj().T
+
+                # Add to full Hamiltonian
+                self.H += H_prime
     def _evolve(self):
         """Evolve the system for a single time step."""
         if self.integrator == 'U':
@@ -157,26 +190,36 @@ class time_evolution:
             step = self.crank_nicolson_step
         else:
             raise NotImplementedError(f"Integrator {self.integrator} not implemented.")
-
-        lmbda = self._lambda_t(self.t, self.ramp_time, self.t_max - self.ramp_time) # Time-dependent parameter
-        lmbda[-1] = 0.0 # Ensure that the last value is zero, until we fix that it is not :) TODO: Fix this
-        lmbda[0] = 0.0
+        lmbda = self._lambda_t(self.t) # Time-dependent parameter
+        # lmbda = self._lambda_t(self.t, self.ramp_time, self.t_max - self.ramp_time) # Time-dependent parameter
+        # lmbda[-1] = 0.0 # Ensure that the last value is zero, until we fix that it is not :) TODO: Fix this
+        # lmbda[0] = 0.0
         self.overlap = np.zeros((self.num_steps, *self.C0.shape), dtype=np.complex128)
+        # self.overlap = np.zeros((self.num_steps, *self.C0[0].shape), dtype=np.complex128)
+        self.psi_t = np.zeros((self.num_steps, *self.psi.shape), dtype=np.complex128)
+        self.psi_t[0] = self.psi.copy()
         self.energies = np.zeros((self.num_steps, *self.E.shape))
-        self.overlap[0] = self.C.copy() #self.C0.conj().T @ self.C
+        # self.overlap[0] = self.C0.conj().T @ self.psi
+        self.overlap[0] = self.C0.conj().T @ self.C
         self.energies[0] = self.E
-        for i in tqdm(range(1, self.num_steps),
-                      desc='Integrating',
-                      total=self.num_steps - 1,
-                      unit='step',
-                      colour='green'):
-            params = self.update_params(lmbda[i])
-            self.params = params
-            self.update_system(self.params)
-            step()
-            self.overlap[i] = self.psi.copy()#self.C0.conj().T @ self.C
-            self.energies[i] = self.E
-
+        with tqdm(total=self.num_steps - 1,
+                  position=0,
+                  colour='green',
+                  leave=True) as pbar:
+            for i in range(1, self.num_steps):
+                params = self.update_params(lmbda[i])
+                self.params = params
+                # self.apply_pulse()
+                self.update_system(self.params)
+                step()
+                self.overlap[i] =   self.C0.conj().T @ self.C #
+                # self.overlap[i] = self.C0.conj().T @ self.psi #
+                self.psi_t[i] = self.psi.copy()
+                self.energies[i] = self.E
+                pbar.set_description(
+                    rf'[Commutator = {np.linalg.norm(self.commutator):.3e}]'
+                )
+                pbar.update(1)
         return self.overlap, self.energies
 
 
@@ -226,6 +269,10 @@ class time_evolution:
         ax[1].plot(self.t, np.abs(self.overlap[:,:, 1])**2)
         ax[2].plot(self.t, np.abs(self.overlap[:,:, 2])**2 )
         ax[3].plot(self.t, self.energies[:,:6])
+        # fig, ax = plt.subplots(3, 1)
+        # ax[0].plot(self.t, np.abs(self.overlap)**2)
+        # ax[1].plot(self.t, np.abs(self.psi_t)**2)
+        # ax[2].plot(self.t, self.energies[:,:6])
         ax[0].set_ylim(0, 1.1)
         ax[1].set_ylim(0, 1.1)
         ax[2].set_ylim(0, 1.1)
@@ -245,7 +292,10 @@ if __name__ == '__main__':
     ## Without fucked interactoin
     params1 = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, 42.47007681]
     params2 = [73.44693037, 71.99175625 ,29.16144963 ,29.16767609, 42.79831711]
-    ins = time_evolution(params1=params1, params2=params2, integrator='U', alpha=1.0)
+    ins = time_evolution(params1=params1, params2=params2, integrator='U', 
+                         alpha=1.0,
+                         t_max=5.0, dt=0.01, ramp_time=1.5, ramp='cosine',
+                         num_lr=4, stay_still_time=0.4)
     # C, e, n = ins.run_parameter_change()
     # steps = np.arange(n)
     # fig, ax = plt.subplots(4,1 )
@@ -263,5 +313,4 @@ if __name__ == '__main__':
     # exit()
     ins._evolve()
     ins._plot_overlap()
-    breakpoint()
-
+    exit()

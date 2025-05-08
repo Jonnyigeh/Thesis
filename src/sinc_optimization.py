@@ -53,11 +53,8 @@ class Optimizer:
             self.target = np.zeros(self.num_l ** 2)
         elif self.config == 'II':
             self.target = np.zeros(self.num_l ** 2)
-            self.target[0] = 0.0
             self.target[1] = 1.0
             self.target[2] = 1.0
-            self.target[3] = 0.0
-            self.target[4] = 0.0
     def _constraint(self, params):
         """Constraint for the optimization problem
         We need to make sure that the parameters are such that we can still fit our basis functions within the potential wells.
@@ -212,7 +209,7 @@ if __name__ == '__main__':
 
     params_II = [73.44693037, 71.99175625 ,29.16144963 ,29.16767609, 42.79831711]
     params_I = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, 42.47007681]
-    ins = Optimizer(params=params_II, tol=1e-10, verbose=False, config='II', dvr=True)
+    ins = Optimizer(params=params_II, tol=1e-8, verbose=False, config='II', dvr=True)
     res = ins.optimize()
 
     breakpoint()
