@@ -189,7 +189,7 @@ which we identify as the harmonic oscillator potential, with the spring constant
     \caption{The Morse potential and the 5 lowest energy levels and energy eigenfunctions. The dissociation energy, $D$, is highlighted by the black dashed line. The parameters for this visualization of a Morse potential are $D=10, a=0.5, x_0=0$.}
     \label{fig:morse_potential}
 \end{figure}
-
+\textcolor{red}{TODO: Fix the figsize so text is correct size.}
 
 %% Double well
 \\ \\
@@ -244,7 +244,7 @@ Thus describing these mixtures require a more general formalism, and to do so we
 \end{equation}
 where the probability weight $w_i$ is the probability of finding the system in the pure state $\ket{\psi_i}$. The density matrix is a positive semi-definite operator, and it has the following properties:
 \begin{itemize}
-    \item $\text{Tr}(\rho) = 1$, meaning the trace of the density matrix is equal to 1.
+    \item $\text{Tr}(\rho) = 1$, meaning the trace of the density matrix is equal to 1, given that $\rho$ is a pure state. $\text{Tr}(\rho) < 1$ for mixed states.
     \item $\rho^\dagger = \rho$, meaning the density matrix is Hermitian.
     \item $\rho \geq 0$, meaning the density matrix is positive semi-definite.
 \end{itemize}
@@ -277,6 +277,51 @@ Another useful aspect of the density matrix formalism is that it naturally ties 
 \begin{align*}
     \braket{O} = \sum_i w_i\bra{\psi_i}O\ket{\psi_i} = \sum_i w_i\text{Tr}\big(\ket{\psi_i}\bra{\psi_i}O\big) = \text{Tr}\big(\sum_i w_i \ket{\psi_i}\bra{\psi_i}O\big) = \text{Tr}(\rho O)
 \end{align*}
+and we see how powerful this notation is, we can quickly calculate expectation values of operators (observables) by a simple trace operation. 
+
+\subsection*{Avoided crossings}
+In our coupled, double well system \textcolor{red}{ref til morse potential}, the emergence of entanglement is a direct consequence of the Coulomb coupling between the two subsystems. This coupling will give rise to a phenomenon known as \emph{avoided crossings}\cite{nazir2005anticrossings}, regions in the parameter space where the energy levels of the two subsystems come close to each other, but do not cross due to the coupling of the two subsystems. This coupling makes it so that the energy levels that may be degenerate in the uncoupled system, are no longer degenerate in the coupled system and they are no longer independent, and the system is no longer separable or expressable as a product state. This means our two subsystems will be entangled, and the energy levels will be shifted due to the coupling and this we can use to manipulate the system. \\ \\
+To illustrate this, we can consider a simple example of a two level system, with two energy levels $E_1$ and $E_2$, which are degenerate in the uncoupled system, i.e $E_1 = E_2$. Introducing a coupling term $V$, the effectiv Hamiltonian of the system can be expressed as
+\begin{align*}
+    H = \begin{pmatrix}
+        E_1 & V \\
+        V & E_2
+    \end{pmatrix}
+\end{align*}
+where $V$ is the coupling strength between the two levels. The eigenvalues of this Hamiltonian are given as
+\begin{align*}
+    E_\pm = \frac{E_1 + E_2}{2} \pm \sqrt{\frac{(E_1 - E_2)^2}{4} + V^2}
+\end{align*}
+and we can see that the energy levels are shifted due to the coupling, and they will never cross for $V\neq0$. Consider now a dynamical system, where there is some explicit time-dependence in the Hamiltonian, with a constant coupling strength $V$.
+\begin{align*}
+    H(t) = \begin{pmatrix}
+        E(t) & V \\
+        V & -E(t)
+    \end{pmatrix} = \begin{pmatrix}
+        vt & V \\
+        V & -vt
+    \end{pmatrix}
+\end{align*}
+where $E(t)$ is the time-dependent energy level of the system, with $v$ the sweeping parameter, that sweep the energy levels towards each other (they are equal at $t=0$). Simulating for a time starting from $t<0$, where the energy levels are degenerate we will highlight the avoided crossing at $t=0$, and we get what is called a \emph{Landau-Zener transition} \cite{landau1932theorie, zener1932non}. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figs/avoided_crossing.pdf}
+    \caption{The avoided crossings in a two-level system as a function time $t$. The energy levels are shifted due to the coupling, and the energy levels do not cross, but rather "avoid" each other.}
+    \label{fig:avoided_crossings}
+\end{figure}
+As we can see, the Coulomb coupling between the two subsystems results in the energy levels 'avoiding' eachother, while the non-interacting system would have crossed at $t=0$ (as indicated by the dotted lines). But what happens with the wavefunctions prepared in th system? Initializing the system in the ground state $\psi_0 = \ket{0}$, we shall see that what happens at the avoided crossing depends heavily on both coupling strength $V$ and sweeping paramter $k$, through the Landau-Zener formula \cite{landau1932theorie, zener1932non}:
+\begin{align*}
+    P_{0\rightarrow1} = e^{-\frac{2\pi V^2}{\hbar k}}
+\end{align*}
+which governs the probability of the system to transitions between the two energy levels. As visualized in the following plot \eqref{fig:landau_zener}, we can see how the sweeping parameter $k$ governs how the avoided crossing affect the prepared wavefunction, in one case we achive some minor level of mixing between the two basis states, while in the other case we achieve a full transition between the two states.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figs/landau_zener.pdf}
+    \caption{The Landau-Zener transition probability as a function of the coupling strength $V$ and the sweeping parameter $k$. The probability of the system to transition between the two energy levels is given by the Landau-Zener formula.}
+    \label{fig:landau_zener}
+\end{figure} 
+
+
 
 \begin{itemize}
     \item What is entanglement
@@ -287,7 +332,9 @@ Another useful aspect of the density matrix formalism is that it naturally ties 
 \end{itemize}
 
 
-\section{Time evolution and numerical integration}
+
+\section{Quantum time evolution}
+In quantum mechanics, the time evolution of a quantum system is described by the Schrödinger equation\eqref{eq:tdse}. The TDSE shows the behaviour of a quantum system over time under the influence of the system Hamiltonian. While simple systems without time-dependence admit closed-form solutions, most physically realisable systems - especially those relevant for quantum control and information - exhibit time-dependent behaviour. Treating such systems that cannot be solved analytically, require numerical methods to approximate the systems evolution. Understanding time evolution is crucial for modelling driven systems such as qubit under external control field, where energy transitions reveal non-trivial dynamics\cite{landau1932theorie, zener1932non}, or simulating quantum gates in quantum computing \cite{leinonen2024coulomb, }.\textcolor{red}{trenger flere kilder og tilfeller}. In this section, we outline the framework for quantum time evolution and introduce the time-evolution operator, which is at the heart of quantum dynamics, and the basis for our numerical methods. We will also conceptualize the steps behind the numerical framework for solving the time-dependent Schrödinger equation, and also for discretizing the time evolution operator. \\
 \subsection*{Time evolution operator}
 Simulating the dynamics of any quantum system is seen through the evolution of the quantum mechanical state representing the system at hand. The time evolution of a quantum state from time $t_0$ to $t$ is expressed by the linear unitary time-evolution operator $U(t, t_0)$, which is a solution to the time-dependent Schrödinger equation.\cite{sakurai1986modern} This operator should do the following
 \begin{equation}
@@ -295,15 +342,15 @@ Simulating the dynamics of any quantum system is seen through the evolution of t
 \end{equation}
 and it must satisfy the following critera:
 \begin{itemize}
-    \item Unitarity: $U(t, t_0)U^\dagger(t, t_0) = U^\dagger(t, t_0)U(t, t_0) = \mathbb{1}$, meaning it preserves the norm of the quantum mechanical state.
-    \item Composition property: $U(t_2, t_0) = U(t_2, t_1)U(t_1, t_0)$, meaning the time-evolution operator is a composition of smaller time-evolution operators that are time-ordered ($t_2>t_1>t_0$).
-    \item Continuity: $\lim_{dt\to 0}U(t_0 + dt, t_0) = \mathcal{1}$, meaning the time-evolution operator is continuous, and reduces to identity when the time difference is zero.
+    \item \textbf{Unitarity:} $U(t, t_0)U^\dagger(t, t_0) = U^\dagger(t, t_0)U(t, t_0) = \mathbb{1}$, meaning it preserves the norm of the quantum mechanical state.
+    \item \textbf{Composition property:} $U(t_2, t_0) = U(t_2, t_1)U(t_1, t_0)$, meaning the time-evolution operator is a composition of smaller time-evolution operators that are time-ordered ($t_2>t_1>t_0$).
+    \item \textbf{Continuity:} $\lim_{dt\to 0}U(t_0 + dt, t_0) = \mathcal{1}$, meaning the time-evolution operator is continuous, and reduces to identity when the time difference is zero.
 \end{itemize}
 All these critera can be satisfied by 
 \begin{align*}
     U(t_0 + dt, t_0) = 1 - i\Omega(t_0) dt
 \end{align*}
-where $\Omega$ is a Hermitian operator, and $dt$ is the infinitesimal time difference. The 4th criteria is satisfied naturally as $dt$ goes to zero, while the 1st and 2nd criteria is satisfied to first order 
+where $\Omega$ is a Hermitian operator, and $dt$ is the infinitesimal time difference. The 3rd criteria is satisfied naturally as $dt$ goes to zero, while the 1st and 2nd criteria is satisfied to first order 
 \begin{align*}
     U^\dagger(t_0 + dt, t_0)U(t_0 + dt, t_0) = (1 + i\Omega(t_0)^\dagger)(1 - i\Omega(t_0)) = 1 + \mathcal{O}(dt^2) \approxeq 1
 \end{align*}
@@ -328,9 +375,25 @@ which is the full form of the time-evolution operator, often coined time-propaga
 \begin{equation}
     U(t, t_0) = \mathcal{T}\text{exp}\bigg(\frac{-i}{\hbar}\int_{t_0}^t H(t')dt'\bigg)\label{eq:time_evolution_operator}
 \end{equation}
-where the integral must be time-ordered, and swapped with the Dyson series expansion should the Hamiltonian be time-dependent, and non-commutative at different times (see chapter 2.1.2 in \cite{sakurai1986modern}). 
-\subsection{Numerical integration}
-The time-propagator in \eqref{eq:time_evolution_operator} involves a time-ordered exponential, which generally cannot be solved analytically for a time-dependent Hamiltonian $H(t)$. Therefore, we must look to numerical methods to approximate and solve the integral. Choice of method is crucial, and it depends on accuracy, computational cost and stability. The simplest approximative method is the \emph{Euler-Cromer} method, a first order method given by Taylor expansion of the time-evolution operator
+where the integral must be time-ordered, and swapped with the Dyson series expansion should the Hamiltonian be time-dependent, and non-commutative at different times (see chapter 2.1.2 in \cite{sakurai1986modern}). For a time-independent Hamiltonian $H$, the time-evolution operator simplifies to 
+\begin{align*}
+    U(t, t_0) = e^{\frac{-i}{\hbar}H(t-t_0)}
+\end{align*}
+allowing for analytical propagation of the system. In contrast, the time-dependent case \eqref{eq:time_evolution_operator} requires numerical treatment to solve the integral, as the exponential cannot be solved analytically. 
+\subsection{Numerical time propagation}
+The time-propagator in \eqref{eq:time_evolution_operator} involves a time-ordered exponential, which generally cannot be solved analytically for a time-dependent Hamiltonian $H(t)$. Therefore, we must look to numerical methods to approximate and solve the integral. Choice of method is crucial, and it depends on accuracy, computational cost and stability. There are some other criteria to consider when developing, or choosing, a numerical method for time propagation. The method should preserve the norm of the wavefunction, and it should preserve the unitarity of the time-evolution operator. 
+\\\\ 
+To simulate quantum time evolution numerically, we start by discretizing time into smaller intervals (time steps) $\Delta t$. Doing so allows us to approximate the time-evolution operator as a product of smaller time-evolution operators, which can be solved iteratively (recall the composition property of the time-evolution operator). At each step then, the wavefunction is evolved by approximating the true time-evolution operator on the time interval $[t, t+\Delta t]$. \\ \\
+The simplest approximative method is the \emph{Euler-Cromer} method, a first order method given by Taylor expansion of the time-evolution operator
+\begin{align*}
+    U(t + dt, t) = 1 - \frac{i}{\hbar}H(t)dt
+\end{align*}
+which leads to an explicit update of the wavefunction as 
+\begin{align*}
+    \ket{\Psi(t + dt)} = \bigg(1 - \frac{i}{\hbar}H(t)dt\bigg)\ket{\Psi(t)}
+\end{align*}
+which is a simple and fast, but inaccurate method. While this method is simple to implement and computationally inexpensive, it suffers from numerical instability and is not unitary nor norm-preserving. This means that the wavefunction will not be normalized after each time step, and the norm of the wavefunction will diverge over time, and we may obtain non-physical results should we want to evolve for longer timespans. \\ \\ 
+To improve the accuracy and stability of the time-propagation, higher-order methods that are norm-preservign are preferred. One approach is to employ the matrix exponential of the Hamiltonian, which is unitary by construction. This ensures that the time-evolution remain physically meaningful, at the cost of computational efficiency due to the costlyness of matrix exponentiation. There are several methods to further approximate such matrix exponentials, such as
 
 
 \begin{itemize}
