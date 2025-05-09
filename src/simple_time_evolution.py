@@ -26,7 +26,6 @@ def landau_zener(v, Delta):
         epsilon = v * t
         return np.array([epsilon - np.sqrt(epsilon**2 + Delta**2), epsilon + np.sqrt(epsilon**2 + Delta**2)])
 
-
     # Time evolution
     psi_t = []
     energies = np.zeros((len(t_values), 2))
@@ -42,10 +41,98 @@ def landau_zener(v, Delta):
     
     return t_values, np.array(psi_t), energies, nonint_energies
 
+
+
+def landau_zener_benchmark(v, Delta):
+    # Time and Hamiltonian setup
+    t_values = np.linspace(-5, 5, 1000)
+    dt = t_values[1] - t_values[0]
+    H = lambda t: np.array([[v * t, Delta], [Delta, -v * t]])
+    
+    # Initial state: ground state at t = t0
+    E0, C0 = np.linalg.eigh(H(t_values[0]))
+    psi0 = C0[:, 0]  # Ground state
+
+    # Storage
+    pop_exp, pop_euler, pop_sym, pop_cn = [], [], [], []
+    norm_exp, norm_euler, norm_sym, norm_cn = [], [], [], []
+    psi_exp, psi_euler, psi_sym, psi_cn = psi0.copy(), psi0.copy(), psi0.copy(), psi0.copy()
+
+    for i, t in enumerate(t_values):
+        # Matrix exponential (baseline)
+        U_exp = scipy.linalg.expm(-1j * H(t) * dt)
+        psi_exp = U_exp @ psi_exp
+        pop_exp.append(np.abs(psi_exp[1])**2)
+        norm_exp.append(np.linalg.norm(psi_exp)**2)
+
+        # Euler-Cromer method (first order)
+        psi_euler = (np.eye(2) - 1j * H(t) * dt) @ psi_euler
+        pop_euler.append(np.abs(psi_euler[1])**2)
+        norm_euler.append(np.linalg.norm(psi_euler)**2)
+
+        # Symmetric 2nd order method
+        H_now = H(t)
+        U_sym = (np.eye(2) - 1j * H_now * dt / 2) @ (np.eye(2) - 1j * H_now * dt / 2)
+        psi_sym = U_sym @ psi_sym
+        pop_sym.append(np.abs(psi_sym[1])**2)
+        norm_sym.append(np.linalg.norm(psi_sym)**2)
+
+        # Crank-Nicholson method
+        # Crank-Nicolson update
+        I = np.eye(2, dtype=complex)
+        A = I + 1j * H_now * dt / 2
+        B = I - 1j * H_now * dt / 2
+        psi_cn = np.linalg.solve(A, B @ psi_cn)
+        pop_cn.append(np.abs(psi_cn[1])**2)
+        norm_cn.append(np.linalg.norm(psi_cn)**2)
+
+
+
+    return t_values, pop_exp, pop_euler, pop_sym, pop_cn, norm_exp, norm_euler, norm_sym, norm_cn
+
 matplotlib.style.use('seaborn-v0_8')
 colors = sns.color_palette()
 b = colors[0]
+g = colors[1]
 r = colors[2]
+
+
+t, pop_exp, pop_euler, pop_sym, pop_cn, norm_exp, norm_euler, norm_sym, norm_cn = landau_zener_benchmark(v=1.0, Delta=1.0)
+fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4))
+
+# Excited state population
+
+ax[0].plot(t, pop_exp, label='Matrix Exp.', lw=2, color=b)
+ax[0].plot(t, pop_euler, '--', label='Euler-Cromer', alpha=0.8)
+ax[0].plot(t, pop_sym, ':', label='Second order', alpha=0.8)
+ax[0].plot(t, pop_cn, '-.', label='Crank-Nicholson', alpha=0.8)
+
+ax[0].set_xlabel('Time')
+ax[0].set_ylabel('Population')
+ax[0].set_title('Population transfer')
+ax[0].legend(loc='upper left', )
+
+# Norms
+ax[1].plot(t, norm_exp, label='Matrix Exp.', lw=2, color=b)
+ax[1].plot(t, norm_euler, '--', label='Euler-Cromer', alpha=0.8)
+ax[1].plot(t, norm_sym, ':', label='Second order', alpha=0.8)
+ax[1].plot(t, norm_cn, '-.', label='Crank-Nicholson', alpha=0.8)
+ax[1].set_xlabel('Time')
+ax[1].set_ylabel(r'Norm of $\Psi$')
+ax[1].set_title('Norm preservation')
+ax[1].legend(loc='upper left', )
+
+plt.tight_layout()
+fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.15, wspace=0.3)
+plt.savefig('../doc/figs/landau_zener_numerical_methods.pdf')
+plt.show()
+exit()
+
+
+
+
+
+
 
 # t_values, psi_t, energies, nonint_energies = landau_zener(2.0, 1.0)
 # psi_t = np.array(psi_t)
@@ -69,27 +156,27 @@ r = colors[2]
 # plt.show()
 # exit()
 
-t1, psi1, e1, nonint_e1 = landau_zener(10.0, 1.0)
-t2, psi2, e2, nonint_e2 = landau_zener(1.0, 1.0)
-p11 = np.abs(psi1[:, 0])**2
-p12 = np.abs(psi1[:, 1])**2
-p21 = np.abs(psi2[:, 0])**2
-p22 = np.abs(psi2[:, 1])**2
-# Plot results
-fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4), sharex=True)
-ax[0].plot(t1, p11, label=r'$\psi_0(t)$', color=b)
-ax[0].plot(t1, p12, label=r'$\psi_1(t)$', color=r)
-ax[1].plot(t2, p21, label=r'$\psi_0(t)$', color=b)
-ax[1].plot(t2, p22, label=r'$\psi_1(t)$', color=r)
-ax[0].set_title(r'$k = 10.0,\quad V=1.0$')
-ax[1].set_title(r'$k = 1.0,\quad V=1.0$')
-ax[0].set_xlabel('Time [s]')
-ax[1].set_xlabel('Time [s]')
-ax[0].set_ylabel('Population')
-ax[1].set_ylabel('Population')
-ax[1].legend(loc='upper right', bbox_to_anchor=(1, 0.75))
-plt.tight_layout()
-fig.subplots_adjust(left=0.1, right=0.9, top=0.85, bottom=0.15)
-fig.suptitle('Landau-Zener Transition')
-plt.savefig('../doc/figs/landau_zener.pdf')
-plt.show()
+# t1, psi1, e1, nonint_e1 = landau_zener(10.0, 1.0)
+# t2, psi2, e2, nonint_e2 = landau_zener(1.0, 1.0)
+# p11 = np.abs(psi1[:, 0])**2
+# p12 = np.abs(psi1[:, 1])**2
+# p21 = np.abs(psi2[:, 0])**2
+# p22 = np.abs(psi2[:, 1])**2
+# # Plot results
+# fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4), sharex=True)
+# ax[0].plot(t1, p11, label=r'$\psi_0(t)$', color=b)
+# ax[0].plot(t1, p12, label=r'$\psi_1(t)$', color=r)
+# ax[1].plot(t2, p21, label=r'$\psi_0(t)$', color=b)
+# ax[1].plot(t2, p22, label=r'$\psi_1(t)$', color=r)
+# ax[0].set_title(r'$k = 10.0,\quad V=1.0$')
+# ax[1].set_title(r'$k = 1.0,\quad V=1.0$')
+# ax[0].set_xlabel('Time [s]')
+# ax[1].set_xlabel('Time [s]')
+# ax[0].set_ylabel('Population')
+# ax[1].set_ylabel('Population')
+# ax[1].legend(loc='upper right', bbox_to_anchor=(1, 0.75))
+# plt.tight_layout()
+# fig.subplots_adjust(left=0.1, right=0.9, top=0.85, bottom=0.15)
+# fig.suptitle('Landau-Zener Transition')
+# plt.savefig('../doc/figs/landau_zener.pdf')
+# plt.show()
