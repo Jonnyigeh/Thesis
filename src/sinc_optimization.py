@@ -150,7 +150,7 @@ class Optimizer:
             detuning_penalty = 0.2 - np.abs(self.eps_l[0] - self.eps_r[0])
         elif self.config == 'II':
             self.ZZ = np.abs(eps[5] - eps[2] - eps[1] + eps[0])
-            detuning_penalty = np.abs(self.eps_l[1] - self.eps_r[1])
+            detuning_penalty = 10 * np.abs(self.eps_l[1] - self.eps_r[1])
 
         entropy_penalty = np.linalg.norm(self.S[:len(self.target)] - self.target) ** 2
 

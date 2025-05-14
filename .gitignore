@@ -1,0 +1,13 @@
+# Ignore log files
+*.log
+
+# Ignore TOC files
+*.toc
+
+# Ignore virtual environment folders
+venv/
+env/
+ENV/
+.venv/
+.env/
+__pycache__/

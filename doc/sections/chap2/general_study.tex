@@ -1,0 +1,103 @@
+\documentclass{subfiles}
+\begin{document}
+%% GENERAL STUDY OF MORSE DOUBLE WELL
+\section{General study of the system}
+In this secton we will outline the methods used to study our system in general. These studies will be used to set up our system in such a way that our desired configurations are achieved, whilst also ensuring that the system is stable, well-defined and physically meaningful. To this end there are a few things we need to consider:
+\begin{itemize}
+    \item At what well separation is our approximation of the two particles being distinguishable valid (to a certain degree)?
+    \item What parameters do we need to set in order to achieve our desired configurations I and II?
+    \item Will our choice of basis functions be sufficient to descibe our system?
+    \item How do we ensure that our system is stable, and well-defined - and also physically meaningful?
+\end{itemize}
+%% Distinguishability of the particles
+\subsection*{Distinguishability of the particles}
+One of the core features of our system - and the foundation of our qubit design - is that the two particles confined in our potential trap act as \emph{distinguishable} particles. As we are looking to trap electrons, indistinguishable particles, we are dealing with fermions, and the Pauli exclusion principle states clearly that two fermions cannot occupy the same quantum state. This fundamental principle would normally prevent us from constructing product states, as the quantum state of any fermionic system must be anti-symmetric under particle exchange.\textcolor{red}{is this really true? and if not, WHEN is it true?}
+\\ However, we are assuming that the potential trap can be constructed in such a way that there are minimal correlations between the two particles, and that the wavefunction can be approximated as a product state. In this analysis we shall look at how "distinguishable" our system actually is, and find a distance between wells where we can safely assume the particles to be distinguishable. \\ \\
+To make an assessment of the systems distinguishability we will firstly look at the eigen-energies of the system given that we either:
+\begin{itemize}
+    \item Assume the particles to be distinguishable: \\ We construct the wavefunction as a product state,
+    \begin{align*}
+        \Psi(\mathbf{r}_1, \mathbf{r}_2) = \phi_L(\mathbf{r}_1)\otimes\phi_R(\mathbf{r}_2)
+    \end{align*} 
+    where $\phi_L$ and $\phi_R$ are the single-particle functions located in the left and right well respectivley. We then calculate the energy by diagonalizing the Hamiltonian matrix for this product state system. In such a product state system the Hamiltonian matrix becomes
+    \begin{align*}
+        H = H_L \otimes I + I \otimes H_R + V
+    \end{align*}
+    where $H_L$ and $H_R$ are the single-particle Hamiltonians for the left and right well, and $V$ is the interaction term between the two particles.
+    \item Assume the particles to be indistinguishable, and construct a Slater determinant that we solve using Hartree-Fock theory.
+\end{itemize}
+
+
+If we are successful, we should find that for a certain distance between the wells, the "true" distinguishable energy will overlap with the indistinguishable HF-energy. Should this be the case, we can safely assume that the particles behave as distinguishable particles for our intents and purposes. 
+
+%% Optimization of the potential parameters
+\subsection*{Optimization of the potential parameters}
+As our goal is to realize single-qubit gates and the two-qubit iSwap gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we've discussed in earlier sections the two configurations we are looking for are:
+\begin{itemize}
+    \item Config I: The measurement configuration, where all energy levels are distinct and there are minimal correlations between the two subsystems (particles). This corresponds to keeping all Von Neumann entropies in our system as close to zero as possible. With this, we know that our two-body energy eigenstates will have a product state structure, and maximal overlap with the Hartree product states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$.
+    \item Config II: The entangled configuration, where we have a degeneracy in the energy levels of our system. This degeneracy will give rise to an avoided crossings in the energy spectrum for the first and second energy eigenstates. In this configuration, the 1st and 2nd energy eigenstates are maximally entangled, while the other energy eigenstates are kept as pure as possible (product states). This corresponds to an entropy equal to 1 for $\ket{\phi_1}$ and $\ket{\phi_2}$, and 0 for $\ket{\phi_0}$ and $\ket{\phi_4}$. 
+\end{itemize}
+As an initial search, we make a grid search over the potential parameters, mostly to map out the landscape of the potential and find regions where we expect to find the desired configuations. Our grid search will be over the following parameters:
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|}
+        \hline
+        Parameter & Range & Description \\
+        \hline
+        $D_l, D_r$ & [$D_{\text{min}}$, $D_{\text{max}}$] & The depth of the potential well \\
+        $k_l, k_r$ & [$k_{\text{min}}$, $k_{\text{max}}$] & The width of the potential well \\
+        $d$ & [$d_{\text{min}}$, $d_{\text{max}}$] & The distance between the two potential wells \\
+        \hline
+    \end{tabular}
+    \caption{The parameters we will search over in our grid search}
+\end{table}
+with the constraint that $2 * D / \sqrt{k} < l$ where $l$ are the number of basis functions allocated to each well, as we've discussed earlier. This is to ensure that the basis functions are well within the potential well, and that we do not have any basis functions that are cut off by the potential. This then becomes a \emph{constrained optimization problem}. To perform our optimization we will use the \texttt{scipy.optimize} package, and the \texttt{minimize} function. We will use the \texttt{COBYQA} method, which is a derivative-free optimization method that is well suited for constrained optimization problems. This method is built on the concept of \emph{sequential quadratic programming}, that solves constrained, non-linear problems. For more details on the method, see \cite{razh_cobyqa}. The optimization will be done as follows:
+\begin{itemize}
+    \item Randomize an initial configuration of the parameters within the specified ranges.
+    \item Run the optimization algorithm, with a high tolerance for convergence.
+    \item Log 'good' regions where we achive the desired configurations.
+    \item Initialize new configurations using the 'good' parameters found from the grid search.
+    \item Run the optimization algorithm again, with a lower tolerance for convergenece.
+\end{itemize}
+\textcolor{red}{TODO: Change this into proper pseudo-code, and add more details about the optimization algorithm.}
+\subsubsection*{Objective function}
+An objective function is constructed for the optimizer, which is the object to be minimized by our optimization algorithm. We will have two separate objective functions, one for each configuration we are looking for. Across both configurations, we want to minimize the $\zeta$-parameter, which directly controls the stability of time-evolution through the Hamiltonian matrix. The parameters is defined as 
+\begin{equation*}
+    \zeta = E_4 - E_1 - E_2 + E_0
+\end{equation*}
+and we can identify this as the \emph{phase} of the rotated time-evolution operator $U = e^{-iHt}$, expressed in terms of the energy eigenstates, $U = \sum_i^4 e^{-iE_it}\ket{\phi_i}\bra{\phi_i}$. We see that written in matrix form, this propagator is (where $\ket{11}$ is the 4th energy eigenstate)
+\begin{align*}
+    U = \begin{pmatrix}
+        e^{-iE_{00}t} & 0 & 0 & 0 \\
+        0 & e^{-iE_{01}t} & 0 & 0 \\
+        0 & 0 & e^{-iE_{10}t} & 0 \\
+        0 & 0 & 0 & e^{-iE_{11}t}
+    \end{pmatrix}
+\end{align*}
+these eigenvectors are not unique, and we can always rotate them by a phase \textcolor{red}{(cite something here i guess?)}. The phase rotation puts an energy relation on the 4th eigenstate, namely $E_4 = E_1 + E_2 - E_0$. This relation means that the excitation energy from the ground state $\ket{00} \rightarrow \ket{11}$ is equal to the sum of excitation energies from $\ket{00}\rightarrow \ket{10}$ and $\ket{00}\rightarrow\ket{01}$, which ensures stability in our iSwap gate \textcolor{red}{Dette må skrives ut, og studeres mer! "This balances the excitation pathways??} \\\\
+Configuration I, as we've mentioned, should have all energy levels distinct. This introduces penalties in our objective function corresponding to the overlap between energy eigenvalues and we want to Von Neumann entropies to be as close to zero as possible. In python we realise this in the following way
+\begin{lstlisting}[language=Python]
+target_entropy = np.zeros(4)
+detuning_penalty = -min(0.5, np.abs(e_L - e_R))
+entropy_penalty = np.linalg.norm(entropy - target_entropy)
+ZZ_penalty = np.abs(E_4 - E_1 - E_2 + E_0)
+\end{lstlisting}
+where \texttt{e\_L} and \texttt{e\_R} are the energy levels of the left and right well, and \texttt{entropy} is the Von Neumann entropy of the subsystems. The \texttt{detuning\_penalty} is a penalty that is introduced to ensure that the energy levels are distinct, and the \texttt{entropy\_penalty} is a penalty that ensures that the entropy is as close to zero as possible. The objective function is then the sum of these two penalties. Furthermore, we would like the two configurations parameters to be close in parameter space, so that our evolution between the two configurations is smoooth. We introduce a penalty for this as well, similar to the \texttt{entropy\_penalty}.
+\\ In configuration II we have a similar detuning penalty, but in this configuration we do want degeneracy in the 1st Hartree energy level in each well, as well as having an entropy penalty, but with a different target vector. 
+\begin{lstlisting}[language=Python]
+target_entropy = np.array([0, 1, 1, 0])
+detuning_penalty = np.abs(e_L - e_R)
+entropy_penalty = np.linalg.norm(entropy - target_entropy)
+ZZ_penalty = np.abs(E_4 - E_1 - E_2 + E_0)
+\end{lstlisting}
+The objective function is then again the sum of these penalties. \\ 
+The overall structure of the objective function is as follows:
+\begin{itemize}
+    \item Solve for the Hartree energy eigenstates of the system given the current parameters $\theta$.
+    \item Calculate the reduced density matrices, and the Von Neumann entropies of the subsystems.
+    \item Calculate the penalties for the current configuration, and return the sum of these penalties.
+\end{itemize}
+\textcolor{red}{TODO: Change this into proper pseudo-code, and add more details.}
+\subsection*{Validation of DVR basis}
+
+\end{document}

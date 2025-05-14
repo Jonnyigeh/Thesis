@@ -1,0 +1,75 @@
+\documentclass{subfiles}
+\begin{document}
+\section{Hartree-Fock}
+As mentioned in the theory section\ref{sec:HF_theory}, the Hartree-Fock method is an iterative method to obtain optimal basis functions (single particle orbitals) that would minimize the energy, and by the variational method, converge towards the true ground state energy. This is inherently an approximaton, where we imagine that the electrons occupy the lowest possible single-particle orbitals, and it has been proven many times that this is a rather accurate approximation for many systems. \textcolor{red}{(Cite some sources here)}.
+We will now outline the method without much information, before diving into each step in more detail and provide insights into the computational aspects of the method.
+\begin{itemize}
+    \item Construct an initial guess for the single-particle orbitals, $\{\phi_i\}$, often using atomic orbitals or other basis sets.
+    \item Diagonalize the Fock matrix to obtain a new set of orbitals, $\{\phi_i\}$, and calculate Hartree-Fock energy, $E_{HF}$.
+    \item Repeat the process until the energy converges, i.e. the change in energy between iterations is below a certain threshold.
+    \item Calculate the total energy of the system, and the electron density, and use this to calculate other properties of the system.
+\end{itemize}
+The first step in the Hartree-Fock procedure is to define an initial ansatz for the trial wavefunction, which is typically represented as a Slater determinant, as discussed earlier. This ansatz requires an initial choice of basis set, which plays a crucial role in the overall success of the method. The initial basis set serves as a starting point for constructing orbitals and significantly influences the convergence of the self-consistent field (SCF) procedure.\\  
+\\ Choosing an appropriate basis set is a nuanced and complex task. A well-chosen basis can simplify numerical calculations and accelerate convergence, whereas a poor choice may lead to slow convergence or even failure to converge. 
+\\ \\
+
+
+There are a multitude of basis sets to choose from, and the choice is guided by the nature of the system. For instance, in quantum dots systems with strong confinement, the quantum harmonic oscillator basis sets are often used to great success\cite{Yuan_2017}. A different procedure to using pre-defined basis sets, is to solve the Schrödinger equation for the non-interacting system, and use these single-particle orbitals as the initial basis set. The latter may often yield quicker convergence due to the functions being specifically tailored for the potential, but at the cost of more computational resources, and in some cases may not even be possible. 
+\\
+\\ With the initial basis, we construct the Fock matrix, which is a matrix representation of the Fock operator in the basis of the single-particle orbitals as seen in section \ref{sec:HF_theory}. The Fock matrix is given by
+\begin{align}
+    F_{pq} = h_{pq} + \sum_{i,j}^N u_{piqj}\rho_{ij} \label{eq:fock_matrix}
+\end{align}
+where $\rho_{ij}$ is the density matrix formed from the eigenvectors of the anti-symmetrized system hamiltonian (\textcolor{red}{Dette bør nok nevnes i seksjon 1.2.1 Hartree-Fock, og refereres til hvordan interaksjonleddet gjørs anti-symmtrisk $u = u_ijab - u_ijba$}). The following snippet 
+\begin{lstlisting}[language=Python]
+h = ...
+u = ...
+def fill_fock_matrix(C):
+    fock = np.zeros(h.shape, dtype=np.complex128)
+    density_matrix = np.zeros((h.shape[0],h.shape[0]), dtype=np.complex128)
+    for i in range(n_particles):
+        density_matrix += np.outer(C[:, i], np.conj(C[:, i]))
+    fock = np.einsum('ij, aibj->ab', density_matrix, u, dtype=np.complex128)        # Compute the two-body operator potential
+    fock += h                                                                       # Add the one-body operator hamiltonian
+
+    return fock
+\end{lstlisting}
+
+\textcolor{red}{not finished}
+
+
+%%% HARTREE METHOD
+\section{Bipartite Hartree}
+As presented in section \ref{sec:bipartite_H}, the Hartree method is also a self-consistent field method, where we solve the coupled eigenvalue equations for the two subsystems (particles) iteratively. The method is very similar to the Hartree-Fock method, and the main difference is that we do not include an exchange term and the wavefunction itself a single hartree product state. The general method is as follows:
+\begin{itemize}
+    \item Construct an initial guess for the single-particle orbitals, $\{\chi_i\}$.
+    \item Diagonalize the Hartree matrix to obtain a new set of orbitals, $\{\phi_i\}$, and calculate the energy.
+    \item Repeat the process until the energy converges, i.e. the change in energy between iterations is below a certain threshold.
+    \item Calculate the total energy of the system, and the electron density, and use this to calculate other properties of the system.
+\end{itemize}
+The way we solve this SCF procedure is by constructing the Hartree matrix, which is a matrix representation of the Hartree operator in the basis of the single-particle orbitals. \\ \\
+We make an initial ansatz for th single-particle orbitals by constructing the Fock matrix in \eqref{eq:fock_matrix} without the interaction term, and diagonalize the matrix to obtain the new set of orbitals, one set for each subsystem. The initial Fock matrix is thus constructed as
+\begin{align*}
+    f_{\alpha\beta}^{M(0)} = h_{\alpha\beta}^M
+\end{align*}
+where $M$ is the subsystem index, and $\alpha, \beta$ are the basis functions. This yields our initial set of orbitals, but does not include any interaction between the two subsystems. We then, in the next iterations construct new Fock matrices, and diagonalize them to obtain new orbitals. The new Fock matrix for the i'th iteration is constructed as
+\begin{align*}
+    f_{\alpha\beta}^{M(i)} = h_{\alpha\beta}^M + \sum_{i}^{N} u_{\alpha\gamma\beta\delta}^{M} \rho_{\gamma\delta}^{M}
+\end{align*}
+where the density matrix $\rho_{\gamma\delta}^{M}$ is constructed from the previous set of orbitals, and used to calculate the interaction term \emph{for subsystem $M$ specifically}. This differs from Hartree-Fock where the interaction term is calculated from the total density matrix \eqref{eq:hf_equations}. In the following code snippet the density matrix is not used directly, but an equivalent einstein summation is performed, following the equations \eqref{eq:bipartite_hartree} in section \ref{sec:bipartite_H}.
+\begin{lstlisting}[language=Python]
+def construct_fock_matrices(self, h_l, h_r, u_lr, c_l, c_r):
+    return (
+        h_l + np.einsum('j, ijkl, l -> ik', c_r[:,0].conj(), u_lr, c_r[:,0]),
+        h_r + np.einsum('i, ijkl, k -> jl', c_l[:,0].conj(), u_lr, c_l[:,0]),
+    )
+def diagonalize_fock_matrices(self, f_l, f_r):
+    eps_l, c_l = scipy.linalg.eigh(f_l, subset_by_index=[0, self.num_basis_l - 1])
+    eps_r, c_r = scipy.linalg.eigh(f_r, subset_by_index=[0, self.num_basis_r - 1])
+    return eps_l, c_l, eps_r, c_r
+\end{lstlisting}
+With these two functions we set up and iterative loop that repeatedly constructs the Fock matrices, diagonalizes them, and constructs new Fock matrices until the energy converges within a pre-set threshold for the two subsystems, or we reach a maximum number of iterations (and have divergence). We use the \texttt{scipy.linalg}\cite{2020SciPy-NMeth} package and it's hermitian eigensolver \texttt{eigh} to diagonalize the Fock matrices, selecting the subset of functions we wish to extract, corresponding to the number of available basis functions in each subsystem. \textcolor{red}{(Not finished, need to write more about the convergence criteria, and the iterative loop perhaps?)}
+
+
+
+\end{document}

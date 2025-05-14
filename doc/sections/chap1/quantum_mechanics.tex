@@ -119,7 +119,7 @@ which is now a pseduo-eigenvalue equation that we need to solve iteratively. To 
     \item 
 \end{itemize}
 
-\subsection*{Bipartite Hartree}\label{sec:bipartite_H}
+\subsection*{Bipartite Hartree}\label{sec:bipartite_hartree}
 The Hartree-Fock method is a powerful tool for solving many-body quantum mechanical problems, but it makes an assumption that the wavefunction is described by a single Slater determinant, which represents anti-symmetric wavefunctions and thus indistinguishable particles. As explained in the previous section, our system is set up in such a way that our two-particle system behaves like distinguishable particles. Therefore, we may express our wavefunction as a \emph{Hartree product}, as we've explained in earlier sections. We can derive a similar procedure to find optimal basis transformations as in the section on Hartree-Fock. \\
 The groundstate wavefunction will then have the following form:
 \begin{align*}
@@ -195,7 +195,7 @@ which we identify as the harmonic oscillator potential, with the spring constant
 \\ \\
 Now, we would like to make a potential trap for \emph{two} separate particles, as our qubit system will be a two-particle system. To do so, we construct a double Morse potential well, simply by adding two Morse potentials together. We flip the right potential well, so that the minima are at the same position, and the potential is symmetric (given symmetric parameters). This gives us the double Morse potential as
 \begin{equation}
-    V(r) = D_L(e^{-c_L(r-r_{0,L})} - 1)^2 + D_R(e^{c_R(r-r_{0,R})} - 1)^2
+    V(r) = D_L(e^{-c_L(r-r_{0,L})} - 1)^2 + D_R(e^{c_R(r-r_{0,R})} - 1)^2\label{eq:double_well_morse_potential}
 \end{equation}
 where the subscripts L and R correspond to left and right well, respectively. The parameter $D$ controls the depth of the potential well, whilst $c$ has some control over the width of the well, through the steepness of the exponential functions decay (and thus the curvature, and width, of the well). A smaller $c$ parameter constitues a wider well as the function would then decay slowly. The parameter $r_0$ is the position of the well minima. 
 

@@ -71,9 +71,9 @@ Another useful aspect of the density matrix formalism is that it naturally ties 
 \end{align*}
 and we see how powerful this notation is, we can quickly calculate expectation values of operators (observables) by a simple trace operation. 
 
-\subsection*{Avoided crossings}
+\subsection*{Avoided crossings}\label{sec:avoided_crossings}
 In our coupled, double well system \textcolor{red}{ref til morse potential}, the emergence of entanglement is a direct consequence of the Coulomb coupling between the two subsystems. This coupling will give rise to a phenomenon known as \emph{avoided crossings}\cite{nazir2005anticrossings}, regions in the parameter space where the energy levels of the two subsystems come close to each other, but do not cross due to the coupling of the two subsystems. This coupling makes it so that the energy levels that may be degenerate in the uncoupled system, are no longer degenerate in the coupled system and they are no longer independent, and the system is no longer separable or expressable as a product state. This means our two subsystems will be entangled, and the energy levels will be shifted due to the coupling and this we can use to manipulate the system. \\ \\
-To illustrate this, we can consider a simple example of a two level system, with two energy levels $E_1$ and $E_2$, which are degenerate in the uncoupled system, i.e $E_1 = E_2$. Introducing a coupling term $V$, the effectiv Hamiltonian of the system can be expressed as
+To illustrate this, we can consider a simple example of a two level system, with two energy levels $E_1$ and $E_2$, which are degenerate in the uncoupled system, i.e $E_1 = E_2$. Introducing a coupling term $V$, the effective Hamiltonian of the system can be expressed as
 \begin{align*}
     H = \begin{pmatrix}
         E_1 & V \\
@@ -84,7 +84,9 @@ where $V$ is the coupling strength between the two levels. The eigenvalues of th
 \begin{align*}
     E_\pm = \frac{E_1 + E_2}{2} \pm \sqrt{\frac{(E_1 - E_2)^2}{4} + V^2}
 \end{align*}
-and we can see that the energy levels are shifted due to the coupling, and they will never cross for $V\neq0$. Consider now a dynamical system, where there is some explicit time-dependence in the Hamiltonian, with a constant coupling strength $V$.
+and we can see that the energy levels are shifted due to the coupling, and they will never cross for $V\neq0$. \\ \\
+
+Consider now a dynamical system, where there is some explicit time-dependence in the Hamiltonian, with a constant coupling strength $V$.
 \begin{align*}
     H(t) = \begin{pmatrix}
         E(t) & V \\
@@ -94,7 +96,29 @@ and we can see that the energy levels are shifted due to the coupling, and they 
         V & -vt
     \end{pmatrix}
 \end{align*}
-where $E(t)$ is the time-dependent energy level of the system, with $v$ the sweeping parameter, that sweep the energy levels towards each other (they are equal at $t=0$). Simulating for a time starting from $t<0$, where the energy levels are degenerate we will highlight the avoided crossing at $t=0$, and we get what is called a \emph{Landau-Zener transition} \cite{landau1932theorie, zener1932non}. 
+where $E(t)$ is the time-dependent energy level of the system, with $v$ the sweeping parameter, that sweep the energy levels towards each other (they are equal at $t=0$). 
+\\ \\
+\textcolor{red}{This simple system will allow us to study some of the most basic features of time-evolution, and entanglement, highlighting the avoided crossings in the energy spectrum for an interacting system. As was studied by Lander and Zener in the 1930s separately, the avoided crossing is a feature of the energy spectrum that arises when two energy levels are close in an interacting quantum system \\
+As an initial exploration of the nuances of solving the time-dependent Schrödinger equation \eqref{eq:TDSE}, we will make a study of a simple two-level system Hamiltonian
+\begin{equation}
+    H(t) = H_0 + \lambda(t)H_I
+\end{equation}
+where the non-interacting, and interacting, Hamiltonians are given by
+\begin{align*}
+    H_0 &= \begin{pmatrix}
+        E_0, 0 & 0, -E_0
+    \end{pmatrix} \\
+    H_I &= \begin{pmatrix}
+        0, \Delta & \Delta, 0
+    \end{pmatrix}
+\end{align*}
+This simple system will allow us to study some of the most basic features of time-evolution, and entanglement, highlighting the avoided crossings in the energy spectrum for an interacting system. As we are only dealing with a 2 by 2 matrix, direct diagonalization is not an issue not we we need to think much about computational resources, and it will be easy for us to test multiple algorithms without spending much computational power. With this simple system, we may test various time-evolution algorithms, and study stability and speed of the algorithms, to make an educated choice for our later study of a more complex, computationally demanding system.}
+
+\\ \\
+
+
+
+Simulating for a time starting from $t<0$, where the energy levels are degenerate we will highlight the avoided crossing at $t=0$, and we get what is called a \emph{Landau-Zener transition} \cite{landau1932theorie, zener1932non}. 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.8\textwidth]{figs/avoided_crossing.pdf}
