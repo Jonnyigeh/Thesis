@@ -42,6 +42,10 @@ For instance, the state $\ket{n_1, n_2, ...}$ informs that $n_1$ particles occup
 \begin{align*}
     a^\dagger_i\ket{n_1, n_2, ...} = \sqrt{n_i + 1}\ket{n_1, n_2, ..., n_i + 1, ...}.
 \end{align*}
+and the action of the hermitian conjugate annihilation operator is given by
+\begin{align*}
+    a_i\ket{n_1, n_2, ...} = \sqrt{n_i}\ket{n_1, n_2, ...,n_i-1, n_i - 1, ...}.
+\end{align*}
 From this, these operators can describe particle interactions, transitions and dynamics in a many-body system. As the Fock space is constructed by direct sums, two states of different particle numbers are inherently orthogonal 
 \\\\ 
 For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \ref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \ref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation.

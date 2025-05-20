@@ -2,12 +2,12 @@
 \begin{document}
 %% TIME-EVOLUTION
 \section{Time-evolution}
-In this section, we outline how we implement and solve the time-dependent Schrödinger equation (TDSE) for our quantum system. Our aim is to compute the time evolution of a given initial quantum state under a (possibly time-dependent) Hamiltonian. To do this, we need to construct a numerical approximation to the time-evolution operator and discretize the time evolution into finite steps.
+In this section, we describe the numerical implementation of the time-dependent Schrödinger equation (TDSE) for evolving quantum states under a (possibly time-dependent) Hamiltonian. Our primary goal is to simulate the time evolution of a quantum wavefunction from a known initial state, using various numerical methods to approximate both the time-evolution operator and the propagation of the wavefunction itself.
 
-We begin by introducing general strategies for computing the time-evolution operator and various numerical techniques for approximating it. We then discuss how the choice of time discretization affects the accuracy and stability of the evolution. Following this, we detail the numerical methods implemented in our work and apply them to a simple Landau-Zener system to benchmark and validate our approach. Finally, we apply these methods to the full double-well Morse potential system.
+We begin by discussing how to discretize time for numerical propagation. We then introduce different strategies for approximating the time-evolution operator and solving the TDSE. Several integration schemes are examined, and we compare their accuracy, stability, and efficiency. We validate our implementation using the well-known Landau-Zener model before applying the methods to the more complex double-well Morse potential system.
 
 \subsection*{Time discretization}
-The first step in any numerical time-evolution scheme is to discretize the time variable. Typically, this is done by introducing a time step $\Delta t$, and defining a grid of time points $t_n = n \Delta t$ where $n$ is an integer. In general, there are two ways to do this:
+The foundation of any numerical time-evolution scheme lies in the discretization of the time variable. Typically, this is done by introducing a time step $\Delta t$, and defining a grid of time points $t_n = n \Delta t$ where $n$ is an integer. In general, there are two ways to do this:
 \begin{itemize}
     \item \textbf{Fixed time step:} This is the most common approach, where we define a fixed time step $\Delta t$ and evolve the system in small steps. 
     \item \textbf{Adaptive time step:} This approach allows for a variable time step, where the time step is adjusted based on the dynamics of the system. This can be useful for systems with rapidly changing dynamics, where a fixed time step may not be sufficient to capture the dynamics accurately.
@@ -16,6 +16,7 @@ In this work we will use primarily employing fixed time steps, as the system we 
 
 
 \subsection*{Approximating the Time-evolution operator}
+\textcolor{red}{TODO: We need to rephrase this section to be more general. We mention not only approximations to the time-evolution operator, but also numerical methods for solving the TDSE. We should also mention that we are not only interested in the time-evolution operator, but also in the wavefunction itself.} \\\\
 As presented in section \ref{sec:time_evolution_theory}, the time-evolution operator is given as in \eqref{eq:time_evolution_operator}
 \begin{align*}
     U(t, t_0) = \mathcal{T}\text{exp}\bigg(\frac{-i}{\hbar}\int_{t_0}^t H(t')dt'\bigg)
@@ -65,27 +66,187 @@ As we have seen, direct matrix exponentiation provides a robust and unitary meth
 
 Unlike direct matrix exponentiation - which preserves unitarity by construction - numerical integrators must be carefully designed to ensure that important physical properties, like norm conservation, are maintainted over time. Some integrators, like the Crank-Nicolson method, are specifically designed to preserve unitarity and are well-suited for long-time simulations. Others, like the Runge-Kutta method, may not preserve unitarity exactly, but is more flexible and can provide highly accurate results for a wide range of systems, and for shorter time simulations. \\ \\ In this section, we present and suggest procedures to implement two widely used numerical integration schemes:
 \begin{itemize}
-    \item \textbf{Crank-Nicolson method:} A semi-implicit, second-order finite-difference method that approximates the time-evolution operator as a weighted average of states at the current and next time step. It preserves unitarity and is numerically stable, making it useful for rapidly varying systems. The unitary nature of the method ensures that the wavefunction remains normalized over time.
-    \item \textbf{Runge-Kutta method (RK4):} A fourth-order explicit integration method that offers high accuracy and ease of implementation. It is particularly useful for systems with smooth dynamics, but does not preserve unitarity exactly. The RK4 method is computationally efficient.
+    \item \textbf{Crank-Nicolson method:} A semi-implicit, second-order finite-difference method that, while not computing the matrix exponential explicitly, it yields an approximative time-evolution operator as a weighted average of states at the current and next time step. It preserves unitarity by construction and is numerically stable, making it useful for rapidly varying systems. The unitary nature of the method ensures that the wavefunction remains normalized over time.
+    \item \textbf{Runge-Kutta method (RK4):} A fourth-order explicit integration method that offers high accuracy and ease of implementation. It is particularly useful for systems with smooth dynamics, but does not preserve unitarity exactly. The RK4 method is computationally efficient, and instead focuses on evolving the wavefunction iteratively over time.
 \end{itemize}
 
 These methods are implemented in Python, and we will provide code snippets to illustrate their usage. They offer a powerful and flexible alternative framework for simulating the time evolution of quantum systems, especially when direct matrix exponentiation becomes impractical. The choice of method depends on the trade-off between computational cost, accuracy, and the specific requirements of the system being studied. In the following sections, we will present the implementation details and performance of these methods in the context of the simple Landau-Zener system\eqref{eq:landau_zener} and, later on, employ these methods to study the full double-well Morse potential system.
+
+%% CRANK-NICOLSON
 \subsubsection*{Crank-Nicolson method} 
+Building on the limitations of the simple method of Euler-Cromer, and to improve upon the computational cost of direct matrix exponentiation, the \emph{Crank-Nicolson method} offers a compelling, and physically grounded alternative. As mentioned, this is a semi-implicit, second-order finite-difference method that aims to solve the TDSE\eqref{eq:TDSE} iteratively over time. The weighted average of states used makes an approximative time-evolution operator - which in turn makes the method unitary by construction - and thus is key to preserve essential physical properties like \textbf{norm conservation} and \textbf{unitarity}. \\\\
+At its core, the Crank-Nicolson method applies the trapezoidal rule to the Schrödinger equation, treating the Hamiltonian propagator as an average of its behaviour at the beginning and end of each time interval. This in turn leads to scheme that does not explicitly compute the time-evolution operator, but still approximates its action through a symmetric update rule. As stated, we apply the trapezoidal rule to the time-derivative in the TDSE\eqref{eq:TDSE}:
+\begin{align*}
+    \frac{\ket{\Psi(t + \Delta t)} - \ket{\Psi(t)}}{\Delta t} \approx \frac{-i}{2\hbar}\bigg[H(t + \Delta t)\ket{\Psi(t + \Delta t)} - H(t)\ket{\Psi(t)}\bigg]
+    \ket{\Psi(t + \Delta t)} \approx \ket{\Psi(t)} - \frac{i\Delta t}{2\hbar}\bigg[H(t + \Delta t)\ket{\Psi(t + \Delta t)} + H(t)\ket{\Psi(t)}\bigg]
+\end{align*}
+Rearranging the terms of this equation, yields the Crank-Nicolson update rule:
+\begin{align*}
+    \bigg[\mathbb{I} + \frac{i\Delta t}{2\hbar}H(t + \Delta t)\bigg]\ket{\Psi(t + \Delta t)} = \bigg[\mathbb{I} - \frac{i\Delta t}{2\hbar}H(t)\bigg]\ket{\Psi(t)}
+\end{align*}
+This equation represents a \textbf{linear system} of equations for the wavefunction, that must be solved at each time step. The implicit nature contributes to the stability of the method, and the symmetric structure of the update rule ensures that the resulting time-evolution operator is unitary to second order in time $\Delta t$. Expressed in matrix form, by left-multiplying the inverse of the left-hand matrix, the update rule, or rather, the approximative time-evolution operator $U_{CN}$, can be written as:
+\begin{align*}
+    U_{CN} (\Delta t) = \bigg[\mathbb{I} + \frac{i\Delta t}{2\hbar}H(t + \Delta t)\bigg]^{-1}\bigg[\mathbb{I} - \frac{i\Delta t}{2\hbar}H(t)\bigg]
+\end{align*}
+This expression is a \textbf{Padé approximation} to the exponential function\textcolor{red}{TODO: Add reference}, and it provides a second-order accurate approximation to the time-evolution operator that is norm-preserving. In the time-independent case, it acts as a rational approximation\textcolor{red}{TODO: Add more details, and references to this} to the exponential time-evolution operator,
+\begin{align*}
+    U = e^{-iH\Delta t/\hbar} \approx \frac{\mathbb{I} - \frac{i\Delta t}{2\hbar}H}{\mathbb{I} + \frac{i\Delta t}{2\hbar}H}
+\end{align*}
+Viewed as such, the Crank-Nicolson method situates itself somewhere in between numerical integration methods and approximate exponentiaion schemes, providing a physical, flexible and efficient framework for quantum state time-evolution. Some of the key advantages of the Crank-Nicolson method include:
+\begin{itemize}
+    \item \textbf{Unitarity:} The method preserves the norm of the wavefunction, ensuring that the total probability remains constant over time. This is crucial for maintaining physical consistency in quantum simulations.
+    \item \textbf{Stability:} The implicit nature of the method provides numerical stability, making it particularly suitable for stiff or rapidly varying systems - or long-time simulations.
+    \item \textbf{Accuracy:} The second-order accuracy of the method supports the use of larger time steps compared to first-order methods, while still maintaining a high level of precision, as the local error scales as $\mathcal{O}(\Delta t^3)$, and global error as $\mathcal{O}(\Delta t^2)$.
+    \item \textbf{Sparsity:} The method can be efficiently implemented for sparse Hamiltonians, as solving the linear system is generally more efficient than computing the full matrix exponential.
+\end{itemize}
+In the following, we shall outline a suggested procedure for implementing the Crank-Nicolson method in Python, and provide a code snippet to illustrate its usage. The implementation is straightforward, and involves the following steps: \textcolor{red}{TODO: Either make pseudo-code, or skip altoghter?}
+\begin{itemize}
+    \item Define the Hamiltonian matrix $H(t)$ at the current time step.
+    \item Construct the Crank-Nicolson update operator $U_{CN}(\Delta t)$ using the Hamiltonian.
+    \item Solve the linear system of equations to obtain the wavefunction at the next time step $\ket{\Psi(t + \Delta t)}$.
+    \item Repeat the process for each time step, updating the wavefunction iteratively.
+\end{itemize}
+\begin{lstlisting}[language=Python]
+N = ... # Number of time steps
+hbar = 1.0  # Reduced Planck's constant (in appropriate units)
+psi = np.zeros([...])  # Initial wavefunction
+time = np.linspace(0, 10, N)  # Time grid
+dt = time[1] - time[0]  # Time step
+def H(t):
+    # Define the Hamiltonian matrix at time t
+    # This is a placeholder function and should be replaced with the actual Hamiltonian
+    return np.array([[1, 0], [0, 1]])  # Example: Identity matrix
+
+def crank_nicolson(H, psi, t, dt):
+    # Define the Hamiltonian matrix at the current time step
+    H_current = H(t)
+    H_next = H(t + dt)
+    
+    # Construct the Crank-Nicolson update operator
+    U_CN = np.linalg.inv(np.eye(len(psi)) + 1j * dt / (2 * hbar) * H_next) @ \
+           (np.eye(len(psi)) - 1j * dt / (2 * hbar) * H_current)
+    
+    # Solve the linear system to obtain the wavefunction at the next time step
+    psi_new = np.dot(U_CN, psi)
+    
+    return psi_new
+# Time evolution loop
+psi_t = np.zeros((N, len(psi)), dtype=complex)  # Store wavefunction at each time step
+for t in time:
+    psi_new = crank_nicolson(H, psi, t, dt)
+    psi_t.append(psi_new)
+    psi = psi_new  # Update the wavefunction for the next iteration
+\end{lstlisting}
+\\\\
+
 
 \subsubsection*{Runge-Kutta method}
+In contrast to the Crank-Nicolson method, the Runge-Kutta method trades off unitarity and exact norm preservation for simplicity, flexibility and short-term accuracy. As such, it provides a versatile and widely used tool for initial value problems, and is particularly useful for systems with smooth dynamics. The RK4 method, in particular, is a fourth-order explicit integration scheme that offers high accuracy and ease of implementation.
+\\\\
+Returning to the TDSE\eqref{eq:TDSE}, we can recast it as a first-order differential equation (ODE) in time:
+\begin{align*}
+    \frac{\partial}{\partial t}\ket{\Psi(t)} = -\frac{i}{\hbar}H(t)\ket{\Psi(t)}
+\end{align*}
+The Runge-Kutta methods are designed to solve ODEs of the form $\frac{dy}{dt} = f(t, y)$, where $y$ is the dependent variable (in our case, the wavefunction $\ket{\Psi(t)}$) and $f(t, y)$ is a function that describes the dynamics of the system (i.e the Hamiltonian). It does so by approximating the solution at successive time steps using a weighted average of the derivatives (slopes) evaluated at different intermediate points within the time step. The RK4 method, in particular, uses four evaluations of the derivative to achieve fourth-order accuracy, and provides a balanced trade-off between accuracy and computational efficiency and is a common choice in quantum dynamics when unitarity is not strictly required. The RK4 update rule is given by:
+\begin{align*}
+    k_1 &= f(t, \Psi(t))) = -\frac{i}{\hbar}H(t)\ket{\Psi(t)} \\
+    k_2 &= f(t + \frac{\Delta t}{2}, \Psi(t) + \frac{\Delta t}{2}k_1) \\
+    k_3 &= f(t + \frac{\Delta t}{2}, \Psi(t) + \frac{\Delta t}{2}k_2) \\
+    k_4 &= f(t + \Delta t, \Psi(t) + \Delta t k_3)
+\end{align*}
+which yields the update to the wavefunction as
+\begin{align*}
+    \Psi(t + \Delta t) = \Psi(t) + \frac{\Delta t}{6}(k_1 + 2k_2 + 2k_3 + k_4)
+\end{align*}
+This method achieves a local error of $\mathcal{O}(\Delta t^5)$ and a global error of $\mathcal{O}(\Delta t^4)$, making it highly accurate for sufficiently small time steps $\Delta t$. However, as we've mentioned, the RK4 method does not infact preserve unitarity and thus the wavefunction norm may drift, especially over longer time scales, unless norm corrections are applied repeatedly. Despite these limitations, for short time simulations, the RK4 remains a robust choice for time-evolution. Summarizing the key advantages of the RK4 method:
+\begin{itemize}
+    \item \textbf{Simplicity:} The RK4 method is easy to implement and understand, making it a popular choice for many applications.
+    \item \textbf{Flexibility:} The method can be applied to a wide range of systems, including those with time-dependent Hamiltonians.
+    \item \textbf{Explicitness:} The RK4 method is explicit, meaning that it does not require the solution of a linear system at each time step, making it computationally efficient for a wide range of systems.
+    \item \textbf{Accuracy:} The fourth-order accuracy enables the use of relatively large time steps while maintaining a high level of accuracy.
+\end{itemize}
+We will now outline a suggestion for implementing a numerical RK4 method in Python, and provide a code snippet to illustrate its usage. 
+\begin{itemize}
+    \item Define the Hamiltonian matrix $H(t)$ at the current time step (RHS of ODE).
+    \item Compute the four slopes $k_1$, $k_2$, $k_3$, and $k_4$ using the Hamiltonian.
+    \item Construct the RK4 update operator using the slopes.
+    \item Update the wavefunction iteratively using the RK4 update rule.
+    \item Repeat the process for each time step, updating the wavefunction iteratively.
+    \item Optionally, apply norm corrections to maintain unitarity.
+\end{itemize}
+\begin{lstlisting}[language=Python]
+psi = np.zeros([...])  # Initial wavefunction
+N = ... # Number of time steps
+time = np.linspace(0, 10, N)  # Time grid
+dt = time[1] - time[0]  # Time step
+hbar = 1.0  # Reduced Planck's constant (in atomic units)
+def H(t):
+    # Define the Hamiltonian matrix at time t
+    # This is a placeholder function and should be replaced with the actual Hamiltonian
+    return np.array([[1, 0], [0, 1]])  # Example: Identity matrix
 
+def runge_kutta_4(H, psi, t, dt):
+    # Define the Hamiltonian matrix at the current time step
+    H_current = H(t)
+    H_dt2 = H(t + dt / 2)
+    H_dt = H(t + dt)
+    
+    # Compute the four slopes
+    k1 = -1j / hbar * np.dot(H_current, psi)
+    k2 = -1j / hbar * np.dot(H_dt2, psi + dt / 2 * k1)
+    k3 = -1j / hbar * np.dot(H_dt2, psi + dt / 2 * k2)
+    k4 = -1j / hbar * np.dot(H_dt, psi + dt * k3)
 
+    # Update the wavefunction using the RK4 update rule
+    psi_new = psi + dt / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+    return psi_new
 
+# Time evolution loop
+psi_t = np.zeros((N, len(psi)), dtype=complex)  # Store wavefunction at each time step
+for t in time:
+    psi_new = runge_kutta_4(H, psi, t, dt)  
+    # Optionally, apply norm corrections to maintain unitarity
+    norm_correction = np.linalg.norm(psi_new)
+    psi_new /= norm_correction  # Normalize the wavefunction
+    psi_t.append(psi_new)
+    psi = psi_new  # Update the wavefunction for the next iteration
+\end{lstlisting}
+This code snippet outlines a suggested procedure, however - in our work, we shall instead use the \texttt{scipy.integrate} packages \texttt{RK45}\footnote{See \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.RK45.html}} method, which is a built-in implementation of the RK4 method. This package provides a convenient and efficient way to perform numerical integration of ODEs, and is well-suited for our purposes.  \\\\
+In the next section, we will compare the performance and qualitative behaviour of the Crank-Nicolson and RK4 methods when applied to the Landau-Zener system \eqref{eq:landau_zener}, providing insight into their respective advantages and limitations in a controlled testbed scenario.
 
+    %% Simple system
+\subsection{Numerical validation: Landau-Zener model}
+To systematically validate our implementation of the aforementiond numerical methods, we require a simple yet representative quantum system that exhibits non-trivial dynamics but still has closed form solutions for comparison. For this purpose, we will once again turn to the simple Landau-Zener model \eqref{eq:landau_zener}, introduced in the section on avoided crossings \ref{sec:avoided_crossings}. This simple two-level system is governed by a time-dependent Hamiltonian. It captures the essential features of quantum dynamics, making it an ideal testbed for our numerical methods in preparation for the more complex double-well Morse potential system we shall study. \\\\
 
+Once again, the Hamiltonian for the Landau-Zener model is given by:
+\begin{align*}
+    H(t) = \begin{pmatrix}
+        vt & V \\
+        V & -vt
+\end{pmatrix}
+\end{align*}
+where $v$ is the sweeping velocity, $V$ is the coupling strength, and $t$ is the time. 
 
+At $t=0$, the uncoupled system would have a degeneracy, but the coupling $V$ opens a gap (lifts the degeneracy), resulting in an avoided crossing as we saw in section \ref{sec:avoided_crossings}. Thus, this minimal system captures one of the simplest non-trivial dyanmics of a quantum system which also leads to a well known analytical solution for the transition probability \eqref{eq:landau_zener_trans_prob}. 
 
+This system is particularly useful for validating our numerical methods, and serves as a suitable testbed for benchmarking due to several reasons, of which some are listed below:
+\begin{itemize}
+    \item \textbf{Low dimensionality:} The Landau-Zener model is a two-level system, making it computationally efficient to simulate and analyze. This allows us to focus on the numerical methods without being overwhelmed by the computational complexity of the system.
+    \item \textbf{Non-trivial dynamics:} The system exhibits interesting dynamics, such as transitions betweeen states, which require the numerical implementations to accurately capture the time evolution of the wavefunction. This provides a meaningful test for the accuracy and stability of the numerical methods.
+    \item \textbf{Analytical reference:} The Landau-Zener model has well-known analytical solutions for the transition probabilities and wavefunction dynamics, allowing us to directly compare the results of our numerical methods against these exact solutions. This serves as a benchmark for assessing the performance of the numerical methods.
+\end{itemize}
 
-
-%% Simple system
-\subsection{Simple system}
-
-
+To test the performance of our numerical implementations, we will evolve an initial state $\ket{\Psi(0)} = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$, which corresponds to the ground state of the uncoupled system, from an initial time $t_0<0$ to a final time $t_f>0$. We will then compare:
+\begin{itemize}
+    \item The norm conservation $|\Psi(t_f)|^2$ of the wavefunction throughout the time-evolution.
+    \item The performance of each integrator by
+    \begin{itemize}
+        \item Global error vs. time step $\Delta t$.
+        \item Runtime efficiency
+        \item Stability and accuracy under varying conditions. 
+    \end{itemize}
+    \item We will also qualitatively investigate how the various methods behave near the avoided crossing.
+\end{itemize}
 
 
 

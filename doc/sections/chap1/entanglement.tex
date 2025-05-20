@@ -87,15 +87,15 @@ where $V$ is the coupling strength between the two levels. The eigenvalues of th
 and we can see that the energy levels are shifted due to the coupling, and they will never cross for $V\neq0$. \\ \\
 
 Consider now a dynamical system, where there is some explicit time-dependence in the Hamiltonian, with a constant coupling strength $V$.
-\begin{align*}
+\begin{align}
     H(t) = \begin{pmatrix}
         E(t) & V \\
         V & -E(t)
     \end{pmatrix} = \begin{pmatrix}
         vt & V \\
         V & -vt
-    \end{pmatrix}
-\end{align*}
+    \end{pmatrix} \label{eq:landau_zener}
+\end{align}
 where $E(t)$ is the time-dependent energy level of the system, with $v$ the sweeping parameter, that sweep the energy levels towards each other (they are equal at $t=0$). 
 \\ \\
 \textcolor{red}{This simple system will allow us to study some of the most basic features of time-evolution, and entanglement, highlighting the avoided crossings in the energy spectrum for an interacting system. As was studied by Lander and Zener in the 1930s separately, the avoided crossing is a feature of the energy spectrum that arises when two energy levels are close in an interacting quantum system \\
@@ -126,9 +126,9 @@ Simulating for a time starting from $t<0$, where the energy levels are degenerat
     \label{fig:avoided_crossings}
 \end{figure}
 As we can see, the Coulomb coupling between the two subsystems results in the energy levels 'avoiding' eachother, while the non-interacting system would have crossed at $t=0$ (as indicated by the dotted lines). But what happens with the wavefunctions prepared in th system? Initializing the system in the ground state $\psi_0 = \ket{0}$, we shall see that what happens at the avoided crossing depends heavily on both coupling strength $V$ and sweeping paramter $k$, through the Landau-Zener formula \cite{landau1932theorie, zener1932non}:
-\begin{align*}
-    P_{0\rightarrow1} = e^{-\frac{2\pi V^2}{\hbar k}}
-\end{align*}
+\begin{align}
+    P_{0\rightarrow1} = e^{-\frac{2\pi V^2}{\hbar k}}\label{eq:landau_zener_trans_prob}
+\end{align}
 which governs the probability of the system to transitions between the two energy levels. As visualized in the following plot \eqref{fig:landau_zener}, we can see how the sweeping parameter $k$ governs how the avoided crossing affect the prepared wavefunction, in one case we achive some minor level of mixing between the two basis states, while in the other case we achieve a full transition between the two states.
 \begin{figure}[h!]
     \centering
