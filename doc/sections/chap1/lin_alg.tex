@@ -6,7 +6,7 @@ Before we dig in to our main course, quantum mechanics, an appetizer is in order
 In short terms, quantum mechanics is built upon the physics of waves and linear algebra, and a strong fundation in these will let us gain a deeper understanding of the intricacies within quantum mechanics.
 In this thesis, we will be dealing with n-dimensional complex vector spaces, expressed in Dirac notation, which is a compact and powerful notation for linear algebra in quantum mechanics.
 %% hey paul
-\subsection*{Dirac notation}
+\subsection{Dirac notation}
 Introduced and named by the famous physicist Paul Dirac in his paper 'A new notation for quantum mechanics' \cite{dirac_1939}, this notation allows for linear algebra in quantum mechanics to be performed in a neat and compact way. Any $n$-dimensional complex vector in the vector space $V$ is represented as a ket, $\ket{\psi}$, and its dual-vector as a bra, $\bra{\psi}$. The inner of two vectors is then defined as:
 \begin{align*}
         \braket{\psi|\phi} = \int \psi^*(x)\phi(x) dx
@@ -22,7 +22,7 @@ where $c_i$ are the coefficients of the expansion. This naturally introduces the
 where $I$ is the identity operator. This relation guarantees that the basis set $\{\ket{i}\}$ spans the entire vector space $V$.
 
 %% Ops
-\subsection*{Operators}
+\subsection{Operators}
 A linear operator is a mathematical object that maps elements from one vector space $V$ to another space $W$. Meaning it is a mapping $\hat O: V \rightarrow W$, and has the following linearity properties:
 \begin{align*}
     \hat O(\alpha \mathbf{x} + \beta\mathbf{y}) = \alpha \hat O\mathbf{x} + \beta \hat O\mathbf{y}
@@ -49,7 +49,7 @@ In quantum mechanics, certain operators play a fundamental role due to their spe
     \item \textbf{Hermitian:} A matrix $U$ is hermitian if $U = U^\dagger$, meaning the matrix is equal to its complex conjugate transpose\footnote{represented by a $\dagger = *^T$}. This is a special case of self-adjoint operators, living in a \emph{complex} Hilbert space, where the eigenvalues are real and the eigenvectors are orthogonal. These matrices are used to represent physical observables in quantum mechanics, like the Hamiltonian operator, which represents the total energy of a quantum mechanical system.
 \end{itemize}
 %% mr hilbert
-\subsection*{Hilbert spaces}\label{sec:Hilbert_space}
+\subsection{Hilbert spaces}\label{sec:Hilbert_space}
 The concept of a Hilbert space is fundamental to quantum mechanics, as it provides the mathematical framework for which quantum states and operators are defined. A Hilbert space is a generalization of Euclidiean space, which allows for linear algerba and calculus to be applied to infinite-dimensional spaces. More formally, a Hilbert space is a complex complete inner product space, which means that it adhers to the following properties: \textcolor{red}{should add some references to the properties of Hilbert spaces, and maybe an illustration? could be cool}
 \begin{itemize}
     \item \textbf{Completeness:} Every Cauchy sequence $\{x_n\}$ in the space $V$ converges to a limit in the space. Specifically, $V$ is complete if:
@@ -74,8 +74,17 @@ for the complex-valued, continuous, state vectors $\ket{\phi}, \ket{\psi} \in V$
     \braket{\psi_i|\psi_j} = \delta_{ij}
 \end{align*}
 where $\delta_{ij}$ is the Kronecker delta. This orthogonality relation is crucial in quantum mechanics, as it allows us to define a basis set of vectors that are orthogonal to each other. As elegant as this framework may be, the challenge of quantum many-body systems lies in the exponential scaling of the Hilbert space with the number of particles and degrees of freedom. For a system of $N$ particles, with $d$ degrees of freedom, the dimension of the Hilbert space is $d^N$, which quickly becomes intractable for classical computers. This rapid growth makes exact solutions for interacting many-body systems computationally infeasible, even in low-dimensional systems. 
-\subsection*{Basis transformations}\textcolor{red}{we should move this section?}
-How we express the state-vectors in a Hilbert space is not unique, and we are free to choose basis sets to represent the vectors that spans our Hilbert space (or any space for that matter). This is a powerful tool in quantum mechanics, as it allows us to choose the basis that best suits the problem at hand, and clever choices can simplify problems significantly. Many modern many-body methods are built upon this principle, where the choice of basis set can make the difference between a computationally infeasible problem and a tractable one. \\ \\ Furthermore, by finding a basis that diagonalizes the Hamiltonian matrix, we can directly solve for the energy eigenvalues and eigenstates. This principle underlies many techniques, such as using harmonic oscillator eigenfunctions for bound systems or plane waves for periodic potentials. The search for an optimal basis is often guided by the specific features of the system under study, such as symmetry or localization, making it a central consideration in both theoretical and computational approaches to quantum mechanics. \\ \\ This means we often have to change between different basis sets, and the transformation between two basis sets $\{\ket{i}\}$ and $\{\ket{j}\}$ is given by the unitary transformation matrix $U$:
+
+%% BASIS SETS
+\subsection{Quantum mechanical bases}\textcolor{red}{we should move this section?}
+The representation of state-vectors in a Hilbert space is not unique, and we are free to choose basis sets to express the vectors that spans our Hilbert space (or any space for that matter), as long as the basis of choice spans the Hilbert space\textcolor{red}{source?}. This is a powerful tool in quantum mechanics, as it allows us to choose the basis that best suits the problem at hand, and clever choices can simplify problems significantly. The flexibility in choosing a basis set is central to both theoretical insights and computational efficiency when solving quantum mechanical problems. Many modern many-body methods are built upon this principle, where the choice of basis set can make the difference between a computationally infeasible problem and a tractable one. For example, by exploting symmetry, localization, or energy scales, we can often reduce the dimensionality of the problem and focus on the most relevant degrees of freedom. The choice of basis is not just a mathematical convenience, it can also yield physical insights into th systems behaviour. For instance, in quantum chemistry, the choice of basis set can reflect the underlying symmetries of the molecular structure, leading to a more efficient representation of the wavefunction and its properties. Similarly, in condensed matter physics, the choice of basis can be guided by the crystal structure or electronic correlations present in the material. \textcolor{red}{Need souces for this}\\ \\
+
+Furthermore, by finding a basis that diagonalizes the Hamiltonian matrix, we can directly solve for the energy eigenvalues and eigenstates. This principle underlies many techniques, such as using harmonic oscillator eigenfunctions for bound systems or plane waves for periodic potentials\textcolor{red}{souces?}. The search for an optimal basis is often guided by the specific features of the system under study, such as symmetry or localization, making it a central consideration in both theoretical and computational approaches to quantum mechanics. In this thesis, we will frequently use both the energy eigenbasis (i.e the eigenfunctions of the system Hamiltonian) and a grid-based Discrete Variable Representation (DVR) basis. These choices will be introduced and justified further on in later sections, particularly in the context of quantum mechanics (Section \ref{sec:quantum_mechanics}) and numerical implementations (Section \ref{sec:general_study})\textcolor{red}{fix references}
+\\ \\ 
+
+Due to the flexible nature of quantum bases, we are often required to re-express our system in various bases, depending on the problem and what we are currently studying. Often, we will have to chang our bases during the course of our calculations and we thus require a mathematical framework to transform between the bases. 
+
+The transformation between two basis sets $\{\ket{i}\}$ and $\{\ket{j}\}$ is given by the unitary transformation matrix $U$:
 \begin{align*}
     \ket{\alpha} = \sum_i U_{\alpha i}\ket{i}
 \end{align*}

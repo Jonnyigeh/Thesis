@@ -3,7 +3,7 @@
 
 \section{Quantum time evolution}
 In quantum mechanics, the time evolution of a quantum system is described by the Schrödinger equation\eqref{eq:tdse}. The TDSE shows the behaviour of a quantum system over time under the influence of the system Hamiltonian. While simple systems without time-dependence admit closed-form solutions, most physically realisable systems - especially those relevant for quantum control and information - exhibit time-dependent behaviour. Treating such systems that cannot be solved analytically, require numerical methods to approximate the systems evolution. Understanding time evolution is crucial for modelling driven systems such as qubit under external control field, where energy transitions reveal non-trivial dynamics\cite{landau1932theorie, zener1932non}, or simulating quantum gates in quantum computing \cite{leinonen2024coulomb, }.\textcolor{red}{trenger flere kilder og tilfeller}. In this section, we outline the framework for quantum time evolution and introduce the time-evolution operator, which is at the heart of quantum dynamics, and the basis for our numerical methods. We will also conceptualize the steps behind the numerical framework for solving the time-dependent Schrödinger equation, and also for discretizing the time evolution operator. \\
-\subsection*{Time evolution operator}
+\subsection{Time evolution operator}
 Simulating the dynamics of any quantum system is seen through the evolution of the quantum mechanical state representing the system at hand. The time evolution of a quantum state from time $t_0$ to $t$ is expressed by the linear unitary time-evolution operator $U(t, t_0)$, which is a solution to the time-dependent Schrödinger equation.\cite{sakurai1986modern} This operator should do the following
 \begin{equation}
     \ket{\Psi(t)} = U(t, t_0)\ket{\Psi(t_0)}
@@ -50,7 +50,7 @@ where the integral must be time-ordered, and swapped with the Dyson series expan
 allowing for analytical propagation of the system. In contrast, the time-dependent case \eqref{eq:time_evolution_operator} requires numerical treatment to solve the integral, as the exponential cannot be solved analytically. 
 
 
-\subsection*{Numerical time propagation}
+\subsection{Numerical time propagation}
 The time-propagator in \eqref{eq:time_evolution_operator} involves a time-ordered exponential, which generally cannot be solved analytically for a time-dependent Hamiltonian $H(t)$. Therefore, we must look to numerical methods to approximate and solve the integral. Choice of method is crucial, and it depends on accuracy, computational cost and stability. There are some other criteria to consider when developing, or choosing, a numerical method for time propagation. The method should preserve the norm of the wavefunction, and it should preserve the unitarity of the time-evolution operator. 
 \\\\ 
 To simulate quantum time evolution numerically, we start by discretizing time into smaller intervals (time steps) $\Delta t$. Doing so allows us to approximate the time-evolution operator as a product of smaller time-evolution operators, which can be solved iteratively (recall the composition property of the time-evolution operator). At each step then, the wavefunction is evolved by approximating the true time-evolution operator on the time interval $[t, t+\Delta t]$. \\ \\

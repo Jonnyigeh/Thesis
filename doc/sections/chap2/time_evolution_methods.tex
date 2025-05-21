@@ -6,7 +6,7 @@ In this section, we describe the numerical implementation of the time-dependent 
 
 We begin by discussing how to discretize time for numerical propagation. We then introduce different strategies for approximating the time-evolution operator and solving the TDSE. Several integration schemes are examined, and we compare their accuracy, stability, and efficiency. We validate our implementation using the well-known Landau-Zener model before applying the methods to the more complex double-well Morse potential system.
 
-\subsection*{Time discretization}
+\subsection{Time discretization}
 The foundation of any numerical time-evolution scheme lies in the discretization of the time variable. Typically, this is done by introducing a time step $\Delta t$, and defining a grid of time points $t_n = n \Delta t$ where $n$ is an integer. In general, there are two ways to do this:
 \begin{itemize}
     \item \textbf{Fixed time step:} This is the most common approach, where we define a fixed time step $\Delta t$ and evolve the system in small steps. 
@@ -15,7 +15,7 @@ The foundation of any numerical time-evolution scheme lies in the discretization
 In this work we will use primarily employing fixed time steps, as the system we are studying is not expected to exhibit rapidly changing dynamics, due to us being in control of how we vary the potential parameters and thus perturb the system. 
 
 
-\subsection*{Approximating the Time-evolution operator}
+\subsection{Approximating the Time-evolution operator}
 \textcolor{red}{TODO: We need to rephrase this section to be more general. We mention not only approximations to the time-evolution operator, but also numerical methods for solving the TDSE. We should also mention that we are not only interested in the time-evolution operator, but also in the wavefunction itself.} \\\\
 As presented in section \ref{sec:time_evolution_theory}, the time-evolution operator is given as in \eqref{eq:time_evolution_operator}
 \begin{align*}
@@ -30,7 +30,7 @@ which simplifies to $U(t) = e^{-iHt}$ for a time-independent system Hamiltonian.
 \end{itemize}
 In this work, we primarily implement matrix exponentiation and Crank-Nicolson, while briefly validating our results against RK45 and Euler-Cromer. The numerical stability, accuracy, and computational efficiency of each approach are evaluated in the context of our double-well Morse potential system. \\ \\
 %% Matrix exponentiation
-\subsubsection*{Matrix exponentiation}
+\subsubsection{Matrix exponentiation}
 Following the material presented in section \ref{sec:time_evolution_theory}, we know that our time-evolution operator \eqref{eq:time_evolution_operator} is given numerically, as an approximation, by the following expression \eqref{eq:numerical_time_evolution_operator}
 \begin{align*}
     U(t) \approx e^{-iH(t)\Delta t} 
@@ -60,7 +60,7 @@ While matrix exponentiation provides a robust method for computing the time-evol
 \end{itemize}
 The choice of evaluation method depends on the specific system, and in this work, we primarily use the Euler method for simplicity and speed. \textcolor{red}{TODO: Add more details, possibly validate against the other two evaluation methods.} \\ In the next section we will discuss the different approach of using numerical integration methods to solve the time-evolution operator, namely the Crank-Nicolson method and the Runge-Kutta method. These methods are more general and can be used for time-dependent Hamiltonians, but are also more complex and computationally expensive.
 
-\subsection*{Numerical integrators}
+\subsection{Numerical integrators}
 As we have seen, direct matrix exponentiation provides a robust and unitary method for approximating the time-evolution operator. However, it becomes increasingly inefficient and impractical for high-dimensional systems, due to the computational complexity of evaluating the matrix exponential of the Hamiltonian in each time step. To address this, we resort to \emph{numerical integratorion methods},which offer more scalable alternatives for evolving the quantum system, and propagating the wavefunction through time.  \\\\ These numerical methods treat the Schrödinger equation \eqref{eq:TDSE} as a first-order differential equation in time and aim to approximate the solution iteratively over successive time steps. This foregoes the need to explicitly compute the time-evolution operator \eqref{eq:time_evolution_operator}, and instead focus on the evolution of the wavefunction itself. \\\\ 
 
 
@@ -73,7 +73,7 @@ Unlike direct matrix exponentiation - which preserves unitarity by construction 
 These methods are implemented in Python, and we will provide code snippets to illustrate their usage. They offer a powerful and flexible alternative framework for simulating the time evolution of quantum systems, especially when direct matrix exponentiation becomes impractical. The choice of method depends on the trade-off between computational cost, accuracy, and the specific requirements of the system being studied. In the following sections, we will present the implementation details and performance of these methods in the context of the simple Landau-Zener system\eqref{eq:landau_zener} and, later on, employ these methods to study the full double-well Morse potential system.
 
 %% CRANK-NICOLSON
-\subsubsection*{Crank-Nicolson method} 
+\subsubsection{Crank-Nicolson method} 
 Building on the limitations of the simple method of Euler-Cromer, and to improve upon the computational cost of direct matrix exponentiation, the \emph{Crank-Nicolson method} offers a compelling, and physically grounded alternative. As mentioned, this is a semi-implicit, second-order finite-difference method that aims to solve the TDSE\eqref{eq:TDSE} iteratively over time. The weighted average of states used makes an approximative time-evolution operator - which in turn makes the method unitary by construction - and thus is key to preserve essential physical properties like \textbf{norm conservation} and \textbf{unitarity}. \\\\
 At its core, the Crank-Nicolson method applies the trapezoidal rule to the Schrödinger equation, treating the Hamiltonian propagator as an average of its behaviour at the beginning and end of each time interval. This in turn leads to scheme that does not explicitly compute the time-evolution operator, but still approximates its action through a symmetric update rule. As stated, we apply the trapezoidal rule to the time-derivative in the TDSE\eqref{eq:TDSE}:
 \begin{align*}
@@ -140,7 +140,7 @@ for t in time:
 \\\\
 
 
-\subsubsection*{Runge-Kutta method}
+\subsubsection{Runge-Kutta method}
 In contrast to the Crank-Nicolson method, the Runge-Kutta method trades off unitarity and exact norm preservation for simplicity, flexibility and short-term accuracy. As such, it provides a versatile and widely used tool for initial value problems, and is particularly useful for systems with smooth dynamics. The RK4 method, in particular, is a fourth-order explicit integration scheme that offers high accuracy and ease of implementation.
 \\\\
 Returning to the TDSE\eqref{eq:TDSE}, we can recast it as a first-order differential equation (ODE) in time:

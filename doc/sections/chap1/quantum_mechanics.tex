@@ -1,7 +1,7 @@
 \documentclass{subfiles}
 \begin{document}
 \section{Quantum Mechanics}
-\subsection*{The quantum mechanical wavefunction and the Schrödinger Equation}
+\subsection{The quantum mechanical wavefunction and the Schrödinger Equation}
 The physical description of any quantum system, i.e the \emph{state space}, is given by the quantum mechanical \emph{wavefunction} (also often called a \emph{state vector})\cite{nielsen2010quantum}, which in Dirac notation\footnote{Named after the physicist Paul Dirac, who was one of the founding fathers of quantum mechanics.} is written as $\ket{\Psi(t)}$. 
 This function is a complex-valued function that gives a complete description of both static and dynamic properties of a given quantum system, and thus presents the analogue to the classical notion of a set of trajectories in phase space \cite{hochstuhl2014time}. 
 
@@ -18,7 +18,7 @@ where $\nabla^2$ is the Laplacian operator, and $V(\mathbf{r})$ is the potential
 
 
 This equation gives the equation of motion for the wavefunction, and describes how the wavefunction evolves in time.
-\subsection*{Second Quantization}
+\subsection{Second Quantization}
 As the earliest formulations of quantum mechanics introduced the ground-breaking concepts of quantized properties like energy, momentum and angular momentum, we can think of this formulation as a "first quantization". Here the observables are represented as operators with real eigenvalues and wavefunctions are assigned to individual particles.
 As quantum mechanics matured, it became clear that first quantization was not sufficient to describe many-body systems - especially systems with indistinguishable particles, such as fermionic structures, or systems where particles are created or annihilated, such as in chemical reactions, or in the study of elementary particles.\\  
 Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles, and makes the statefunction also expressed in terms of operators. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in \emph{state} $i$?". 
@@ -32,7 +32,7 @@ where $[A, B] = AB - BA$, and for fermions, the \emph{anti-}commutation relation
     \{a_i, a_j\} = \{a^\dagger_i, a^\dagger_j\} = 0, \quad \{a_i, a^\dagger_j\} = \delta_{ij}\label{eq:anti_commutation}
 \end{align}
 where $\{A, B\} = AB + BA$.
-\subsection*{Fock Space}
+\subsection{Fock Space}
 In the framework of second quantization, the concept of a \emph{Fock space}\footnote{First introduced by V. A. Fock in \cite{fock1932konfigurationsraum}} emerge naturally as a mathematical structure for describing quantum systems with variable, or uknown, number of particles. A Fock space is a direct sum of Hilbert spaces, 
 \begin{align*}
     \mathcal{F} = \bigotimes_{n=0}^\infty S_{\pm} \mathcal{H}_n
@@ -50,7 +50,7 @@ From this, these operators can describe particle interactions, transitions and d
 \\\\ 
 For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \ref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \ref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation.
 %%%% HARTREEE FOCKKKKKK
-\subsection*{Hartree-Fock}\label{sec:HF_theory}\textcolor{red}{should move alot of this into an appendix}
+\subsection{Hartree-Fock}\label{sec:HF_theory}\textcolor{red}{should move alot of this into an appendix}
 Accurately solving the Schödinger equation for many-body systems is a formidable challenge, even in seemingly simple cases such as a one-dimensional system with few interacting, indistinguishable particles. The inherent complexity arise from the interactions between particles, the Pauli exclusion principle, and the indistinguishability of particles. As we mentioned in the section on Hilbert spaces\ref{sec:Hilbert_space}, the dimension of the Hilbert space grows exponentially with the number of particles, making exact solutions computationally infeasible. In many cases, such a molecular dynamics and solid-state physics, the Hilbert space is reduced dramatically by imposing the Born-Oppenheimer approximation, which separates the electronic and nuclear motion, effectively disregarding the degrees of freedom of the nuclei by treating the nuclei as fixed. Even so, the many-body problem remains an intractable problem for classical computers, and finding approximate solutions to the Schrödinger equation is therefore necessary. The \emph{Hartree-Fock} method is a fundamental approach for solving the many-body problem in quantum chemistry. In this section, we will examine the theory behind the method in detail, beginning with essential concepts from quantum many-body theory, setting the stage for the method to be presented in later sections. \\ \\
 
 %% Many-body concepts
@@ -123,7 +123,7 @@ which is now a pseduo-eigenvalue equation that we need to solve iteratively. To 
     \item 
 \end{itemize}
 
-\subsection*{Bipartite Hartree}\label{sec:bipartite_hartree}
+\subsection{Bipartite Hartree}\label{sec:bipartite_hartree}
 The Hartree-Fock method is a powerful tool for solving many-body quantum mechanical problems, but it makes an assumption that the wavefunction is described by a single Slater determinant, which represents anti-symmetric wavefunctions and thus indistinguishable particles. As explained in the previous section, our system is set up in such a way that our two-particle system behaves like distinguishable particles. Therefore, we may express our wavefunction as a \emph{Hartree product}, as we've explained in earlier sections. We can derive a similar procedure to find optimal basis transformations as in the section on Hartree-Fock. \\
 The groundstate wavefunction will then have the following form:
 \begin{align*}
@@ -154,7 +154,7 @@ These eigenvalue equations are for subsystem A and B respectivly, and we can ide
 with the Hartree matrices from eqs. \ref{eq:bipartite_hartree}. This method to solve the interacting many-body problem is called the Hartree method, and is a simplification of the Hartree-Fock method where Hartree product states are applied, instead of anti-symmtric Slater determinants. This method will natually introduce a mean-field coulomb interaction between our two subsystems into their respective basis sets, and will be the basis for our study of the two-particle system.
 
 %%% MORSE  POTENTIAL
-\subsection*{Morse potential}\label{sec:morse_potential}
+\subsection{Morse potential}\label{sec:morse_potential}
 To build our qubit system, we need to define some form of potential trap that we can confine our particles within. In modern quantum computing many different potentials are used, tested and theorized. One of the most common potentials are the quantum harmonic oscillator potential (QHO), a very well known potential in quantum mechanics. This potential has been studied in great detail and has been used in many different quantum systems, and is very often used as a benchmark for more advanced symmetric potentials. \textcolor{red}{(Cite some sources here)}. The QHO basis sets are widely employed to study quantum dot systems\cite{Yuan_2017}, and are often used in quantum chemistry to describe molecular vibrations. In our study, we will also employ the QHO potential to test our implementations and to compare our results with other studies.\textcolor{red}{will we?}
 \\ \\ One could think that using the QHO potential for our qubit would be a natural choice, but there are some nuances necessary to consider. The QHO double well potential is perfectly symmetric, meaning the energy levels are uniformly spaced, and equal across both wells. This is not ideal for our realization of the iSwap gate, as we need more control over eneregy levels in both wells. \\ \\ To achieve this, we will instead use the Morsee potential, first introduced by Philip M. Morse in 1929 as a solution to the Schrödinger equation representing the motion of the nuclei in a diatomic molecule\cite{morse1929diatomic}. This potential has non-uniform energy levels, and more parameters, and is widely used in quantum mechanics to describe anharmonic oscillators. An extension of the Morse potential, Morse/Long-rangee potential is one of the most popular potentials to model potential energy surfaces used for spectroscopy\cite{zhai2018constructing}. Given that this potential has already seen alot of study within quantum dot systems, and molecular systems in general, it is natural to belive that this potential, should we succeed in our study, prove to be a good candidate for a room-temperature qubit system. \\ \\ 
 

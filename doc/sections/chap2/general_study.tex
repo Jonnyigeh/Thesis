@@ -10,7 +10,7 @@ In this secton we will outline the methods used to study our system in general. 
     \item How do we ensure that our system is stable, and well-defined - and also physically meaningful?
 \end{itemize}
 %% Distinguishability of the particles
-\subsection*{Distinguishability of the particles}
+\subsection{Distinguishability of the particles}
 One of the core features of our system - and the foundation of our qubit design - is that the two particles confined in our potential trap act as \emph{distinguishable} particles. As we are looking to trap electrons, indistinguishable particles, we are dealing with fermions, and the Pauli exclusion principle states clearly that two fermions cannot occupy the same quantum state. This fundamental principle would normally prevent us from constructing product states, as the quantum state of any fermionic system must be anti-symmetric under particle exchange.\textcolor{red}{is this really true? and if not, WHEN is it true?}
 \\ However, we are assuming that the potential trap can be constructed in such a way that there are minimal correlations between the two particles, and that the wavefunction can be approximated as a product state. In this analysis we shall look at how "distinguishable" our system actually is, and find a distance between wells where we can safely assume the particles to be distinguishable. \\ \\
 To make an assessment of the systems distinguishability we will firstly look at the eigen-energies of the system given that we either:
@@ -31,7 +31,7 @@ To make an assessment of the systems distinguishability we will firstly look at 
 If we are successful, we should find that for a certain distance between the wells, the "true" distinguishable energy will overlap with the indistinguishable HF-energy. Should this be the case, we can safely assume that the particles behave as distinguishable particles for our intents and purposes. 
 
 %% Optimization of the potential parameters
-\subsection*{Optimization of the potential parameters}
+\subsection{Optimization of the potential parameters}
 As our goal is to realize single-qubit gates and the two-qubit iSwap gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we've discussed in earlier sections the two configurations we are looking for are:
 \begin{itemize}
     \item Config I: The measurement configuration, where all energy levels are distinct and there are minimal correlations between the two subsystems (particles). This corresponds to keeping all Von Neumann entropies in our system as close to zero as possible. With this, we know that our two-body energy eigenstates will have a product state structure, and maximal overlap with the Hartree product states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$.
@@ -60,7 +60,7 @@ with the constraint that $2 * D / \sqrt{k} < l$ where $l$ are the number of basi
     \item Run the optimization algorithm again, with a lower tolerance for convergenece.
 \end{itemize}
 \textcolor{red}{TODO: Change this into proper pseudo-code, and add more details about the optimization algorithm.}
-\subsubsection*{Objective function}
+\subsubsection{Objective function}
 An objective function is constructed for the optimizer, which is the object to be minimized by our optimization algorithm. We will have two separate objective functions, one for each configuration we are looking for. Across both configurations, we want to minimize the $\zeta$-parameter, which directly controls the stability of time-evolution through the Hamiltonian matrix. The parameters is defined as 
 \begin{equation*}
     \zeta = E_4 - E_1 - E_2 + E_0
@@ -98,6 +98,6 @@ The overall structure of the objective function is as follows:
     \item Calculate the penalties for the current configuration, and return the sum of these penalties.
 \end{itemize}
 \textcolor{red}{TODO: Change this into proper pseudo-code, and add more details.}
-\subsection*{Validation of DVR basis}
+\subsection{Validation of DVR basis}
 
 \end{document}
