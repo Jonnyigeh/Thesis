@@ -15,9 +15,17 @@ This operator describes the total energy of the system, and is given by (in atom
     H = -\nabla^2 + V(\mathbf{r})
 \end{align*}
 where $\nabla^2$ is the Laplacian operator, and $V(\mathbf{r})$ is the potential energy of the system, both external and internal.
+This equation gives the equation of motion for the wavefunction, and describes how the wavefunction evolves in time. \\ \\
 
+While the TDSE govern the time-evolution of the quantum system, many problems - particularly stationary or bound-state problems - are often more easily analysed through the \emph{Time-independent Schrödinger Equation} (TISE), which is obtained by separating the temporal and spatial variables in the TDSE. This gives us
+\begin{equation}
+    H\ket{\psi_n(x)} = E_n\ket{\psi_n(x)}\label{eq:tise},
+\end{equation}
+where $\psi_n(x)$ are the \emph{energy eigenstates} of the system, and $E_n$ are the corresponding \emph{energy eigenvalues}. As is clear from the equation \eqref{eq:tise}, the energy eigenvalues are the diagonal elements of the diagonalized Hamiltonian operator. In practice, these eigenvalues are obtained by diagonalizing the Hamiltonian operator (regardless of time-dependency), and the associated eigenvectors forming a basis of energy eigenfunctions. \\
 
-This equation gives the equation of motion for the wavefunction, and describes how the wavefunction evolves in time.
+The energy eigenstates are the stationary states of the system, and they form an complete orthonormal basis for the Hilbert space of the system. This means that any wavefunction can be expressed as a linear combination of the energy eigenstates, and in our work, it will serve as an important reference point to validate other basis sets. 
+
+%% 2nd quantization
 \subsection{Second Quantization}
 As the earliest formulations of quantum mechanics introduced the ground-breaking concepts of quantized properties like energy, momentum and angular momentum, we can think of this formulation as a "first quantization". Here the observables are represented as operators with real eigenvalues and wavefunctions are assigned to individual particles.
 As quantum mechanics matured, it became clear that first quantization was not sufficient to describe many-body systems - especially systems with indistinguishable particles, such as fermionic structures, or systems where particles are created or annihilated, such as in chemical reactions, or in the study of elementary particles.\\  
@@ -169,7 +177,7 @@ This function has a minima of $-D$ at $r = r_0$, and goes asymptotically towards
 \end{align*}
 which yields a simpler form, by factorization using the square binomial formula,
 \begin{align}
-    &= D(e^{-a(r-r_0)} - 1)^2
+    V = D(e^{-a(r-r_0)} - 1)^2\label{eq:morse_potential}
 \end{align}
 where now, computationally, we need only evaluate the exponential function once, and the rest of the potential is simple algebraic operations. This makes our computations more efficient, as the evaluation of the expoenntial function is computationally expensive\cite{sauce?}, and algebraic operations are much faster. Expanding a Taylor series about the well minima, we can see that the potential is approximativly harmonic. From this, we can identify Hookes law, and also identify the spring constant in this potential. Expanding around $r_0$
 \begin{align*}
