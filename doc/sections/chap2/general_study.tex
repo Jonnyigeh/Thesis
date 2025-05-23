@@ -101,8 +101,8 @@ The overall structure of the objective function is as follows:
 
 
 %%% DVR basis
-\subsection{Validation of DVR basis}
-In this section, we validate the Discrete Variable Representation (DVR) basis used throughout this thesis by comparing the results of the DVR basis against more traditional basis sets, such as the (exact) energy eigenbasis. We do so in a simplified system, where we have a single particle in a Morse potential. This will allow us to compare the results to known analytical solutions. We will also showcase how such a DVR basis, namely the Sinc-DVR\textcolor{red}{put source} is used to express quantum mechanical systems numerically, and how we choose to implement it in our code. 
+\subsection{Validation of Sinc-Discrete Variable Representation basis}
+In this section, we validate the Sinc Discrete Variable Representation (Sinc-DVR) basis used throughout this thesis by comparing the results of the DVR basis against more traditional basis sets, such as the (exact) energy eigenbasis. We do so in a simplified system, where we have a single particle in a Morse potential. This will allow us to compare the results to known analytical solutions. We will also showcase how such a DVR basis, namely the Sinc-DVR\textcolor{red}{put source} is used to express quantum mechanical systems numerically, and how we choose to implement it in our code. 
 
 As a grid-based basis, DVR offers practical computational advantages, particularly when dealing with operators that are diagonally representable and/or localized states. Its effectiveness depends however, on the ability to accurately represent the relevant physical states of the system at hand. To test this, we examine how the DVR basis functions overlap with the exact energy eigenstates of the system, and we use the DVR basis to compute the ground state energy of the system, which we then compare to the result obtained from the exact energy eigenstates by diagonalizaton of the Hamiltonian. 
 \\
@@ -110,7 +110,7 @@ As a grid-based basis, DVR offers practical computational advantages, particular
 We focus on the Sinc-DVR basis\textcolor{red}{put source} for the analysis done in our thesis work, due to its simple structure and wide applicability to problems with smooth, localized potentials\textcolor{red}{should cite something here}. The Sinc-DVR basis functions forms an orthonormal set on a uniformly spaced spatial grid, and exhibit Kronecker delta-like behaviour at the grid points, making them especially suited for representing localized states and sparse Hamiltonians.
 \\ The Sinc-DVR basis funtions are mathematically defined as
 \begin{align*}
-    \phi_n(x) = \frac{1}{\sqrt{N}} \text{sinc}\left(\frac{x - x_n}{\Delta x}\right),
+    \phi_n(x) = \frac{1}{\sqrt{N}} \text{sinc}\left(\frac{x - x_n}{\Delta x}\right)\label{eq:sinc_dvr},
 \end{align*}
 where $N$ is the number of grid points, $x_n$ is the $n$th grid point, and $\Delta x$ is the grid spacing. The Sinc function is defined as
 \begin{align*}
@@ -123,8 +123,24 @@ These basis functions are orthonormal, meaning that they satisfy the following r
 \begin{align*}
     \int_{-\infty}^{\infty} \phi_n(x) \phi_m(x) dx = \delta_{nm},
 \end{align*}
-where $\delta_{nm}$ is the Kronecker delta function. This orthonormality property is crucial for ensuring that the basis functions can be used to represent quantum states accurately, and results in the Hilbert space being spanned by the basis functions. We shall in later sections discuss further on how we chose to implement the Sinc-DVR basis in our code, by number of grid points, grid spacing etc.
+where $\delta_{nm}$ is the Kronecker delta function. This orthonormality property is crucial for ensuring that the basis functions can be used to represent quantum states accurately, and results in the Hilbert space being spanned by the basis functions. We shall in later sections discuss further on how we chose to implement the Sinc-DVR basis in our code, by number of grid points, grid spacing etc. 
 
+In the Discrete Variable Representation, the kinetic energy operator is expressed in matrix form using a grid-basis. Using atomic units, this operator is given by
+\begin{align*}
+    T = -\frac{1}{2} \frac{d^2}{dx^2} ,
+\end{align*}
+and the Sinc-DVR function defined on a uniform grid as presented above in \eqref{eq:sinc_dvr}. The kinetic energy operator matrix elements are then given by
+\begin{align*}
+    T_{nm} = \braket{\phi_n}{-\frac{1}{2} \frac{d^2}{dx^2}}{\phi_m}.
+\end{align*}
+Using the known analytical solution of these integrals with the sinc function properties (see for example \cite{colbert1992novel}), these matrix elements take the form 
+\begin{align*}
+    T_{nm} = \begin{cases}
+        -\frac{\pi^2}{6\Delta x^2} & \text{if } n = m \\
+        \frac{(-1)^(n-m)}{\Delta x^2(n - m)^2} & \text{if } n \neq m.
+    \end{cases}
+\end{align*}
+This provides us with a simple matrix expression for the Sinc-DVR Hamiltonian that is easily implemented numerically, as it removes the need for numerical differentiation.
 \\ \\
 To validate the Sinc-DVR basis, we compare its performance to the exact energy eigenstates of the system, obtained by directly diagonalizing the Hamiltonian of the system. This mirrors the procedure used to solve the time-independent Schrödinger equation \eqref{eq:tise}, where the eigenvalues and eigenfunctions define the stationary states of the system.
 
@@ -135,10 +151,10 @@ As a test case, we consider a single particle trapped in a Morse potential\eqref
 where $D$ is the depth of the potential well, $a$ is the width of the potential, and $x_0$ is the equilibrium position of the potential. This potential is well-suited for benchmarking, as it is smooth and localised, and also well represents the more complex double-well potential we are later interested in. It will allow us to compare the DVR-computed energy states to the exact energy eigenstates of the system, and also to test the accuracy of the DVR basis functions in representing the energy eigenstates. Moving on, we will examine both the energy spectrums and the overlap between DVR basis and exact energy eigenstates. 
 
 To summarize, in practice we construct the Sinc-DVR basis by sampling the analytical basis functions $\phi_n(x)$ \eqref{eq:sinc_dvr} over a uniform grid, using standard \texttt{python} libraries such as \texttt{numpy} and \texttt{scipy} for sinc-function evaluation. The grid parameters are chosen to ensure convergence and that the basis functions are well-localized within the potential well, as we will discuss more in following sections. 
-\subsubsection{Energy spectrum} 
+\subsubsection*{Energy spectrum} 
 To compare the energy spectrum of the two basis sets, we set up a single Morse potential well numerically, using the following parameters:
 \begin{align*}
-    D = 1.0 \\
+    D = 10.0 \\
     a = 1.0 \\
     x_0 = 0.0 \\
     x_{\text{min}} = -2.0 \\
@@ -152,13 +168,76 @@ where $N$ is the number of grid points used to sample the potential. This then r
 where $V(x)$ is the Morse potential. 
 
 \\ \\ In the following code snippet, we highlight some of the key steps in the construction of the quantum mechanical system
-\begin{lstlisting}[language=Python]
+\begin{lstlisting}[language=Python]\label{lst:dvr_validation}
+N = 200
+x = np.linspace(-1, 2, N)
+dx = x[1] - x[0]
+
+def morse_potential(x, D, a, x0):
+    """
+    Morse potential function.
+    """
+    return D * (1 - np.exp(-a * (x - x0)))**2 - D
+
+V_matrix = np.diag(morse_potential(x, D, a, x0))
+T_dvr = np.zeros((N, N))
+for i in range(N):
+    for j in range(N):
+        if i == j:
+            T_dvr[i, j] = np.pi**2 / (6 * dx**2)
+        else:
+            T_dvr[i, j] = ((-1)**(i - j)) / (dx**2 * (i - j)**2)
+T_true = np.zeros((N, N))
+T_diag = 1 / dx**2 
+T_off_diag = -1 / (2 * dx**2)
+for i in range(N):
+    for j in range(N):
+        if i == j:
+            T_true[i, j] = T_diag
+        elif abs(i - j) == 1:
+            T_true[i, j] = T_off_diag
+        else:
+            T_true[i, j] = 0
 
 
-
+H_true = T_true + V_matrix
+H_dvr = T_dvr + V_matrix
+# Diagonalize the Hamiltonian
+E_dvr, psi_dvr = np.linalg.eigh(H_dvr)
+E_true, psi_true = np.linalg.eigh(H_true)
 \end{lstlisting}
+which yields the energy spectrm for the Morse potential, as shown in figure \ref{fig:dvr_validation}. The energy spectrum is shown in atomic units, and we see that the energy levels of the Sinc-DVR basis closely match the exact energy eigenstates of the system, especially for the lowest lying states - of which we are mostly interested in. This is a great indication that our choice of Sinc-DVR basis is trustworthy and we can safely proceed with our analysis of the double-well potential. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{figs/dvr_validation.pdf}
+    \caption{Comparison of the energy spectrum of the Morse potential using the Sinc-DVR basis and the exact energy eigenstates. The parameters used for the Morse potential are $D = 10.0$, $a = 1.0$, and $x_0 = 0.0$. The grid spacing is $\Delta x = 0.025$, and the number of grid points is $N = 200$. The energy spectrum is shown in atomic units.}
+    \label{fig:dvr_validation}
+\end{figure}
 
+\subsubsection*{Energy eigenstates}
+To compare the energy eigenstates of the two basis sets, we compute the overlap between the Sinc-DVR basis functions and the exact energy eigenstates of the system. The overlap is defined as
+\begin{align*}
+    S_{nm} = \braket{\phi_n}{\psi_m} = \int_{-\infty}^{\infty} \phi_n(x) \psi_m(x) dx,
+\end{align*}
+where $\phi_n(x)$ is the Sinc-DVR basis function and $\psi_m(x)$ is the exact energy eigenstate of the system. The overlap can be computed numerically using the trapezoidal rule, as shown in the following code snippet, building on the previous code snippet \ref{lst:dvr_validation}:
+\begin{lstlisting}[language=Python]
+E_dvr, psi_dvr = np.linalg.eigh(H_dvr)
+E_true, psi_true = np.linalg.eigh(H_true)
+S = np.zeros((n_levels, n_levels))
+for i in range(n_levels):
+    for j in range(n_levels):
+        # Calculate the overlap integral
+        overlap = np.sum(psi_dvr[:, i].conj() * psi_true[:, j])
+        S[i, j] = np.abs(overlap)
+\end{lstlisting}
+where \texttt{n\_levels} is the number of energy levels we are interested in. The overlap matrix $S$ is then a measure of how well the Sinc-DVR basis functions represent the exact energy eigenstates of the system. The results are shown in figure \ref{fig:dvr_validation_overlap}, where we see that the overlap between the Sinc-DVR basis functions and the exact energy eigenstates is quite high, especially for the lowest lying states. We see that the overlap matrix is close to the identity matrix, indicating a near perfect overlap between the two basis sets.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{figs/dvr_validation_overlap.pdf}
+    \caption{Overlap between the Sinc-DVR basis functions and the exact energy eigenstates of the Morse potential. The parameters used for the Morse potential are $D = 10.0$, $a = 1.0$, and $x_0 = 0.0$. The grid spacing is $\Delta x = 0.025$, and the number of grid points is $N = 200$.}
+    \label{fig:dvr_validation_overlap}
+\end{figure}
+\\ \\ 
 
-
-
+In summary, we have shown that the Sinc-DVR basis is a valid choice for representing quantum mechanical systems, and that it can be used to accurately compute the energy spectrum and energy eigenstates of the system. We have also shown that the Sinc-DVR basis functions closely match the exact energy eigenstates of the system, especially for the lowest lying states. This gives us confidence in our choice of basis set, and we can safely proceed with our analysis of the double-well potential.
 \end{document}
