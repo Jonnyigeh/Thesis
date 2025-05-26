@@ -1,0 +1,74 @@
+\documentclass{subfiles}
+\begin{document}
+\section{Implementation summary and workflow}\label{sec:summary_workflow}
+Having now introduced the theoretical background and numerical strategies used to solve the time-dependent Schrödinger equation (TDSE) for our Morse double well quantum dot system, we conclude this chapter with a brief summary of how the various numerical components fit together in practice. This overview outlines the structure of our simulation codebase and the logic behind the implementation. The goal is to clarify how the different parts interact to evolve the quantum state over time and realise the quantum time evolution. 
+\subsection*{Structure of the Simulation Framework}
+
+The simulation pipeline in this thesis follows a logical sequence, designed around the Morse double-well potential system for two interacting quantum particles. The key stages of the implementation are as follows:
+
+\begin{enumerate}
+    \item \textbf{Numerical Construction of the Morse Double-Well Potential} \\
+    The first step is to implement a flexible and numerically stable representation of the Morse potential with a double-well structure. This involves defining the functional form of the potential, setting physical parameters (well separation, depth, width), and discretizing the spatial domain to represent the wavefunctions and operators.
+
+    \item \textbf{Setup of the Quantum Basis and Hamiltonian Matrix} \\
+    A key component of the simulation is constructing the full basis set for the two-particle system. The code computes all relevant matrix elements — both one-body terms (single-particle Hamiltonians) and two-body terms (Coulomb interaction) — by numerically integrating the corresponding expressions. This yields a complete Hamiltonian matrix in a suitable truncated basis.
+
+    \item \textbf{Initial State Preparation and Parameter Optimization} \\
+    Before time evolution, an initial quantum state must be selected. In most cases, this is the ground state of the full Hamiltonian, obtained via diagonalization. However, in certain scenarios, specific states can be prepared manually (e.g., localized or excited states). This step also includes optimizing parameters like well spacing or potential shape to target particular dynamics.
+
+    \item \textbf{Time Discretization and Control of Driving Protocol} \\
+    The time domain is discretized using a fixed step size $\Delta t$ over a total simulation time $T$. The time grid also defines a ramping protocol, where parameters of the Hamiltonian (e.g., the barrier height or interaction strength) can be smoothly varied. This allows the simulation of processes like energy level transitions or entangling operations by sweeping the system through avoided crossings.
+
+    \item \textbf{Numerical Time Evolution} \\
+    The system is evolved in time using one of several numerical methods:
+    \begin{itemize}
+        \item Direct application of the time-evolution operator via matrix exponentiation.
+        \item Numerical integrators like Crank-Nicolson or Runge-Kutta applied directly to the TDSE.
+    \end{itemize}
+    The choice of method is specified in the simulation settings. Each method is implemented modularly, allowing for easy swapping and benchmarking.
+
+    \item \textbf{Storing Results and Observables} \\
+    During propagation, the time-dependent wavefunction is stored along with any derived observables, such as:
+    \begin{itemize}
+        \item State populations in the eigenbasis or diabatic basis.
+        \item Transition probabilities.
+        \item Wavefunction norm and energy.
+        \item Entanglement measures (if relevant).
+    \end{itemize}
+
+    \item \textbf{Post-Processing and Visualization} \\
+    After simulation, a set of standardized analysis routines are used to extract relevant features from the time-evolved data. These include:
+    \begin{itemize}
+        \item Plots of population dynamics.
+        \item Comparison to analytical solutions (e.g., Landau-Zener transition probabilities).
+        \item Benchmarking performance of numerical integrators.
+        \item 2D projections or animations of wavefunction evolution.
+    \end{itemize}
+\end{enumerate}
+
+\subsection*{Design Philosophy}
+
+The simulation code is organized into modular components with clear responsibilities:
+\begin{itemize}
+    \item \textbf{Potential \& Basis modules} handle spatial discretization and basis set construction.
+    \item \textbf{Hamiltonian module} computes all matrix elements.
+    \item \textbf{Integrator module} defines the time propagation schemes.
+    \item \textbf{Driver scripts} set up the simulation, specify parameters, and call the appropriate routines to execute the full workflow.
+\end{itemize}
+
+This design ensures flexibility and maintainability: adding a new time-evolution method, swapping potentials, or testing new initial states requires minimal changes.
+
+\subsection*{Summary}
+
+The overall workflow — from system definition to result analysis — closely mirrors the physical logic of quantum simulation:
+\begin{enumerate}
+    \item Build the system (basis + Hamiltonian),
+    \item Prepare the state,
+    \item Define the time domain and control fields,
+    \item Evolve the state using a suitable integrator,
+    \item Extract and analyze physical quantities of interest.
+\end{enumerate}
+
+This structure provides a coherent and extensible framework for studying both fundamental quantum dynamics and more complex qubit-like behavior in the coupled double-well Morse potential system.
+
+\end{document}

@@ -238,21 +238,46 @@ This system is particularly useful for validating our numerical methods, and ser
 
 To test the performance of our numerical implementations, we will evolve an initial state $\ket{\Psi(0)} = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$, which corresponds to the ground state of the uncoupled system, from an initial time $t_0<0$ to a final time $t_f>0$. We will then compare:
 \begin{itemize}
-    \item The norm conservation $|\Psi(t_f)|^2$ of the wavefunction throughout the time-evolution.
     \item The performance of each integrator by
     \begin{itemize}
         \item Global error vs. time step $\Delta t$.
         \item Runtime efficiency
         \item Stability and accuracy under varying conditions. 
     \end{itemize}
-    \item We will also qualitatively investigate how the various methods behave near the avoided crossing.
+    \item We will also qualitatively investigate how the various methods behave near the avoided crossing. \textcolor{red}{TODO: will we do this?}
 \end{itemize}
+\\ \\ We numerically propagate an initial wavefunction prepared in the ground state of the uncoupled system (the \emph{diabatic basis}), and compute the final transition probability $P_{12}$, which is defined as the probability of finding the system in the excited state at time $t_f$, given analytically by \eqref{eq:landau_zener_trans_prob}. \\
 
+The system is initialized in the state $$\ket{\Psi(0)} = \ket{\Psi_1} = \begin{pmatrix} 1 \\ 0 \end{pmatrix},$$ and we compute the final transition probability $$P_{12} = |\langle \Psi(t_f) | \Psi_2 \rangle|^2,$$ where $\ket{\Psi_2}$ is the excited diabatic state of the system. This process is repeated for various numerical methods using a fixed time step $\Delta t$, while varying the length of simulation $2T$. The Landau-Zener transition probability is derived in the infinite time-limit, i.e $t\rightarrow \pm \infty$, this analysis illustrate how each numerical method converges to the analytical solution as the simulation time increases.
+\begin{figure}{h!}
+\centering
+\includegraphics[width=1.0\textwidth]{figs/landau_zener_convergence_benchmark.pdf}
+\caption{Final transition probability computed using various numerical methods for increasing total simulation time $
+2T$. All methods converge toward the analytical Landau-Zener probability (dashed line), with RK4 showing good accuracy until instability sets in at longer times due to lack of normalization. Euler becomes unstable very early. The x-axis is in logarithmic scale.}
+\end{figure}
 
+As we can see in figure \eqref{fig:landau_zener_convergence_benchmark}, all methods used converge to the analytical solution, but not exactly. The two Taylor-expansion methods (Euler and RK4) show good agreement but quickly become unstable, with Euler diverging first, as we've seen already in figure \eqref{fig:landau_zener}. Both of these methods can be improved upon by introducing norm corrections, at a computational cost (albeit minimal). The Crank-Nicolson method, on the other hand, remains stable and accurate for longer simulation times, as it preserves unitarity by construction. 
+\\ \\ 
 
+To assess the computational performance of the numerical methods, a full Landau-Zener simulation was measured using the \texttt{time.perf\_counter()} function in Python, which provides a high-resolution timer suitable for short time measurements.This measurement also includes system overhead, yielding realistic performance metrics to evaluate each method. 
 
+The benchmark was performed for the two-level system with sweeping parameter $v=7.0$, coupling strength $V=1.0$, and a time integration interval of $t \in [-5, 5]$ with $100{,}000$ time steps, i.e a time-step of $\Delta t = 10^{-4}$s. The results are presented in the following table \eqref{tab:landau_zener_runtime}, which summarizes the runtime of each method, along with remarks on their performance characteristics.
 
-
+\begin{table}[h!]
+\centering
+\caption{Runtime comparison of time propagation methods for the Landau-Zener model ($v = 7.0$, $\Delta = 1.0$, $t \in [-5, 5]$, 100,000 steps). Timing measured using \texttt{time.perf\_counter()}.}
+\begin{tabular}{l c l}
+\toprule
+\textbf{Method} & \textbf{Time (ms)} & \textbf{Remarks} \\
+\midrule
+Matrix Exponential & 5942.1 & Most accurate, but very slow \\
+Euler              & 828.6  & Fastest, but unstable \\
+RK4                & 2621.0 & Balanced performance \\
+Crank--Nicholson   & 1953.6 & Stable and efficient \\
+\bottomrule
+\end{tabular}\label{tab:landau_zener_runtime}
+\end{table}
+We see here that the more accurate, direct matrix exponentiation method is the slowest by a good margin, while the Euler method is the
 
 
 \end{document}

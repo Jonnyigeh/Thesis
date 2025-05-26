@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import scipy
 import seaborn as sns
+from time import perf_counter
 from tqdm import tqdm
 from utils.visualization import find_figsize
 
@@ -50,33 +51,37 @@ def landau_zener(v, Delta):
 
 
 
-def landau_zener_benchmark(v, Delta):
+def landau_zener_benchmark(v, Delta,
+                        t_values = np.linspace(-5, 5, 1000)
+                        , dt=None):
     # Time and Hamiltonian setup
-    t_values = np.linspace(-5, 5, 1000)
-    dt = t_values[1] - t_values[0]
     H = lambda t: np.array([[v * t, Delta], [Delta, -v * t]])
-    
+    if dt is None:
+        dt = t_values[1] - t_values[0]
     # Initial state: ground state at t = t0
     E0, C0 = np.linalg.eigh(H(t_values[0]))
-    psi0 = C0[:, 0]  # Ground state
+    # psi0 = C0[:, 0]  # Ground state
+    psi0 = np.array([1, 0], dtype=np.complex128)  # Start in |0>
+    psi1 = np.array([0, 1], dtype=np.complex128)  # Start in |1>
 
     # Storage
     pop_exp, pop_euler, pop_sym, pop_cn, pop_rk4 = [], [], [], [], []
     norm_exp, norm_euler, norm_sym, norm_cn, norm_rk4 = [], [], [], [], []
     psi_exp, psi_euler, psi_sym, psi_cn, psi_rk4 = psi0.copy(), psi0.copy(), psi0.copy(), psi0.copy(), psi0.copy()
     error_rk4, error_cn, error_euler = [], [], []
-    for i, t in enumerate(t_values):
+    for i, t in tqdm(enumerate(t_values)):
         H_current = H(t)
         # Matrix exponential (baseline)
-        U_exp = scipy.linalg.expm(-1j * H(t) * dt)
+        U_exp = scipy.linalg.expm(-1j * H_current * dt)
         psi_exp = U_exp @ psi_exp
         pop_exp.append(np.abs(psi_exp[1])**2)
         norm_exp.append(np.linalg.norm(psi_exp)**2)
 
-        # Euler-Cromer method (first order)
-        psi_euler = (np.eye(2) - 1j * H(t) * dt) @ psi_euler
-        pop_euler.append(np.abs(psi_euler[1])**2)
+        # # Euler-Cromer method (first order)
+        psi_euler = (np.eye(2) - 1j * H_current * dt) @ psi_euler
         norm_euler.append(np.linalg.norm(psi_euler)**2)
+        # psi_euler /= np.linalg.norm(psi_euler)  # Normalize
+        pop_euler.append(np.abs(psi_euler[1])**2)
 
 
         # RK4 method (2nd order)
@@ -85,8 +90,9 @@ def landau_zener_benchmark(v, Delta):
         k3 = -1j * H(t + 0.5 * dt) @ (psi_rk4 + 0.5 * dt * k2)
         k4 = -1j * H(t + dt) @ (psi_rk4 + dt * k3)
         psi_rk4 = psi_rk4 + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
-        pop_rk4.append(np.abs(psi_rk4[1])**2)
         norm_rk4.append(np.linalg.norm(psi_rk4)**2)
+        # psi_rk4 /= np.linalg.norm(psi_rk4)  # Normalize
+        pop_rk4.append(np.abs(psi_rk4[1])**2)
         
         
         # Symmetric 2nd order method
@@ -102,13 +108,15 @@ def landau_zener_benchmark(v, Delta):
         A = I + 1j * H_current * dt / 2
         B = I - 1j * H_current * dt / 2
         psi_cn = np.linalg.solve(A, B @ psi_cn)
-        pop_cn.append(np.abs(psi_cn[1])**2)
         norm_cn.append(np.linalg.norm(psi_cn)**2)
+        pop_cn.append(np.abs(psi_cn[1])**2)
 
         # Accuracy check
         error_rk4.append(np.linalg.norm(psi_rk4 - psi_exp))
         error_cn.append(np.linalg.norm(psi_cn - psi_exp))
         error_euler.append(np.linalg.norm(psi_euler - psi_exp))
+
+        # Calculate transitions 
 
 
 
@@ -121,82 +129,247 @@ def landau_zener_probability(v, Delta):
     return np.exp(-np.pi * Delta**2 / v)
 
 
+def landau_zener_efficiency_benchmark(v, Delta, t_values=np.linspace(-5, 5, 1000), dt=None):
+    H = lambda t: np.array([[v * t, Delta], [Delta, -v * t]], dtype=np.complex128)
+    if dt is None:
+        dt = t_values[1] - t_values[0]
+
+    psi0 = np.array([1, 0], dtype=np.complex128)
+
+    results = {}
+    
+    # ========== Matrix Exponential ==========
+    psi = psi0.copy()
+    start = perf_counter()
+    for t in t_values:
+        U = scipy.linalg.expm(-1j * H(t) * dt)
+        psi = U @ psi
+    end = perf_counter()
+    results["Matrix Exponential"] = end - start
+
+    # ========== Euler Method ==========
+    psi = psi0.copy()
+    start = perf_counter()
+    for t in t_values:
+        psi = (np.eye(2) - 1j * H(t) * dt) @ psi
+    end = perf_counter()
+    results["Euler"] = end - start
+
+    # ========== RK4 ==========
+    psi = psi0.copy()
+    start = perf_counter()
+    for t in t_values:
+        H1 = H(t)
+        k1 = -1j * H1 @ psi
+        k2 = -1j * H(t + 0.5 * dt) @ (psi + 0.5 * dt * k1)
+        k3 = -1j * H(t + 0.5 * dt) @ (psi + 0.5 * dt * k2)
+        k4 = -1j * H(t + dt) @ (psi + dt * k3)
+        psi = psi + (dt / 6.0) * (k1 + 2*k2 + 2*k3 + k4)
+    end = perf_counter()
+    results["RK4"] = end - start
+
+    # ========== Crank-Nicholson ==========
+    psi = psi0.copy()
+    start = perf_counter()
+    for t in t_values:
+        H_now = H(t)
+        I = np.eye(2, dtype=np.complex128)
+        A = I + 1j * H_now * dt / 2
+        B = I - 1j * H_now * dt / 2
+        psi = np.linalg.solve(A, B @ psi)
+    end = perf_counter()
+    results["Crank-Nicholson"] = end - start
+
+    return results
+
+
+
+
+
+
+
+
+
+# Set up the plotting style
 matplotlib.style.use('seaborn-v0_8')
 colors = sns.color_palette()
 b = colors[0]
 g = colors[1]
 r = colors[2]
 
-Delta = 1.0
 v = 7.0
-t, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, error_rk4, error_cn, error_euler = landau_zener_benchmark(v=v, Delta=Delta)
-labels = ["Landau-Zener (Analytical)", "Matrix Exp.", "Crank-Nicholson", "RK4"]
-P_LZ = np.exp(-2 * np.pi * Delta ** 2 / v)
-P_exp = pop_exp[-1]
-P_cn = pop_cn[-1]
-P_rk4 = pop_rk4[-1]
-# P_euler = pop_euler[-1]
-values = [P_LZ, P_exp, P_cn, P_rk4,]
-plt.figure(figsize=(8, 5))
-bars = plt.bar(labels, values, color=colors, edgecolor="k", alpha=0.8)
-plt.ylabel("Transition Probability")
-plt.title("Comparison of Final Transition Probabilities")
-plt.xticks(rotation=15)
-plt.grid(axis="y", linestyle="--", alpha=0.5)
-plt.tight_layout()
-
-# Optionally, annotate values
-for bar in bars:
-    height = bar.get_height()
-    plt.text(bar.get_x() + bar.get_width() / 2, height + 0.01,
-             f"{height:.3f}", ha='center', va='bottom')
-
-plt.show()
-exit()
-
-errors = [error_euler, error_rk4, error_cn]
-labels = ['Euler-Cromer', 'RK4', 'Crank-Nicholson']
-plt.figure(figsize=find_figsize(1.2, 0.4))
-plt.plot(t, error_cn, label='Crank-Nicholson')
-plt.plot(t, error_rk4, label='RK4')
-plt.legend(loc='upper right')
-# plt.plot(t, error_euler, label='Euler-Cromer', lw=2, color=r)
-plt.ylabel(r'$||\Psi_\mathrm{method} - \Psi_\mathrm{expm}||$')
-plt.title('Final-State Error vs. Matrix Exponential')
-plt.tight_layout()
-plt.show()
+Delta = 1.0
+t_values = np.linspace(-5, 5, 100_000)
+res = landau_zener_efficiency_benchmark(v=v, Delta=Delta, t_values=t_values)
+import pickle
+with open('data/lz_runtime_benchmark.pkl', 'wb') as f:
+    pickle.dump(res, f)
+breakpoint()
 exit()
 
 
-fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4))
 
-# --- Excited state population ---
-ax[0].plot(t, pop_exp, label='Matrix Exp.', lw=2, color=b)
-# ax[0].plot(t, pop_euler, '--', label='Euler-Cromer', alpha=0.8)
-ax[0].plot(t, pop_rk4, ':', label='RK4', alpha=0.8)
-ax[0].plot(t, pop_cn, '-.', label='Crank-Nicholson', alpha=0.8)
 
-ax[0].set_xlabel('Time')
-ax[0].set_ylabel('Population in |1⟩')
-ax[0].set_title('Population Transfer')
-ax[0].legend(loc='upper left')
+### Convergence benchmark for Landau-Zener transition probability
+# Delta = 1.0
+# v = 7.0
+# dt = 0.01
+# t_1 = 0.4
+# t_2 = 1.0
+# t_3 = 5.0
+# t_4 = 10.
+# t_5 = 20
+# t_6 = 50
+# t_7 = 100
+# t1 = np.linspace(-t_1, t_1, int(2 * t_1 / dt) + 1)
+# t2 = np.linspace(-t_2, t_2, int(2 * t_2 / dt) + 1)
+# t3 = np.linspace(-t_3, t_3, int(2 * t_3 / dt) + 1)
+# t4 = np.linspace(-t_4, t_4, int(2 * t_4 / dt) + 1)
+# t5 = np.linspace(-t_5, t_5, int(2 * t_5 / dt) + 1)
+# t6 = np.linspace(-t_6, t_6, int(2 * t_6 / dt) + 1)
+# t7 = np.linspace(-t_7, t_7, int(2 * t_7 / dt) + 1)
+# # t1 = np.linspace(-0.5, 0.5, 10_000)
+# # t2 = np.linspace(-1, 1, 10_000)
+# # t3 = np.linspace(-2, 2 , 10_000)
+# # t4 = np.linspace(-4, 4, 10_000)
+# # t5 = np.linspace(-10, 10, 10_000)
+# # t6 = np.linspace(-20, 20, 10_000)
+# # t7 = np.linspace(-50, 50, 10_000)
+# P_LZ = np.exp(-2 * np.pi * Delta ** 2 / v)
+# # Store intermediate results
+# tags = ["t1", "t2", "t3", "t4", "t5", "t6", 't7']
+# i=0
+# probs = {}
+# errors = {}
 
-# --- Norm preservation ---
-ax[1].plot(t, norm_exp, label='Matrix Exp.', lw=2, color=b)
-# ax[1].plot(t, norm_euler, '--', label='Euler-Cromer', alpha=0.8)
-ax[1].plot(t, norm_rk4, ':', label='RK4', alpha=0.8)
-ax[1].plot(t, norm_cn, '-.', label='Crank-Nicholson', alpha=0.8)
+# for t in tqdm([t1, t2, t3, t4, t5, t6, t7], desc="Running benchmarks"):
+#     t, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, error_rk4, error_cn, error_euler = landau_zener_benchmark(v=v, Delta=Delta, t_values=t)
+#     P_exp = pop_exp[-1]
+#     P_cn = pop_cn[-1]
+#     P_rk4 = pop_rk4[-1]
+#     P_euler = pop_euler[-1]
 
-ax[1].set_xlabel('Time')
-ax[1].set_ylabel(r'Norm of $\Psi$')
-ax[1].set_title('Norm Preservation')
-ax[1].legend(loc='lower right')
+#     # Store results
+#     probs[tags[i]] = {
+#         "P_exp": P_exp,
+#         "P_cn": P_cn,
+#         "P_rk4": P_rk4,
+#         "P_euler": P_euler
+#     }
+#     errors[tags[i]] = {
+#         "error_rk4": error_rk4,
+#         "error_cn": error_cn,
+#         "error_euler": error_euler
+#     }
+#     i += 1
 
-# Layout adjustments
-plt.tight_layout()
-fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.15, wspace=0.3)
+# # import pickle
+# # try:
+# #     with open('data/lz_benchmark_results_constdt.pkl', 'wb') as f:
+# #         pickle.dump(probs, f)
+# #     with open('data/lz_benchmark_errors_constdt.pkl', 'wb') as f:
+# #         pickle.dump(errors, f)
+# # except:
+# #     print("Failed to save results to file.")
+# #     breakpoint()
+# # with open('data/lz_benchmark_results.pkl', 'rb') as f:
+# #     probs = pickle.load(f)
+# # with open('data/lz_benchmark_errors.pkl', 'rb') as f:
+# #     errors = pickle.load(f)
 
-plt.show()
+# windows =[0.8, 2.0, 10.0, 20.0, 40.0, 100.0, 200.0] # seconds
+# P_exp = [probs[tag]["P_exp"] for tag in tags]
+# P_cn = [probs[tag]["P_cn"] for tag in tags]
+# P_rk4 = [probs[tag]["P_rk4"] for tag in tags]
+# P_euler = [probs[tag]["P_euler"] for tag in tags]
+
+# fig, ax = plt.subplots(figsize=find_figsize(1.2, 0.4))
+# ax.plot(windows, P_exp, 'o-', label='Matrix Exponential')
+# ax.plot(windows, P_cn, 's-', label='Crank-Nicholson')
+# ax.plot(windows, P_rk4, '^-', label='RK4 (un-normalized)')
+# ax.plot(windows, P_euler, 'x--', label='Euler')
+# ax.axhline(P_LZ, color='k', linestyle='--', label='Analytical $P_{LZ}$')
+# ax.set_ylim([-0.2, 1])
+# ax.set_xscale("log")
+# ax.set_xlabel(r"Total simulation time window $2T$ [s]")
+# ax.set_ylabel(r"Transition probability $P_{|0\rangle \to |1\rangle}$")
+# ax.set_title("Numerical convergence toward Landau-Zener transition probability")
+# ax.legend()
+# ax.grid(True)
+# plt.tight_layout()
+# plt.savefig('../doc/figs/landau_zener_convergence_benchmark.pdf')
+# plt.show()
+# exit()
+
+
+# t, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, error_rk4, error_cn, error_euler = landau_zener_benchmark(v=v, Delta=Delta)
+# labels = ["Landau-Zener (Analytical)", "Matrix Exp.", "Crank-Nicholson", "RK4"]
+# P_LZ = np.exp(-2 * np.pi * Delta ** 2 / v)
+# P_exp = pop_exp[-1]
+# P_cn = pop_cn[-1]
+# P_rk4 = pop_rk4[-1]
+# # P_euler = pop_euler[-1]
+# values = [P_LZ, P_exp, P_cn, P_rk4,]
+# plt.figure(figsize=(8, 5))
+# bars = plt.bar(labels, values, color=colors, edgecolor="k", alpha=0.8)
+# plt.ylabel("Transition Probability")
+# plt.title(r"Comparison of Final Transition Probabilities, $P_{|0\rangle \to |1\rangle}$")
+# plt.xticks(rotation=15)
+# plt.grid(axis="y", linestyle="--", alpha=0.5)
+# plt.tight_layout()
+
+# # Optionally, annotate values
+# for bar in bars:
+#     height = bar.get_height()
+#     plt.text(bar.get_x() + bar.get_width() / 2, height + 0.01,
+#              f"{height:.3f}", ha='center', va='bottom')
+
+# plt.show()
+# exit()
+
+# errors = [error_euler, error_rk4, error_cn]
+# labels = ['Euler-Cromer', 'RK4', 'Crank-Nicholson']
+# plt.figure(figsize=find_figsize(1.2, 0.4))
+# plt.plot(t, error_cn, label='Crank-Nicholson')
+# plt.plot(t, error_rk4, label='RK4')
+# plt.legend(loc='upper right')
+# # plt.plot(t, error_euler, label='Euler-Cromer', lw=2, color=r)
+# plt.ylabel(r'$||\Psi_\mathrm{method} - \Psi_\mathrm{expm}||$')
+# plt.title('Final-State Error vs. Matrix Exponential')
+# plt.tight_layout()
+# plt.show()
+exit()
+
+
+# fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4))
+
+# # --- Excited state population ---
+# ax[0].plot(t, pop_exp, label='Matrix Exp.', lw=2, color=b)
+# # ax[0].plot(t, pop_euler, '--', label='Euler-Cromer', alpha=0.8)
+# ax[0].plot(t, pop_rk4, ':', label='RK4', alpha=0.8)
+# ax[0].plot(t, pop_cn, '-.', label='Crank-Nicholson', alpha=0.8)
+
+# ax[0].set_xlabel('Time')
+# ax[0].set_ylabel('Population in |1⟩')
+# ax[0].set_title('Population Transfer')
+# ax[0].legend(loc='upper left')
+
+# # --- Norm preservation ---
+# ax[1].plot(t, norm_exp, label='Matrix Exp.', lw=2, color=b)
+# # ax[1].plot(t, norm_euler, '--', label='Euler-Cromer', alpha=0.8)
+# ax[1].plot(t, norm_rk4, ':', label='RK4', alpha=0.8)
+# ax[1].plot(t, norm_cn, '-.', label='Crank-Nicholson', alpha=0.8)
+
+# ax[1].set_xlabel('Time')
+# ax[1].set_ylabel(r'Norm of $\Psi$')
+# ax[1].set_title('Norm Preservation')
+# ax[1].legend(loc='lower right')
+
+# # Layout adjustments
+# plt.tight_layout()
+# fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.15, wspace=0.3)
+# plt.savefig('../doc/figs/landau_zener_numerical_methods.pdf')
+# plt.show()
 exit()
 
 
