@@ -11,7 +11,7 @@ import scipy
 # Local imports
 import quantum_systems as qs        # Quantum systems library, will be swapped out with the new library at a later stage
 from bipartite_hartree import BipartiteHartreeSolver as BHS   
-    
+from sinc_bipartite_hartree import BipartiteHartreeSolver as sinc_BHS    
 
 
 def entropy_analysis(d, l, num_func, grid_length, num_grid_points, alpha=1.0, a=0.25, potential = None, verbose=False):

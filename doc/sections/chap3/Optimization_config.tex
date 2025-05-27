@@ -1,0 +1,29 @@
+\documentclass{subfiles}
+\begin{document}
+\section{Optimization of the Morse Double-Well Parameters}\label{sec:optimization_result}
+Applying the optimization procedure outlined in Section \ref{sec:optimization_procedure}, we identify two sets of optimal parameters for the Morse doubl well potential that meet the desired energy and entanglement criteria. Configuration $C_I$ is tailored to yield distinct, well-separated single-particle energy spectrums and vanishing two-body entanglement, while configuration $C_{II}$ is designed to produce a significant two-body entanglement and enforce a degeneracy of the first excited single-particle energy levels in each well to enable coherent mixing of the $\ket{10}$ and $\ket{01}$ logical states.
+\\ 
+
+Table \ref{tab:optimized_params} summarizes the five optimized parameters - depths of the left and right wells $D_L$ and $D_R$, widths $k_L$ and $k_R$, and inter-well separation $d$ -  for each configuation, all in atomic units (a.u.). In $C_I$ a deeper left well ($D_L = 73.4060$ a.u.) alongside a shallower right well ($D_R = 71.1004$ a.u.) ensures disctint eigenenergies and a von Neumann entanglement entropy of $S_{VN} = 0.0000$\textcolor{red}{TODO: Calculate, and insert} between the two first excited logical states $\ket{10}$ and $\ket{01}$, confirming a product state regime. Configuation $C_{II}$, on the other hand, slightly increases the right-well depth ($D_R = 71.9918$ a.u.) and adjust a more balanced width for both wells ($k_L = 29.1615$ a.u., $k_R = 29.1677$ a.u.) so that the first excited single-particle energies coincid within numerical tolerance, and we have degeneracy in our two-particle system.
+
+This engineered degeneracy creates a sharp 'entanglement peak' in the potential parameter space, allowing our ramp protocol to traverse from $C_I$ to $C_{II}$ to induce mixing of the logical states $\ket{10}$ and $\ket{01}$, and thus, generate a significant two-body entanglement. The two configuations are similar within a few atomic units, so quantum control protocols can perturb our system without having to significantly alter the systme architecture, with minimal control overhead. \\
+
+These two parameter configuations form the foundation for all subsequent static analyses and dynamical simulations in the thesis work. 
+\begin{table}[h!]
+  \centering
+  \caption{Optimized Morse potential parameters for configurations \(C_1\) (separable) and \(C_2\) (degenerate).}
+  \label{tab:optimized_params}
+  \begin{tabular}{lcc}
+    \toprule
+    Parameter & \(C_1\) & \(C_2\) \\
+    \midrule
+    \(D_L\) (depth of left well)       [a.u.] & 73.4060 & 73.4469 \\
+    \(D_R\) (depth of right well)      [a.u.] & 71.1004 & 71.9918 \\
+    \(k_L\) (width of left well)       [a.u.] & 31.6126 & 29.1615 \\
+    \(k_R\) (width of right well)      [a.u.] & 26.5751 & 29.1677 \\
+    \(d\)   (inter-well separation)     [a.u.] & 42.4701 & 42.7983 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\end{document}

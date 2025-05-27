@@ -1,4 +1,10 @@
 \documentclass{subfiles}
 \begin{document}
 \chapter{Results}
+In this chapter, we present parameter-optimization and dynamical-simulation results that test our implementation of the Morse double-well. We have two main goals: first, to identify the optimal parameters for the Morse double-well configuration $C_I$ and $C_{II}$ with the desired enrgy and entanglement properties and, second, driving the system adiabatically from configuation $C_I$ to configuration $C_{II}$ and back to implement an iSWAP-like two-qubit operation. After a brief introduction to the optimization and simulation methods, we divide our results into three sections: the static optimization of the potential paramteres (Section \ref{sec:static_optimization}), analysis of the reduced basis, entanglement measures and state populations (Section \ref{sec:reduced_basis}), and the time-dependent simulation of the iSWAP-like operation, investigating state and energy evolution under the ramp protocol (Section \ref{sec:time_dependent_simulation}), and a preliminary assessment of gate fidelity (\textcolor{red}{TODO: will we?}).
+\newpage
+\subfile{../sections/chap3/Optimization_config.tex} \\
+\subfile{../sections/chap3/time_independent_basis.tex} \\
+% \subfile{../sections/chap3/} \\
+% \subfile{../sections/chap3/} \\
 \end{document}

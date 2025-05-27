@@ -120,7 +120,7 @@ and the Hartree-Fock equations can be written as
 \end{align}
 which is now a pseduo-eigenvalue equation that we need to solve iteratively. To solve this equation we employ the \emph{Self-Consistent Field} (SCF) procedure, an iterative method designed to converge to the ground-state energy of the system. This procedure starts with an initial guess for the coefficients $C_{ip}^{(0)}$, which defines the initial guess for the molecular orbitals. With this guess, the Fock operator is constructed, and the Hartree-Fock equations are solved. This yields a new set of coefficients $C_{ip}^{(1)}$, and the process is repeated until the HF-energies $\epsilon^{HF}$ converge within a set threshold, or the change in coefficients $C_{ip}$ becomes negligable. A more thorough presentation of the SCF method applied to the Hartree-Fock equations will be presented in later sections. \textcolor   
 
-\textcolor{red}{Maybe add some more references. What about showing explicitly the integrals? Also the coulomb and exchange terms, maybe these would be good to show. SHould we talk about the Roothan-Hall equations?? No clue what that even is, but sounds cool perhaps. Also would be easier to cite.}
+\textcolor{red}{Maybe add some more references. What about showing explicitly the integrals? Also the coulomb and exchange terms, maybe these would be good to show. SHould we talk about the Roothan-Hall equations?}
 
 \begin{itemize}
     \item Born-Oppenheimer approximation, herein lies the separation of electronic and nuclear motion and mean-field approximation comes in naturally.
@@ -132,6 +132,7 @@ which is now a pseduo-eigenvalue equation that we need to solve iteratively. To 
 \end{itemize}
 
 \subsection{Bipartite Hartree}\label{sec:bipartite_hartree}
+\textcolor{red}{should specify more clearly the lack of a exchange term in the integals, and be more clear on the Hartree states. AFter we move the HF section to an appendix, this section must inform the reader on these integrals and their importance.  }
 The Hartree-Fock method is a powerful tool for solving many-body quantum mechanical problems, but it makes an assumption that the wavefunction is described by a single Slater determinant, which represents anti-symmetric wavefunctions and thus indistinguishable particles. As explained in the previous section, our system is set up in such a way that our two-particle system behaves like distinguishable particles. Therefore, we may express our wavefunction as a \emph{Hartree product}, as we've explained in earlier sections. We can derive a similar procedure to find optimal basis transformations as in the section on Hartree-Fock. \\
 The groundstate wavefunction will then have the following form:
 \begin{align*}
