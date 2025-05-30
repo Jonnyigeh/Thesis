@@ -26,4 +26,25 @@ These two parameter configuations form the foundation for all subsequent static 
   \end{tabular}
 \end{table}
 
+\\ \\ Figure \ref{fig:state_populations_I} show the decomposition of the six lowest two-particle energy eigenstates in the Sinc-DVR product basis for configuration $C_I$, where we observe that the states are indeed pure product states within a numerical tolerance of $10^{-7}$. Each eigenstate has exactly one dominant block, and is zero elsewhere - meaning the there is vanishing two-body entanglement between the particles, as seen from the listed entropy $S$ for each state - just what we aimed to achieve for the separable configuration. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figs/state_populations_I.pdf}
+    \label{fig:state_populations_I}
+\end{figure}
+
+
+\\
+
+By contrast, Figure \ref{fig:state_populations_II} illustrates the same six two-particle energy eigenstates under configuation $C_{II}$, where we observe that the first excited states $\ket{10}$ and $\ket{01}$ are now mixed, with both states having significant contributions from both wells. The mixture is almost equal, and we are close to achieve the Bell states (maximally entangled states) for these two energy eigenstates, as indicated by the entropy $S \approx 1$. This means we have near perfect superpositions of the logical states $\ket{10}$ and $\ket{01}$. The remaining states remain essentially pure product states up to numerical tolerance ($10^{-7}$), highlighting that only the desired qubit subspace is affected by the entanglement, while the rest of the two-particle Hilbert space remains unaffected. This will be crucial for quantum control protocols we aim to run.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{figs/state_populations_II.pdf}
+    \label{fig:state_populations_II}
+\end{figure}
+\\ \\
+
+Together, these two static heatmaps validate our optimization procedure: Configuration $C_I$ produces well-separated, unentangled energy eigenstates, while configuration $C_{II}$ enforces a degeneracy of the first excited states, enabling a coherent mixing of the logical states $\ket{10}$ and $\ket{01}$, thus generating significant two-body entanglement needed for our two-qubit gate operation protocols. The optimized parameters for both configurations are used in all subsequent analyses and simulations throughout the thesis, ensuring a consistent and controlled environment for our investigations into quantum control and entanglement dynamics in the Morse double-well potential.
+
 \end{document}
