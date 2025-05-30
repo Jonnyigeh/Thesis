@@ -164,7 +164,9 @@ with the Hartree matrices from eqs. \ref{eq:bipartite_hartree}. This method to s
 
 %%% MORSE  POTENTIAL
 \subsection{Morse potential}\label{sec:morse_potential}
-To build our qubit system, we need to define some form of potential trap that we can confine our particles within. In modern quantum computing many different potentials are used, tested and theorized. One of the most common potentials are the quantum harmonic oscillator potential (QHO), a very well known potential in quantum mechanics. This potential has been studied in great detail and has been used in many different quantum systems, and is very often used as a benchmark for more advanced symmetric potentials. \textcolor{red}{(Cite some sources here)}. The QHO basis sets are widely employed to study quantum dot systems\cite{Yuan_2017}, and are often used in quantum chemistry to describe molecular vibrations. In our study, we will also employ the QHO potential to test our implementations and to compare our results with other studies.\textcolor{red}{will we?}
+To build our qubit system, we need to define some form of potential trap that we can confine our particles within. In modern quantum computing many different potentials are used, tested and theorized. One of the most common potentials are the quantum harmonic oscillator potential (QHO), a very well known potential in quantum mechanics. This potential has been studied in great detail and has been used in many different quantum systems, and is very often used as a benchmark for more advanced symmetric potentials. \textcolor{red}{(Cite some sources here)}. The QHO basis sets are widely employed to study quantum dot systems\cite{Yuan_2017}, and are often used in quantum chemistry to describe molecular vibrations. 
+
+
 \\ \\ One could think that using the QHO potential for our qubit would be a natural choice, but there are some nuances necessary to consider. The QHO double well potential is perfectly symmetric, meaning the energy levels are uniformly spaced, and equal across both wells. This is not ideal for our realization of the iSwap gate, as we need more control over eneregy levels in both wells. \\ \\ To achieve this, we will instead use the Morsee potential, first introduced by Philip M. Morse in 1929 as a solution to the Schrödinger equation representing the motion of the nuclei in a diatomic molecule\cite{morse1929diatomic}. This potential has non-uniform energy levels, and more parameters, and is widely used in quantum mechanics to describe anharmonic oscillators. An extension of the Morse potential, Morse/Long-rangee potential is one of the most popular potentials to model potential energy surfaces used for spectroscopy\cite{zhai2018constructing}. Given that this potential has already seen alot of study within quantum dot systems, and molecular systems in general, it is natural to belive that this potential, should we succeed in our study, prove to be a good candidate for a room-temperature qubit system. \\ \\ 
 
 The Morse potential is given, first proposed by Morse, as
@@ -198,7 +200,7 @@ which we identify as the harmonic oscillator potential, with the spring constant
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{figs/potential_spf.pdf}
+    \includegraphics[width=1.0\textwidth]{figs/potential_spf.pdf}
     \caption{The Morse potential and the 5 lowest energy levels and energy eigenfunctions. The dissociation energy, $D$, is highlighted by the black dashed line. The parameters for this visualization of a Morse potential are $D=10, a=0.5, x_0=0$.}
     \label{fig:morse_potential}
 \end{figure}

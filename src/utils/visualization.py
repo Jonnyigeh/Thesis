@@ -69,8 +69,8 @@ def show_potential_with_spf():
     spf = np.zeros((5, num_grid_points))
     for i in range(5):
         spf[i] = morse_spf(grid, i, lmbda, 0, a)
-    figsize=(10, 5)
-    # figsize = find_figsize(0.9, 0.3)
+    # figsize=(10, 5)
+    figsize = find_figsize(1.2, 0.4)
     fig, ax = plt.subplots(ncols=2, nrows=1, figsize=figsize, sharex=True)
     ax[0].plot(grid, V, label="Potential")
     ax[0].set_title("Potential")
@@ -95,7 +95,7 @@ def show_potential_with_spf():
     ax[1].set_ylabel("Amplitude")
     ax[1].legend(["n=0", "n=1", "n=2", "n=3", "n=4"])
     fig.tight_layout()
-    plt.savefig('../../doc/figs/potential_spf.pdf')
+    plt.savefig('../doc/figs/potential_spf.pdf')
     plt.show()
 
 if __name__ == "__main__":
