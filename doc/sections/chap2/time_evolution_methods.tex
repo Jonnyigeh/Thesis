@@ -280,5 +280,41 @@ Crank--Nicholson   & 1953.6 & Stable and efficient \\
 We see here that the more accurate, direct matrix exponentiation method is the slowest by a good margin, while the Euler method is the
 
 \subsection{Ramping protocols}
-\textcolor{red}{TODO: Add a section on ramping protocols, and how to implement them in the context of the time-evolution methods. This is important for the double-well Morse potential system, where we will need to ramp the potential parameters to avoid non-adiabatic transitions.} \\\\
+\textcolor{red}{TODO: Add a plot visualizing an example ramp for the lambda parameter?} \\\\
+In the context of time-evolution methods, ramping protocols refer to the controlled variation of system parameters over time, allowing for smooth transitions between different potential configurations. In our double-well Morse potential system, we will employ ramping protocols to gradually change the potential parameters during the simulation, to encur mixing of the states between the two wells. \\\\
+In order to steer our system from the separable configuration $C_I$ into the degenerate, entanglging configuration $C_{II}$ (and back again), we implement a time-dependent ramping protocol for the Morse potential parameters. This protocol is crucial to avoid diabatic transitions and to maintain a level of quantum control over the induced entanglement.
+
+\\\\ We begin by choosing a total evolution time $T_\text{total}$ and a fixed time step $\Delta t$. We also define an interpolation function that smoothly varies the potential parameters from their initial values in configuration $C_I$ to their final values in configuration $C_{II}$. The function of choice is a linear interpolation, which is simple and effective for our purposes. The potential parameters are defined as functions of time:
+\begin{equation}
+    C(t) = (1 - \lambda(t))C_I + \lambda(t)C_{II}\label{eq:interpolation_function}
+\end{equation}
+where $\lambda(t)$ is a time-dependent parameter that varies from $0$ to $1$ over the total evolution time $T_\text{total}$, by some ramping protocol we shall now outline.\\
+
+To set the ramping protocol we partition the evolution into five segments:
+\begin{itemize}
+    \item An \textbf{initial hold} of duration $T_{\text{start}}$, where the system is prepared in the separable configuration $C_I$ and can equilibrate.
+    \item A \textbf{ramp-up} duration $T_{\text{up}}$, where the parameters interpolate from the initial configuration $C_I$ to the degenerate configuration $C_{II}$.
+    \item A \textbf{hold} duration $T_{\text{hold}}$, where the system is held in the degenerate configuration $C_{II}$ to allow the system to explore the entangled regime.
+    \item A \textbf{ramp-down} duration $T_{\text{down}}$, where the parameters interpolate back from the degenerate configuration $C_{II}$ to the separable configuration $C_I$.
+    \item A final \textbf{hold} of duration $T_{\text{end}}$, where the system is held in the separable configuration $C_I$ to allow for equilibration and measurement.
+\end{itemize}
+
+To implement this ramping protocol, we define the time-dependent parameter $\lambda(t)$ as follows, using a cosine ramping function:
+\begin{equation*}
+    \lambda(t) = \begin{cases}
+0, &
+t \le T_{\mathrm{start}}, \\[6pt]
+\dfrac{1 - \cos\!\bigl(\pi \,\tfrac{t - T_{\mathrm{start}}}{T_{\mathrm{up}}}\bigr)}{2}, &
+T_{\mathrm{start}} < t \le T_{\mathrm{start}} + T_{\mathrm{up}}, \\[8pt]
+1, &
+T_{\mathrm{start}} + T_{\mathrm{up}} < t \le T_{\mathrm{tot}} - T_{\mathrm{end}} - T_{\mathrm{down}}, \\[6pt]
+\dfrac{1 + \cos\!\bigl(\pi \,\tfrac{t - \bigl(T_{\mathrm{tot}} - T_{\mathrm{end}} - T_{\mathrm{down}}\bigr)}{T_{\mathrm{down}}}\bigr)}{2}, &
+T_{\mathrm{tot}} - T_{\mathrm{end}} - T_{\mathrm{down}} < t \le T_{\mathrm{tot}} - T_{\mathrm{end}}, \\[6pt]
+0, &
+t > T_{\mathrm{tot}} - T_{\mathrm{end}}.
+\end{cases}
+\label{eq:lambda_ramp}
+\end{equation*}
+At each time step, we evaluate the potential parameters $C(t)$ using the interpolation function \eqref{eq:interpolation_function} and the ramping parameter $\lambda(t)$ and update the Hamiltonian accordingly in the main evolution loop. By varying the various ramping parameters, we can test, and control, how efficintly the system transitions, how well entanglement is induced, and how robust the protocol remain under various numerical methods. The ramping routine thus slots directly into our existing time-evolution framework, and provides a controlleed way to explore the dynamics of the double-well Morse potential system.
+
 \end{document}
