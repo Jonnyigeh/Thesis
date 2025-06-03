@@ -65,16 +65,21 @@ An objective function is constructed for the optimizer, which is the object to b
 \begin{equation*}
     \zeta = E_4 - E_1 - E_2 + E_0
 \end{equation*}
-and we can identify this as the \emph{phase} of the rotated time-evolution operator $U = e^{-iHt}$, expressed in terms of the energy eigenstates, $U = \sum_i^4 e^{-iE_it}\ket{\phi_i}\bra{\phi_i}$. We see that written in matrix form, this propagator is (where $\ket{11}$ is the 4th energy eigenstate)
+and we can identify this as the \emph{accumulated phase} of the rotated time-evolution operator $U = e^{-iHt}$, expressed in terms of the energy eigenstates, $U = \sum_i^4 e^{-iE_it}\ket{\phi_i}\bra{\phi_i}$. We see that written in matrix form in the logical state basis $\{|ij>\}$, this propagator is (where $\ket{11}$ is the 4th energy eigenstate)
 \begin{align*}
     U = \begin{pmatrix}
         e^{-iE_{00}t} & 0 & 0 & 0 \\
         0 & e^{-iE_{01}t} & 0 & 0 \\
         0 & 0 & e^{-iE_{10}t} & 0 \\
         0 & 0 & 0 & e^{-iE_{11}t}
-    \end{pmatrix}
+    \end{pmatrix}.
 \end{align*}
-these eigenvectors are not unique, and we can always rotate them by a phase \textcolor{red}{(cite something here i guess?)}. The phase rotation puts an energy relation on the 4th eigenstate, namely $E_4 = E_1 + E_2 - E_0$. This relation means that the excitation energy from the ground state $\ket{00} \rightarrow \ket{11}$ is equal to the sum of excitation energies from $\ket{00}\rightarrow \ket{10}$ and $\ket{00}\rightarrow\ket{01}$, which ensures stability in our iSwap gate \textcolor{red}{Dette må skrives ut, og studeres mer! "This balances the excitation pathways??} \\\\
+The energy eigenstates themselves are not unique, because we are free to apply arbitrary single-qubit phase rotations to shift their individual phases without affecting populations (as they are cancelled in any innerproduct). By performing local Z-rotations on qubit A and B, we can absorb the phases on the first three states ($\ket{00}$, $\ket{10}$, $\ket{01}$) into $\ket{11}$. In other words, invoking a single global phase, we use single-qubit rotations on each qubit to collect the relative phases onto $\ket{11}$. After the rotations, the condition
+\begin{align*}
+    E_{11} = E_{10} + E_{01} - E_00
+\end{align*}
+means that the excitation energy from the 0th state $\ket{00}\to\ket{11}$ equals the sum of excitations $\ket{00}\to\ket{10}$ and $\ket{00}\to\ket{01}$, which aids in ensuring phase stability in our iSwap-like two-qubit gate operation. 
+\\\\
 Configuration I, as we've mentioned, should have all energy levels distinct. This introduces penalties in our objective function corresponding to the overlap between energy eigenvalues and we want to Von Neumann entropies to be as close to zero as possible. In python we realise this in the following way
 \begin{lstlisting}[language=Python]
 target_entropy = np.zeros(4)

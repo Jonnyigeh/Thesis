@@ -10,8 +10,9 @@ from scipy.special import erf
 from tqdm import tqdm
 
 # Local imports
-import quantum_systems as qs
-from sinc_bipartite_hartree import BipartiteHartreeSolver as sinc_BHS
+from utils.potential import MorsePotentialDW
+from utils.qd_system import ODMorse
+from utils.sinc_bipartite_hartree import BipartiteHartreeSolver as sinc_BHS  
 from utils.visualization import find_figsize
 
 
@@ -43,10 +44,10 @@ def build_quantum_system(
     - h_l, h_r: Effective left and right Hamiltonians (in Hartree basis).
     """
 
-    potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(*params)
+    potential = MorsePotentialDW(*params)
     num_l = num_lr
     num_r = num_lr
-    basis = qs.ODMorse(
+    basis = ODMorse(
         l=l,
         grid_length=grid_length,
         num_grid_points=num_grid_points,

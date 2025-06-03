@@ -9,9 +9,9 @@ import seaborn as sns
 import scipy
 
 # Local imports
-import quantum_systems as qs        # Quantum systems library, will be swapped out with the new library at a later stage
-# from bipartite_hartree import BipartiteHartreeSolver as BHS   
-from sinc_bipartite_hartree import BipartiteHartreeSolver as sinc_BHS  
+from utils.potential import MorsePotentialDW
+from utils.qd_system import ODMorse
+from utils.sinc_bipartite_hartree import BipartiteHartreeSolver as sinc_BHS  
 from utils.visualization import find_figsize
 
 
@@ -37,10 +37,10 @@ def entropy_analysis(params,
     
     # System parameters
     if potential is None:
-        potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
+        potential = MorsePotentialDW(
                    *params,
                 )
-    basis = qs.ODMorse(
+    basis = ODMorse(
         l=l,
         grid_length=grid_length,
         num_grid_points=num_grid_points,

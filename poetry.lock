@@ -818,27 +818,6 @@ files = [
 ]
 
 [[package]]
-name = "quantum-systems"
-version = "0.2.6"
-description = ""
-optional = false
-python-versions = "*"
-files = []
-develop = true
-
-[package.dependencies]
-numba = "*"
-numpy = "*"
-pandas = "*"
-pyscf = "*"
-scipy = "*"
-sympy = "*"
-
-[package.source]
-type = "directory"
-url = "../quantum-systems"
-
-[[package]]
 name = "scipy"
 version = "1.14.1"
 description = "Fundamental algorithms for scientific computing in Python"
@@ -991,4 +970,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "eb813a1d783a28985e0c2a4797d476851d2c8d29b7f9d65ad4f1702bd92186a1"
+content-hash = "2088077712ab92a216b5a33510004cf63b9e83344cb0641d3328a02530e2b62c"

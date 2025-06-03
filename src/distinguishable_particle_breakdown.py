@@ -9,9 +9,10 @@ import seaborn as sns
 import scipy
 
 # Local imports
-import quantum_systems as qs        # Quantum systems library, will be swapped out with the new library at a later stage
-from bipartite_hartree import BipartiteHartreeSolver as BHS
-from sinc_bipartite_hartree import BipartiteHartreeSolver as sinc_BHS
+from utils.potential import MorsePotentialDW
+from utils.qd_system import ODMorse
+from utils.sinc_bipartite_hartree import BipartiteHartreeSolver as sinc_BHS  
+from utils.visualization import find_figsize
 
 
 def TIHF(h, u, num_func, n_particles, max_iters=10_000, epsilon=1e-10, verbose=True):
@@ -142,7 +143,7 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     # disting_eps, disting_C = np.linalg.eigh(disting_H)
     # # Sinc basis Hartree-product WF
     num_grid_points_sinc = 400
-    basis = qs.ODMorse(
+    basis = ODMorse(
         l=l,
         grid_length=grid_length,
         num_grid_points=num_grid_points_sinc,
@@ -190,7 +191,7 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     disting_eps, disting_C = np.linalg.eigh(H)
 
     # Anti-symmetric WF 
-    indisting_basis = qs.ODMorse(
+    indisting_basis = ODMorse(
         l=l,
         grid_length=grid_length,
         num_grid_points=num_grid_points,
@@ -245,7 +246,7 @@ if __name__ == "__main__":
     #     print(f"Separation: {d}")
     #     # Should maybe test this also, and put in thesis for parameters in th emiddle of config I and config II?
     #     # Currently use params found from config II
-    #     potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
+    #     potential = MorsePotentialDW(
     #         *params_close,
     #             # D_a=70,
     #             # D_b=70,

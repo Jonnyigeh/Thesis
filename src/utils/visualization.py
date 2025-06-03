@@ -8,8 +8,6 @@ import matplotlib
 import seaborn as sns
 
 
-import quantum_systems as qs        # Quantum systems library, will be swapped out with the new library at a later stage
-
 def find_figsize(width_scale=1, height_scale=1):
     """Calculate the figsize based on the LaTeX scaling of \textwidth.
 

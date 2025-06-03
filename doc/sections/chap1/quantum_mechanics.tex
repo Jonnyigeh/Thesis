@@ -57,25 +57,20 @@ and the action of the hermitian conjugate annihilation operator is given by
 From this, these operators can describe particle interactions, transitions and dynamics in a many-body system. As the Fock space is constructed by direct sums, two states of different particle numbers are inherently orthogonal 
 \\\\ 
 For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \ref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \ref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation.
-%%%% HARTREEE FOCKKKKKK
-\subsection{Hartree-Fock}\label{sec:HF_theory}\textcolor{red}{should move alot of this into an appendix}
-Accurately solving the Schödinger equation for many-body systems is a formidable challenge, even in seemingly simple cases such as a one-dimensional system with few interacting, indistinguishable particles. The inherent complexity arise from the interactions between particles, the Pauli exclusion principle, and the indistinguishability of particles. As we mentioned in the section on Hilbert spaces\ref{sec:Hilbert_space}, the dimension of the Hilbert space grows exponentially with the number of particles, making exact solutions computationally infeasible. In many cases, such a molecular dynamics and solid-state physics, the Hilbert space is reduced dramatically by imposing the Born-Oppenheimer approximation, which separates the electronic and nuclear motion, effectively disregarding the degrees of freedom of the nuclei by treating the nuclei as fixed. Even so, the many-body problem remains an intractable problem for classical computers, and finding approximate solutions to the Schrödinger equation is therefore necessary. The \emph{Hartree-Fock} method is a fundamental approach for solving the many-body problem in quantum chemistry. In this section, we will examine the theory behind the method in detail, beginning with essential concepts from quantum many-body theory, setting the stage for the method to be presented in later sections. \\ \\
 
-%% Many-body concepts
-In any many-electron system, the indistinguishability of particles introduce a fundamental contraint on the wavefunction, namely that is must be anti-symmetric under the exchange of any two particles. i.e 
-\begin{align*}
-    \Psi(\mathbf{r}_1, \mathbf{r}_2, ..., \mathbf{r}_N) = -\Psi(\mathbf{r}_2, \mathbf{r}_1, ..., \mathbf{r}_N)
-\end{align*}
-This constraint is known as the \emph{Pauli exclusion principle}, which require that no two electrons can occupy the same quantum state. A common way to incorporate this mathematically is to construct wavefunctions using Slater determinants of single-particle orbitals (functions). These orbitals are our basis set of choice $\{\phi_i\}$, and a slater determinant is constructed as follows:
-\begin{align*}
-    \Psi(\mathbf{r}_1, \mathbf{r}_2, ..., \mathbf{r}_N) = \frac{1}{\sqrt{N!}}\begin{vmatrix}
-        \phi_1(\mathbf{r}_1) & \phi_2(\mathbf{r}_1) & \cdots & \phi_N(\mathbf{r}_1)\\
-        \phi_1(\mathbf{r}_2) & \phi_2(\mathbf{r}_2) & \cdots & \phi_N(\mathbf{r}_2)\\
-        \vdots & \vdots & \ddots & \vdots\\
-        \phi_1(\mathbf{r}_N) & \phi_2(\mathbf{r}_N) & \cdots & \phi_N(\mathbf{r}_N)
-    \end{vmatrix}
-\end{align*}
-The mathematical nature of the determinant incorporates the anti-symmetry under particle exchange, as by swapping two columns in a determinant, the sign changes. The Slater determinant are a linear combination of \emph{Hartree products} built from the single-particle orbitals, which are products of spatial orbitals with (or without) the spin orbitals where the spin part is often omitted for simplicity. These single-particle orbitals are the solution of the one-electron Schrödinger equation, 
+
+\subsection{Hartree approximation}\label{sec:bipartite_hartree}
+\textcolor{red}{should specify more clearly the lack of a exchange term in the integals, and be more clear on the Hartree states. AFter we move the HF section to an appendix, this section must inform the reader on these integrals and their importance.  }
+
+Accurately solving the Schrödinger equation for many-body systems is a formidable challenge—even a one-dimensional system with just a few interacting particles can become intractable very quickly. The core difficulty stems from the exponential growth of the Hilbert space as we add more degrees of freedom, coupled with particle interactions and, for identical particles, the need to enforce antisymmetry (the Pauli exclusion principle). In real-world applications—like molecular dynamics or solid-state physics - we often invoke the Born-Oppenheimer\textcolor{red}{cite} approximation to freeze out the nuclear motion, which drastically reduces the size of the electronic Hilbert space. Even after that simplification, however, finding an exact solution on a classical computer remains out of reach.
+\\ \\ 
+Mean-field methods offer a practical way to approximate the many-body problem by replacing the full interacting Hamiltonian with an effective single-particle picture in which each particle feels an average field created by all the others. In quantum chemistry, the most familiar mean-field approach is Hartree-Fock (HF), which assumes the wavefunction is a single Slater determinant of orthonormal orbitals. A detailed derivation of the Hartree-Fock procedure can be found in appendix \ref{app:HF_theory}. Those orbitals are determined self-consistently, meaning iteratively until convergence, so that each one “sees” the averaged Coulomb repulsion (direct term) and exchange interactions from all the other electrons.
+\\
+Central to any mean-field approach is the variational principle, which asserts that the expectation value of the energy
+\begin{equation}
+    E[\Psi] = \frac{\braket{\Psi|H|\Psi}}{\braket{\Psi|\Psi}}\label{eq:variational_principle},
+\end{equation}
+is always greater than or equal to the true ground state energy $E_0$. By choosing a trial wavefunction $\Psi$ with adjustable parameters (here, the singl-particl orbitals), we can minimize this expectation value until it converges to a local minimum. In Hartee-Fock theory this trial wavefunction is a slater-determinant; in Hartree, it becomes a simple product of single-particle orbitals, often called a \emph{Hartree product}. These single-particle orbitals are the solution of the one-electron Schrödinger equation, 
 \begin{align*}
     \hat{h}\phi_i = \epsilon_i\phi_i
 \end{align*}
@@ -87,53 +82,25 @@ which has the solution eigenvector
 \begin{align}
     \Psi = \phi_1(\mathbf{r}_1)\phi_2(\mathbf{r}_2)...\phi_N(\mathbf{r}_N)\label{eq:hartree_product}
 \end{align}
-with corresponding eigenvalue $E = \epsilon_1 + \epsilon_2 + ... + \epsilon_N$, i.e. the sum of single-particle energies. Eq. \ref{eq:hartree_procut} is the Hartree product, and it is the simplest possible wavefunction for a many-body system of non-interacting particles. As is evident, this Hartree product is not anti-symmtric, nor indistinguishable, as the particles are designated a specific orbital to occupy and thus they are distinguishable, which is why the Slater determinant builds linear combinations of such products. In our study, we will make use of both - as our system can be constructed to both exhibit distinguishable and indistinguishable behaviour.\\ \\
-Another important concept is the \emph{variational principle}, which states that, for any quantum system, the expectation value of the energy is always greater than, or equal to, the true ground state energy. 
-\begin{align}
-    E[\Psi] = \frac{\braket{\Psi|H|\Psi}}{\braket{\Psi|\Psi}} \geq E_0 \label{eq:variational_principle}
-\end{align}
-where $\Psi$ is the trial wavefunction, $H$ is the Hamiltonian operator, and $E_0$ is the true ground state energy of our system. The trial wavefunction in question could be a slater determinant, built from an initial guess for a "good" basis. As previously explained, we may transform this basis using unitary matrices to find a "better" basis, which in this case, would make our energy estimate \emph{lower}. This is the essence of the Hartree-Fock method, where we iteratively improve our basis set to minimize the energy of the system by use of the variational method. For more material and details on the variational method, we refer the reader to chapter 1.3 in \cite{szabo1996modern}.
-\\\\
-To arrive at the Hartree-Fock equations, we start at the variational principle
-\begin{align*}
-    E_0 \leq E^{HF} = \bra{\psi^{HF}}H\ket{\psi^{HF}}
-\end{align*}
-where $\ket{\psi^{HF}}$ is the Hartree-Fock wavefunction, which is a single Slater determinant, and it is normalized so we can omit the denominator in the expectation value. This basis is related to a chosen initial basis by a unitary transformation.
-\begin{align*}
-    \psi^{HF}_p = \sum_qC_{qp}\psi_q
-\end{align*}
-where the unitary matrix is expressed by its matrix elements. The Hamiltonian in question is the sum of the kinetic energy operator and the electron-electron repulsion operator, and the energy is given, expressed in the initial basis with the coefficients $C_p$, as
-\begin{align*}
-    E^{HF} = \sum_i\sum_{pq}C^*_{ip}C_{i}qh_{pq} + \frac{1}{2}\sum_{ij}\sum_{pqrs}C^*_{ip}C^*_{jq}C_{ir}C_{j}su_{pqrs}
-\end{align*}
-here expressed in terms of the one- and two-electron integrals, in the initial basis. The Hartree-Fock equations are derived by minimizing the energy with respect to the coefficients $C_{ip}$. We take the derivative w.r.t $C_{i}p^*$ which gives us the Hartree-Fock equations
-\begin{align*}
-    \sum_qh_{pq}C_{iq} + \sum_j\sum_{qrs}C^*_{jr}C_{js}u_{pqrs}C_{iq} = \epsilon^{HF}_{ip}C_{ip}.
-\end{align*}
-By assumption, the summation over $r$ and $s$ is over all the occupied orbitals (below the Fermi level), as these are the only ones that contribute in the (mean-field) interaction matrix. As a result, the indices reduce to a summation over the occupied orbitals only. This simplification modifies the two-body integrals into $u_{piqi}$, where $i$ runs over orbitals below the Fermi level, while $p,q$ remains the orbitals being varied. This simplification reflects the mean-field approximation central in Hartree-Fock theory, as only interactions with occupied orbitals are considereed. With this, we can now define the Fock operator as
-\begin{align*}
-    f_{pq} = h_{pq} + \sum_{i<F}C^*_{i}C_{i}u_{piqi}
-\end{align*}
-and the Hartree-Fock equations can be written as
-\begin{align}
-    f_{pq}C_{iq} = \epsilon^{HF}_{ip}C_{ip}\label{eq:hf_equations}
-\end{align}
-which is now a pseduo-eigenvalue equation that we need to solve iteratively. To solve this equation we employ the \emph{Self-Consistent Field} (SCF) procedure, an iterative method designed to converge to the ground-state energy of the system. This procedure starts with an initial guess for the coefficients $C_{ip}^{(0)}$, which defines the initial guess for the molecular orbitals. With this guess, the Fock operator is constructed, and the Hartree-Fock equations are solved. This yields a new set of coefficients $C_{ip}^{(1)}$, and the process is repeated until the HF-energies $\epsilon^{HF}$ converge within a set threshold, or the change in coefficients $C_{ip}$ becomes negligable. A more thorough presentation of the SCF method applied to the Hartree-Fock equations will be presented in later sections. \textcolor   
+with corresponding eigenvalue $E = \epsilon_1 + \epsilon_2 + ... + \epsilon_N$, i.e. the sum of single-particle energies. Eq. \ref{eq:hartree_procut} is the Hartree product, and it is the simplest possible wavefunction for a many-body system. As is evident, this Hartree product is not anti-symmtric, nor indistinguishable, as the particles are designated a specific orbital to occupy and thus they are distinguishable. \\ \\
 
-\textcolor{red}{Maybe add some more references. What about showing explicitly the integrals? Also the coulomb and exchange terms, maybe these would be good to show. SHould we talk about the Roothan-Hall equations?}
+\\
+In our double-well system, the two particles remain localized in separate wells and therefore behave like distinguishable subsystems rather than identical fermions. We still employ a mean-field strategy—now in the form of a Hartree approach—where the full two-particle wavefunction is approximated as a simple product of two single-particle orbitals (one in each well). Each orbital is chosen so that it minimizes the energy in the presence of the averaged Coulomb field generated by the other particle. This “bipartite Hartree” procedure allows us to incorporate the essential interaction effects while keeping the computational effort manageable.
 
-\begin{itemize}
-    \item Born-Oppenheimer approximation, herein lies the separation of electronic and nuclear motion and mean-field approximation comes in naturally.
-    \item Slater Determinants
-    \item Hartree products
-    \item Link in orbitals?
-    \item Variational principle should be mentioned
-    \item 
-\end{itemize}
+\\
+% The Hartree-Fock method is a powerful tool for solving many-body quantum mechanical problems, but it makes an assumption that the wavefunction is described by a single Slater determinant, which represents anti-symmetric wavefunctions and thus indistinguishable particles. As explained in the previous section, our system is set up in such a way that our two-particle system behaves like distinguishable particles. Therefore, we may express our wavefunction as a \emph{Hartree product}, as we've explained in earlier sections. We can derive a similar procedure to find optimal basis transformations as in the section on Hartree-Fock. \\
+To implement this method, we select a finite basis set $\{\chi_\alpha\}$ for each subsystem $M$ (left or right well), and expand the single-particle Hartree orbitals in this basis. 
+\begin{align*}
+    \ket{\phi^M_i} = \sum_{\alpha=1}^{N^M} C^M_{\alpha i}\ket{\chi_\alpha}
+\end{align*}
+where $N^M$ is the number of single-particle basis functions in subsystem $M$. The Hartree product state for our two-particle system can then be expressed as a product of the single-particle Hartree orbitals for each subsystem, i.e. $\ket{\phi^A_i}$ and $\ket{\phi^B_j}$, where $i,j$ are the orbital indices for subsystems A and B respectively. We can then also define the two necessary integrals, the one-body integrals and the two-body interaction integrals, as
+\begin{align*}
+    h_{\alpha\beta}^M &= \bra{\chi_\alpha^M}h^M\ket{\chi_\beta^M} = \int \chi_\alpha^{M*} h^M\chi_\beta^M d\mathbf{r},\\
+    u_{\alpha\beta,\gamma\delta} &= \bra{\chi_\alpha^M\chi_\beta^N}u^{MN}\ket{\chi_\gamma^M\chi_\delta^N}, = \int \chi_\alpha^{M*}\chi_\beta^{N*} u^{MN} \chi_\gamma^M\chi_\delta^N d\mathbf{r}_M d\mathbf{r}_N
+\end{align*}
+where $h^M$ is the single-body Hamiltonian for subsystem $M$, and $u^{MN}$ is the two-body interaction between subsystems $M$ and $N$. The two-body interaction is the Coulomb interaction between the two subsystems. Due to the nature of our system, where the particls occupy distinct wells, we can omit the otherwise present exchange term in the two-body interaction integral and only the direct coulomb interaction remains. \\
 
-\subsection{Bipartite Hartree}\label{sec:bipartite_hartree}
-\textcolor{red}{should specify more clearly the lack of a exchange term in the integals, and be more clear on the Hartree states. AFter we move the HF section to an appendix, this section must inform the reader on these integrals and their importance.  }
-The Hartree-Fock method is a powerful tool for solving many-body quantum mechanical problems, but it makes an assumption that the wavefunction is described by a single Slater determinant, which represents anti-symmetric wavefunctions and thus indistinguishable particles. As explained in the previous section, our system is set up in such a way that our two-particle system behaves like distinguishable particles. Therefore, we may express our wavefunction as a \emph{Hartree product}, as we've explained in earlier sections. We can derive a similar procedure to find optimal basis transformations as in the section on Hartree-Fock. \\
+
 The groundstate wavefunction will then have the following form:
 \begin{align*}
     \ket{\Psi} = \ket{\phi^A_0\phi^B_0}

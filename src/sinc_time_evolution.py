@@ -2,14 +2,18 @@ import warnings
 warnings.filterwarnings('ignore', category=UserWarning) # Ignores a warnings due to scipy.special version dislike of current python3.10 installation
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+import seaborn as sns
 import scipy
 from scipy.optimize import minimize
 from scipy.special import erf
 from tqdm import tqdm
 
 # Local imports
-import quantum_systems as qs
-from sinc_bipartite_hartree import BipartiteHartreeSolver as sinc_BHS
+from utils.potential import MorsePotentialDW
+from utils.qd_system import ODMorse
+from utils.sinc_bipartite_hartree import BipartiteHartreeSolver as sinc_BHS  
+from utils.visualization import find_figsize
 
 
 class time_evolution:
@@ -17,7 +21,7 @@ class time_evolution:
                  params1,
                  params2,
                  l=25,
-                 num_lr=2,
+                 num_lr=8,
                  num_grid_points=400,
                  grid_length=200,
                  num_particles=2,
@@ -25,8 +29,11 @@ class time_evolution:
                  alpha=1.0,
                  dt=0.1,
                  t_max=1.0,
-                 ramp_time=0.2,
-                 stay_still_time=0.1,
+                 chill_before=0.3,
+                 ramp_up=1.5,      
+                 plateau=0.5,        # time to sit at C_II
+                 ramp_down=1.5,      # time to go from C_II → C_I
+                 chill_after=1.0,    # time to sit at C_I at end
                  ramp='cosine',
                  integrator='U',
                  hartree=False):
@@ -41,35 +48,74 @@ class time_evolution:
         self.a = a
         self.alpha = alpha
         self.dt = dt
-        self.t_max = t_max
-        self.ramp_time = ramp_time
-        self.t_start = stay_still_time
-        self.t_end = stay_still_time
-        self.ramp = ramp
+        # Set times for ramping and staying still
+        self.chill_before = chill_before
+        self.ramp_up      = ramp_up
+        self.plateau      = plateau
+        self.ramp_down    = ramp_down
+        self.chill_after  = chill_after
+        # compute total time
+        self.t_max = (chill_before + ramp_up +
+                      plateau   + ramp_down +
+                      chill_after)
+        # build time array
         self.t = np.arange(0, self.t_max, self.dt)
         self.num_steps = len(self.t)
+
+        # precompute segment boundaries
+        self.t1 = chill_before
+        self.t2 = self.t1 + ramp_up
+        self.t3 = self.t2 + plateau
+        self.t4 = self.t3 + ramp_down
+        # self.t_max = t_max
+        # self.ramp_time = ramp_time
+        # self.t_start = stay_still_time
+        # self.t_end = stay_still_time
+        # self.ramp = ramp
+        # self.t = np.arange(0, self.t_max, self.dt)
+        # self.num_steps = len(self.t)
         self.integrator = integrator
         self.hartree = hartree
         self.grid = np.linspace(-grid_length/2, grid_length/2, num_grid_points)
 
         self.set_system(params1)
         self.H0 = self.H.copy()
-        self.C0 = self.C.copy()
-        self.E0 = self.E.copy()
+        # self.C0 = self.C.copy()
+        # self.E0 = self.E.copy()
+        self.C0 = np.eye(self.h_l.shape[0] * self.h_r.shape[0])
+        self.E0 = np.add.outer(self.eps_l, self.eps_r).ravel()
         self.psi = (self.C0[:,1] + self.C0[:,2]) / np.sqrt(2)
         psi = np.zeros(self.C0.shape[0], dtype=np.complex128)
         # psi[1] = 1.0 / np.sqrt(2)
         # psi[4] = 1.0 / np.sqrt(2)
         psi[1] = 1.0
         self.psi = self.C0 @ psi
+        # Find logical state indices
+        self.idx_01 = 0 * self.num_l + 1
+        self.idx_10 = 1 * self.num_r + 0
+        row_10 = self.C0.conj().T[self.idx_10]
+        row_01 = self.C0.conj().T[self.idx_01]
+        self.eig_idx_10 =  np.argmax(np.abs(row_10)**2)
+        self.eig_idx_01 = np.argmax(np.abs(row_01)**2)
+        # self.S0 = np.zeros(len(self.E0))
+        # for i in range(len(self.E0)):
+        #     self._make_density_matrix(self.C0[:,i]) # Each column is the energy eigenstates
+        #     rho = np.trace(self._rho.reshape(self.h_l.shape[0], self.h_l.shape[0], self.h_l.shape[0], self.h_l.shape[0]), axis1=0, axis2=2)
+        #     # and then entropy
+        #     self.S0[i] = self._find_VN_entropies(rho)
+
+
+        V_01_10 = self.H[self.idx_01, self.idx_10]
+        print(f"Coupling <01|H|10> =", V_01_10)
+
     
     def set_system(self, params):
         # params = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, 42.47007681]
         # params = self.params2
-        self.potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
+        self.potential = MorsePotentialDW(
             *params,
         )
-        self.basis = qs.ODMorse(
+        self.basis = ODMorse(
             l=self.l,
             grid_length=self.grid_length,
             num_grid_points=self.num_grid_points,
@@ -92,16 +138,16 @@ class time_evolution:
         self.h_l = self.c_l.conj().T @ self.h_l @ self.c_l
         self.h_r = self.c_r.conj().T @ self.h_r @ self.c_r
         self.u_lr = np.einsum('ai, bj, ab, ak, bl -> ijkl', self.c_l.conj(), self.c_r.conj(), self.u_lr, self.c_l, self.c_r)
-        H = np.kron(self.h_l, np.eye(*self.h_l.shape)) + np.kron(np.eye(*self.h_r.shape), self.h_r) 
-        U = self.u_lr.reshape(*H.shape)
-        self.H = H + U
+        self.H_dist = np.kron(self.h_l, np.eye(*self.h_l.shape)) + np.kron(np.eye(*self.h_r.shape), self.h_r) 
+        U = self.u_lr.reshape(*self.H_dist.shape)
+        self.H = self.H_dist + U
         self.E, self.C = np.linalg.eigh(self.H)
 
 
     
     def update_system(self, params):
         # Update one-body hamiltonian with new potential
-        self.potential = qs.quantum_dots.one_dim.one_dim_potentials.MorsePotentialDW(
+        self.potential = MorsePotentialDW(
             # *self.params2,
             *params,
         )
@@ -109,25 +155,24 @@ class time_evolution:
         new_V_r = np.clip(self.potential.right_pot(self.basis.right_grid), 0, 100)
         newh_l = self.basis.no_1bpot_h_l + np.diag(new_V_l) / self.basis.dx
         newh_r = self.basis.no_1bpot_h_r + np.diag(new_V_r) / self.basis.dx
-        # self.u_lr = self.basis._ulr
+        self.u_lr = self.basis._ulr
         # And solve new Hartree equations 
-        # self.bhs = sinc_BHS(self.h_l, self.h_r, self.u_lr, self.num_l, self.num_r)
-        # self.bhs.solve()
-        # self.eps_l = self.bhs.eps_l
-        # self.eps_r = self.bhs.eps_r
-        # self.c_l = self.bhs.c_l
-        # self.c_r = self.bhs.c_r
+        self.bhs = sinc_BHS(newh_l, newh_r, self.u_lr, self.num_l, self.num_r)
+        self.bhs.solve()
+        self.eps_l = self.bhs.eps_l
+        self.eps_r = self.bhs.eps_r
+        self.c_l = self.bhs.c_l
+        self.c_r = self.bhs.c_r
         self.h_l = self.c_l.conj().T @ newh_l @ self.c_l
         self.h_r = self.c_r.conj().T @ newh_r @ self.c_r
-        # self.u_lr = np.einsum('ai, bj, ab, ak, bl -> ijkl', self.c_l.conj(), self.c_r.conj(), self.u_lr, self.c_l, self.c_r)
+        self.u_lr = np.einsum('ai, bj, ab, ak, bl -> ijkl', self.c_l.conj(), self.c_r.conj(), self.u_lr, self.c_l, self.c_r)
         H = np.kron(self.h_l, np.eye(*self.h_l.shape)) + np.kron(np.eye(*self.h_r.shape), self.h_r) 
         U = self.u_lr.reshape(*H.shape)
         newH = H + U
-        # self.H = self.C0.conj().T @ newH @ self.C0
         self.commutator = self.H @ newH - newH @ self.H
         self.H = newH
         # self.apply_pulse()
-        self.E, _ = np.linalg.eigh(self.H)
+        self.E, self.C = np.linalg.eigh(self.H)
         
     
     def U_step(self):
@@ -154,22 +199,40 @@ class time_evolution:
         # mask3 = (t > self.ramp_time - self.t_end) & (t <= self.t_end + self.ramp_time)
         # mask_end = t > self.t_end + self.ramp_time
 
-        mask_start = t <= self.t_start
-        mask1 = (t > self.t_start) & (t <= self.ramp_time + self.t_start)
-        mask2 = (t > self.ramp_time + self.t_start) & (t <= self.t_max - self.t_end - self.t_end)
-        mask3 = (t > self.t_max - self.t_end - self.ramp_time) & (t <= self.t_max - self.t_end)
-        mask_end = t > self.t_max - self.t_end
+        # mask_start = t <= self.t_start
+        # mask1 = (t > self.t_start) & (t <= self.ramp_time + self.t_start)
+        # mask2 = (t > self.ramp_time + self.t_start) & (t <= self.t_max - self.t_end - self.t_end)
+        # mask3 = (t > self.t_max - self.t_end - self.ramp_time) & (t <= self.t_max - self.t_end)
+        # mask_end = t > self.t_max - self.t_end
 
+        # lmbda = np.zeros_like(t)
+        # if self.ramp=='cosine':
+        #     lmbda[mask_start] = 0.0 # Stay still in config I
+        #     lmbda[mask1] = 0.5 * (1 - np.cos(np.pi * (t[mask1] - self.t_start) / self.ramp_time)) # Up-ramp from config I -> config II
+        #     lmbda[mask2] = 1 # Stay a while in config II
+        #     lmbda[mask3] = 0.5 * (1 + np.cos(np.pi * (t[mask3] - (self.t_max - self.t_end - self.ramp_time)) / self.ramp_time)) # Down-ramp from config II -> config I
+        #     lmbda[mask_end] = 0.0 # Stay still in config I
+        # else:
+        #     raise NotImplementedError(f"Ramp {self.ramp} not implemented.")
         lmbda = np.zeros_like(t)
-        if self.ramp=='cosine':
-            lmbda[mask_start] = 0.0 # Stay still in config I
-            lmbda[mask1] = 0.5 * (1 - np.cos(np.pi * (t[mask1] - self.t_start) / self.ramp_time)) # Up-ramp from config I -> config II
-            lmbda[mask2] = 1 # Stay a while in config II
-            lmbda[mask3] = 0.5 * (1 + np.cos(np.pi * (t[mask3] - (self.t_max - self.t_end - self.ramp_time)) / self.ramp_time)) # Down-ramp from config II -> config I
-            lmbda[mask_end] = 0.0 # Stay still in config I
-        else:
-            raise NotImplementedError(f"Ramp {self.ramp} not implemented.")
-        
+
+        # masks
+        m0 = (t <=  self.t1)
+        m1 = (t >  self.t1) & (t <= self.t2)
+        m2 = (t >  self.t2) & (t <= self.t3)
+        m3 = (t >  self.t3) & (t <= self.t4)
+        m4 = (t >  self.t4)
+
+        # assign segments
+        lmbda[m0] = 0.0
+        # up‐ramp: cosine from 0→1
+        lmbda[m1] = 0.5*(1 - np.cos(np.pi*(t[m1]-self.t1)/self.ramp_up))
+        # plateau
+        lmbda[m2] = 1.0
+        # down‐ramp: cosine from 1→0
+        lmbda[m3] = 0.5*(1 + np.cos(np.pi*(t[m3]-self.t3)/self.ramp_down))
+        # final chill
+        lmbda[m4] = 0.0
         return lmbda
     def apply_pulse(self, delta=0.5):
                 # H' in the C0 (logical/tensor product) basis
@@ -228,18 +291,18 @@ class time_evolution:
         eigs = np.linalg.eigvalsh(rho)
         return -np.sum(eigs * np.log2(eigs + 1e-15))    
     def _make_density_matrix(self, C):
-        self._rho = np.zeros((self.num_l ** 2, self.num_l ** 2), dtype=np.complex128)
-        for n in range(2):
-            self._rho += np.outer(C[n], np.conj(C[n]).T)
-        # self._rho = np.outer(C, np.conj(C))
+        # self._rho = np.zeros((self.num_l ** 2, self.num_l ** 2), dtype=np.complex128)
+        # for n in range(2):
+        #     self._rho += np.outer(C[n], np.conj(C[n]).T)
+        self._rho = np.outer(C, np.conj(C))
     def run_parameter_change(self):
-        lmbda = self._lambda_t(self.t, self.ramp_time, self.t_max - self.ramp_time)
+        lmbda = self._lambda_t(self.t)
         num_steps = len(lmbda)
         C_matrix = np.zeros((num_steps, *self.C.shape), dtype=np.complex128)
-        C_matrix[0] = self.C0.copy()
+        # C_matrix[0] = self.C0.copy()
         energies = np.zeros((num_steps, *self.E0.shape))
-        energies[0] = self.E0.copy()
-        for i in tqdm(range(1, num_steps)):
+        # energies[0] = self.E0.copy()
+        for i in tqdm(range(num_steps)):
             params = self.update_params(lmbda[i])
             self.update_system(params)
             self.S = np.zeros(self.num_l ** 2)
@@ -264,21 +327,43 @@ class time_evolution:
     
     def _plot_overlap(self):
         """Plot the overlap between the initial and current state."""
+        matplotlib.style.use('seaborn-v0_8')
+        colors = sns.color_palette()
+        b = colors[0]
+        g = colors[1]
+        r = colors[2]
         fig, ax = plt.subplots(4, 1)
         ax[0].plot(self.t, np.abs(self.overlap[:,:, 0])**2)
         ax[1].plot(self.t, np.abs(self.overlap[:,:, 1])**2)
-        ax[2].plot(self.t, np.abs(self.overlap[:,:, 2])**2 )
-        ax[3].plot(self.t, self.energies[:,:6])
-        # fig, ax = plt.subplots(3, 1)
-        # ax[0].plot(self.t, np.abs(self.overlap)**2)
-        # ax[1].plot(self.t, np.abs(self.psi_t)**2)
-        # ax[2].plot(self.t, self.energies[:,:6])
+        ax[2].plot(self.t, np.abs(self.overlap[:,:, 4])**2 )
+        pop_01_to_10 = abs(self.overlap[:, self.idx_01, self.eig_idx_10])**2
+        pop_10_to_01 = abs(self.overlap[:, self.idx_10, self.eig_idx_01])**2   
+        ax[3].plot(self.t, pop_01_to_10, color=b, label='|01⟩ to |10⟩')
+        ax[3].plot(self.t, pop_10_to_01, color=g, label='|10⟩ to |01⟩')
         ax[0].set_ylim(0, 1.1)
         ax[1].set_ylim(0, 1.1)
         ax[2].set_ylim(0, 1.1)
         ax[0].set_xlabel('Time')
         ax[0].set_ylabel('Population')
-        ax[0].legend(['00', '01', '02', '03', '10', '11'])
+        ax[0].legend(['|00⟩', '|01⟩', '|10⟩', '|11⟩'], ncol=2, loc='upper right', fontsize='small')
+        # fig, ax = plt.subplots(10, 1)
+        # ax[0].plot(self.t, np.abs(self.overlap[:, :, 0])**2, color=b)
+        # ax[1].plot(self.t, np.abs(self.overlap[:, :, 1])**2, color=g)
+        # ax[2].plot(self.t, np.abs(self.overlap[:, :, 2])**2, color=r)
+        # ax[3].plot(self.t, np.abs(self.overlap[:, :, 3])**2, color='orange')
+        # ax[4].plot(self.t, np.abs(self.overlap[:, :, 4])**2, color='purple')
+        # ax[5].plot(self.t, np.abs(self.overlap[:, :, 5])**2, color='brown')
+        # ax[6].plot(self.t, np.abs(self.overlap[:, :, 6])**2, color='pink')
+        # ax[7].plot(self.t, np.abs(self.overlap[:, :, 7])**2, color='gray')
+        # ax[8].plot(self.t, np.abs(self.overlap[:, :, 8])**2, color='cyan')
+        # ax[9].plot(self.t, np.abs(self.overlap[:, :, 9])**2, color='olive')
+        # ax[0].legend(['|00⟩', '|01⟩', '|02⟩', '|03>⟩', '|10>', '|11⟩', '|12⟩', '|13>', '|20⟩', '|21⟩',], ncol=2, loc='upper right', fontsize='small')
+        ax[0].set_ylim(0, 1.1)
+        ax[0].set_xlabel('Time')
+        ax[0].set_ylabel('Population')
+        fig.tight_layout()
+        plt.show()
+
 
         plt.show()
 if __name__ == '__main__':
@@ -292,25 +377,81 @@ if __name__ == '__main__':
     ## Without fucked interactoin
     params1 = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, 42.47007681]
     params2 = [73.44693037, 71.99175625 ,29.16144963 ,29.16767609, 42.79831711]
+
+    # 02.06
+    # params_1 = ...
+    # params_2 = [47.96777414, 50.42158537, 13.19020138, 13.15246072, 16.37341536]
+
+    ## 03.06
+    params_2 = [63.68144808, 43.05416999 ,10.69127355 ,10.90371128, 16.02656697]
+    params_1 = [61.48354464, 37.12075554, 22.36820274, 8.1535532, 16.58949561]
+
+
     ins = time_evolution(params1=params1, params2=params2, integrator='U', 
                          alpha=1.0,
-                         t_max=5.0, dt=0.01, ramp_time=1.5, ramp='cosine',
-                         num_lr=4, stay_still_time=0.4)
-    # C, e, n = ins.run_parameter_change()
-    # steps = np.arange(n)
+                         t_max=5.0, dt=0.01,  ramp='cosine',
+                         num_lr=4,
+                         plateau=2,
+                         ramp_up=0.8,
+                         ramp_down=0.8,
+                         chill_after=0.2,
+                         chill_before=0.2,)
+    C, e, n = ins.run_parameter_change()
+    N = C.shape[1]
+    idx_00 = 0*ins.num_r + 0
+    idx_01 = 0*ins.num_r + 1
+    idx_10 = 1*ins.num_r + 0
+    
+    overlap = np.zeros((n, N, N))
+    for t in range(n):
+        M = ins.C0.conj().T @ C[t]
+        overlap[t] = np.abs(M)**2
+    over01_0 = overlap[0, idx_01, :]    # shape (N,)
+    over10_0 = overlap[0, idx_10, :]
+    eig01 = np.argmax(over01_0)         # index j0 so that ψ_j0(0) ≈ |01⟩
+    eig10 = np.argmax(over10_0)         # index j1 so that ψ_j1(0) ≈ |10⟩
+    steps = np.arange(n)
+
+    fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(6, 6), sharex=True)
+    # Panel 1: how |01⟩ populates its own eigenvector vs the other (“swapped”) one
+    ax1.plot(steps, overlap[:, idx_01, eig01], label="|01⟩→ψ₍01₎(t)")
+    ax1.plot(steps, overlap[:, idx_01, eig10], label="|01⟩→ψ₍10₎(t)")
+    ax1.set_ylabel("Pop. from |01⟩")
+    ax1.set_ylim(0, 1.05)
+    ax1.legend(fontsize="small")
+    ax1.set_title("Mixing of |01⟩ ↔ |10⟩")
+
+    # Panel 2: same for |10⟩
+    ax2.plot(steps, overlap[:, idx_10, eig10], label="|10⟩→ψ₍10₎(t)")
+    ax2.plot(steps, overlap[:, idx_10, eig01], label="|10⟩→ψ₍01₎(t)")
+    ax2.set_ylabel("Pop. from |10⟩")
+    ax2.set_ylim(0, 1.05)
+    ax2.legend(fontsize="small")
+
+    # Panel 3: lowest three eigenvalues vs step
+    for j in (0, 1, 2):
+        ax3.plot(steps, e[:, j], label=f"E_{j}")
+    ax3.set_ylabel("Eigenvalues")
+    ax3.set_xlabel("Parameter Step")
+    ax3.legend(fontsize="small", ncol=3)
+    ax3.set_title("Lowest three eigenvalues")
+    plt.show()
+
     # fig, ax = plt.subplots(4,1 )
-    # ax[0].plot(steps, np.abs((ins.C0.conj().T @ C)[:,:,0]) ** 2)
     # ax[1].plot(steps, np.abs((ins.C0.conj().T @ C)[:,:,1]) ** 2)
-    # ax[2].plot(steps, np.abs((ins.C0.conj().T @ C)[:,:,2]) ** 2)
+    # ax[0].plot(steps, np.abs((ins.C0.conj().T @ C)[:,:,0]) ** 2)
+    # ax[2].plot(steps, np.abs((ins.C0.conj().T @ C)[:,:,4]) ** 2)
+    # ax[1].plot(steps, overlap[:, ins])
     # ax[3].plot(steps, e[:,:6])
     # ax[0].set_ylim(0, 1.1)
     # ax[1].set_ylim(0, 1.1)
     # ax[2].set_ylim(0, 1.1)
-    # ax[0].legend(['00', '01', '10', '11', '20', '02'])
+    # ax[0].legend(['00', '01', '02', '03', '10', '02'])
     # plt.show()
 
+    exit()
+    # ins._evolve()
+    # ins.run_parameter_change()
+    # ins._plot_overlap()
     # breakpoint()
     # exit()
-    ins._evolve()
-    ins._plot_overlap()
-    exit()
