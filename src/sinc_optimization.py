@@ -59,6 +59,8 @@ class Optimizer:
 
         self.idx_01 = 0*self.num_r + 1
         self.idx_10 = 1*self.num_r + 0
+        self.eig_idx_01 = self.idx_01
+        self.eig_idx_10 = self.idx_10
     
     def _constraint(self, params):
         """Constraint for the optimization problem
@@ -382,9 +384,9 @@ if __name__ == '__main__':
     params_II = [63.68144808, 43.05416999 ,10.69127355 ,10.90371128, 16.02656697]
     params_I = [61.48354464, 37.12075554, 22.36820274, 8.1535532, 16.58949561]
 
-    ins = Optimizer(params=params_II, tol=1e-8, verbose=False, config='II', dvr=True)
-    res = ins.optimize()
-    # ins.test_params(params_II, config='II')
+    ins = Optimizer(params=params_II, tol=1e-8, verbose=False, config='I', dvr=True)
+    # res = ins.optimize()
+    ins.test_params(params_I, config='I')
 
     breakpoint()
     exit()

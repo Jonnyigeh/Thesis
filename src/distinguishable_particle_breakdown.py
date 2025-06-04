@@ -142,7 +142,7 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     # disting_H = disting_h + disting_u
     # disting_eps, disting_C = np.linalg.eigh(disting_H)
     # # Sinc basis Hartree-product WF
-    num_grid_points_sinc = 400
+    num_grid_points_sinc = 1600
     basis = ODMorse(
         l=l,
         grid_length=grid_length,
@@ -165,9 +165,12 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     c_r = bhs.c_r
     h_l = c_l.conj().T @ h_l @ c_l
     h_r = c_r.conj().T @ h_r @ c_r
-    u_lr = np.einsum('ai, bj, ab, ak, bl -> ijkl', c_l.conj(), c_r.conj(), u_lr, c_l, c_r)
+    # u_lr = np.einsum('ai, bj, ab, ak, bl -> ijkl', c_l.conj(), c_r.conj(), u_lr, c_l, c_r)
+    u_lr = c_l.conj().T @ u_lr @ c_r
+    u_diag = u_lr.flatten()
+    U = np.diag(u_diag)
     H_ = np.kron(h_l, np.eye(*h_l.shape)) + np.kron(np.eye(*h_r.shape), h_r) 
-    U = u_lr.reshape(*H_.shape)
+    # U = u_lr.reshape(*H_.shape)
     H = H_ + U
 
     M = h_l.shape[0]               # number of one-particle functions
@@ -185,6 +188,8 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     eps_asym, C_asym = np.linalg.eigh(H_antisym)
     E_fermion_exact = np.real(eps_asym[0])
     print("Exact antisymmetric ground energy:", E_fermion_exact)
+    breakpoint()
+    exit()
     # --- end snippet ---
 
     # (Optional) If you still want the full product‐space spectrum:
@@ -221,67 +226,68 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     print(f"Indistuinguishable energies: {indisting_eps[:6]}")
     print(f"HF energy: {E}")
     print(f"Deviation in ground state estimate: {np.abs(disting_eps[0] - E):.5f}")
-    print(f"Deviation between fermionic energyes: {np.abs(E_fermion_exact - E):.5f}")
+    print(f"Deviation between fermionic energies: {np.abs(E_fermion_exact - E):.5f}")
     print(f'Relative error: {np.abs(disting_eps[0] - E) / E.real:.5f}')
     print(f'Relative error fermionic: {np.abs(E_fermion_exact - E) / E.real:.5f}')
 
     return eps_asym, E, disting_eps, S
 if __name__ == "__main__":
-    separations = [5, 10, 15, 25, 50, 75, 100]
-    # separations = [50]
+    # separations = [5, 10, 15, 25, 50, 75, 100]
+    separations = [20, 50, 100, 150]
     alpha = 1.0
     a = 0.25
     num_grid_points = 4_001
     l = 10
     n = 2 # Number of particles
     num_func = 4
-    grid_length = 400
+    grid_length = 800
     asym_en = []
     E_n = []   
     prod_e = []
     overlaps = []
-    # for d in separations:    
-    #     params_close = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, d]
-    #     paramsI_also_long = [ 95.70685722 , 76.66934364 , 54.2000149  , 10., d]
-    #     print(f"Separation: {d}")
-    #     # Should maybe test this also, and put in thesis for parameters in th emiddle of config I and config II?
-    #     # Currently use params found from config II
-    #     potential = MorsePotentialDW(
-    #         *params_close,
-    #             # D_a=70,
-    #             # D_b=70,
-    #             # k_a=31,
-    #             # k_b=25,
-    #             # d=d
-    #         )
+    for d in separations:    
+        params_close = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, d]
+        # params0306 = [63.68144808, 43.05416999 ,10.69127355 ,10.90371128, d] #16.02656697]
+        # paramsI_also_long = [ 95.70685722 , 76.66934364 , 54.2000149  , 10., d]
+        # params = [61.48354464, 37.12075554, 22.36820274, 8.1535532, 16.58949561]
+        params = params_close
+        print(f"Separation: {d}")
+        # Should maybe test this also, and put in thesis for parameters in th emiddle of config I and config II?
+        # Currently use params found from config II
+        potential = MorsePotentialDW(
+            *params,
+                # D_a=70,
+                # D_b=70,
+                # k_a=31,
+                # k_b=25,
+                # d=d
+            )
 
-    #     eps_asym, E, prod_en, S_ = make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
-    #     breakpoint()
-    #     asym_en.append(eps_asym[0])
-    #     E_n.append(E)
-    #     prod_e.append(prod_en[0])
-    #     overlaps.append(S_)
-    #     print("\n")
+        eps_asym, E, prod_en, S_ = make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
+        asym_en.append(eps_asym[0])
+        E_n.append(E)
+        prod_e.append(prod_en[0])
+        overlaps.append(S_)
+        print("\n")
     
-    # data = {
-    #     "separations": separations,
-    #     "asym_energies": asym_en,
-    #     "prod_energies": prod_en,
-    #     "E_n": E_n,
-    #     "overlaps": overlaps,
-    # }
-
+    data = {
+        "separations": separations,
+        "asym_energies": asym_en,
+        "prod_energies": prod_en,
+        "E_n": E_n,
+        "overlaps": overlaps,
+    }
     # import pickle
-    # with open("data/distinguishable_particle_breakdown.pkl", "wb") as f:
+    # with open("data/distinguishable_particle_breakdown0306.pkl", "wb") as f:
     #     pickle.dump(data, f)
 
 
     # exit()
-    # # Load data
-    import pickle
-    from utils.visualization import find_figsize
-    with open("data/distinguishable_particle_breakdown.pkl", "rb") as f:
-        data = pickle.load(f)
+    # # # Load data
+    # import pickle
+    # from utils.visualization import find_figsize
+    # with open("data/distinguishable_particle_breakdown.pkl", "rb") as f:
+    #     data = pickle.load(f)
 
     E_n = data['E_n']
     separations = data['separations']
@@ -319,5 +325,5 @@ if __name__ == "__main__":
                     wspace=0.3)
     # plt.savefig("../doc/figs/exchange_shift.pdf")
     plt.show()
-
+    breakpoint()
 
