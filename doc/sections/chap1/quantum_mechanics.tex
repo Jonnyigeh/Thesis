@@ -9,13 +9,14 @@ The dynamics of the wavefunction is governed by the \emph{Time-dependent Schröd
 \begin{equation}
     i\frac{\partial}{\partial t}\ket{\Psi(x, t)} = H(x,t)\ket{\Psi(x, t)}\label{eq:tdse}
 \end{equation}
-where $H$ a linear hermitian operator often referred to as the \emph{Hamiltonian}. Here $x$ is the position of the particle, and $t$ is the time. 
-This operator describes the total energy of the system, and is given by (in atomic units) \textcolor{red}{(Add more about the Hamiltonian, also see chapter 2.1.1 in Szabo Ostlund for material on atomic units. This is probably needed for results (to have proper discussions, and a real sense of "distance" in the results section). In the book, atomic units are as follows: length $=0.52918$ (Å), energy $=27.211$ (eV), dipole-moment (two charges at distance $a_0$) $=2.5418$ Debyes (D). There is also a conversion table that could prove useful.)}
+where $H$ a linear hermitian operator often referred to as the \emph{Hamiltonian} \cite{griffiths2018introduction, berera2021quantum}. Here $x$ is the position of the particle, and $t$ is the time. 
+This operator describes the total energy of the system, and is given by (in atomic units)
 \begin{align*}
     H = -\nabla^2 + V(\mathbf{r})
 \end{align*}
 where $\nabla^2$ is the Laplacian operator, and $V(\mathbf{r})$ is the potential energy of the system, both external and internal.
-This equation gives the equation of motion for the wavefunction, and describes how the wavefunction evolves in time. \\ \\
+This equation gives the equation of motion for the wavefunction, and describes how the wavefunction evolves in time. Atommic units set fundamental constants like the speed of light $c$, Planck's constant $\hbar$, and the electron mass $m_e$ to unity, to simplify the equations and calculations. This is a common practice in quantum mechanics, as it allows for easier manipulation of the equations without losing generality. In this notation, lengths are measured in Bohr radii ($1 a_0 = 0.529Å$) and energies in Hartees ($1 \text{Ha} = 27.211 eV$) \cite{szabo1996modern}.
+\\ \\
 
 While the TDSE govern the time-evolution of the quantum system, many problems - particularly stationary or bound-state problems - are often more easily analysed through the \emph{Time-independent Schrödinger Equation} (TISE), which is obtained by separating the temporal and spatial variables in the TDSE. This gives us
 \begin{equation}
@@ -23,13 +24,15 @@ While the TDSE govern the time-evolution of the quantum system, many problems - 
 \end{equation}
 where $\psi_n(x)$ are the \emph{energy eigenstates} of the system, and $E_n$ are the corresponding \emph{energy eigenvalues}. As is clear from the equation \eqref{eq:tise}, the energy eigenvalues are the diagonal elements of the diagonalized Hamiltonian operator. In practice, these eigenvalues are obtained by diagonalizing the Hamiltonian operator (regardless of time-dependency), and the associated eigenvectors forming a basis of energy eigenfunctions. \\
 
-The energy eigenstates are the stationary states of the system, and they form an complete orthonormal basis for the Hilbert space of the system. This means that any wavefunction can be expressed as a linear combination of the energy eigenstates, and in our work, it will serve as an important reference point to validate other basis sets. 
+The energy eigenstates are the stationary states of the system, and they form an complete orthonormal basis for the Hilbert space of the system. This means that any wavefunction can be expressed as a linear combination of the energy eigenstates, and in our work, it will serve as an important reference point to validate our choice basis sets. \textcolor{red}{TODO: Remove/clarify. We compare enrgy state in the validation part, but we do not simulate in energy states? Must be okay tho.}
 
 %% 2nd quantization
 \subsection{Second Quantization}
-As the earliest formulations of quantum mechanics introduced the ground-breaking concepts of quantized properties like energy, momentum and angular momentum, we can think of this formulation as a "first quantization". Here the observables are represented as operators with real eigenvalues and wavefunctions are assigned to individual particles.
-As quantum mechanics matured, it became clear that first quantization was not sufficient to describe many-body systems - especially systems with indistinguishable particles, such as fermionic structures, or systems where particles are created or annihilated, such as in chemical reactions, or in the study of elementary particles.\\  
-Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles, and makes the statefunction also expressed in terms of operators. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in \emph{state} $i$?". 
+As the earliest formulations of quantum mechanics introduced the ground-breaking concept that physical properties such as energy, momentum and angular momentum are inherently quantized, this formulation is now often referred to as "first quantization". In first quantization, observables are represented by linear operators with real eigenvalues and each individual particle is assigned a wavefunction in a fixed $N$-dimensional Hilbert space.
+However, as the theory matured, it became clear that first quantization was inadequate to describe true many-body systems - like systems with indistinguishable particles, where one must (anti-)symmetrize the $N-$ particle wavefunction, or natural processes like particle creation and annihilation, as occurs in chemical reactions or in high-energy physical processes. In these cases the wavefunction must account for all possible particle configurations (outcomes), which quickly becomes unwieldy. The number of terms grows exponentially with the number of particles, making both manipulation and storage intractable.
+
+Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles, and makes the statefunction also expressed in terms of operators. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in \emph{state} $i$?". \cite{szabo1996modern, shavitt2009many, helgaker2013molecular}.
+
 As such, second quantization is often referred to as the "occupation number representation" of quantum mechanics. This moves the focus from the individual particles to the orbitals they occupy. This reformulation also reduces much of the manipulation of the wavefunction to algebraic operations, which makes numerical implementations much more efficient, and easy to understand.\cite{helgaker2013molecular}.
 \\ \\ In second quantization, we introduce a set of creation and annihilation operators, $a^\dagger$ and $a$, which create and annihilate particles in a given state. An important thing to note, is that these operators differ depending on the type of particles. For bosons, these operators satisfy the following commutation relations:
 \begin{align}
@@ -54,9 +57,9 @@ and the action of the hermitian conjugate annihilation operator is given by
 \begin{align*}
     a_i\ket{n_1, n_2, ...} = \sqrt{n_i}\ket{n_1, n_2, ...,n_i-1, n_i - 1, ...}.
 \end{align*}
-From this, these operators can describe particle interactions, transitions and dynamics in a many-body system. As the Fock space is constructed by direct sums, two states of different particle numbers are inherently orthogonal 
+From this, these operators can describe particle interactions, transitions and dynamics in a many-body system. As the Fock space is constructed by direct sums, two states of different particle numbers are inherently orthogonal, i.e. $\braket{n|m} = \delta_{nm}$, where $n$ and $m$ are the number of particles in the two states. This orthogonality is crucial for the mathematical consistency of the notation \cite{helgaker2013molecular, shavitt2009many}.
 \\\\ 
-For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \ref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \ref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation.
+For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \ref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \ref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation \cite{pethick2008bose}.
 
 
 \subsection{Hartree approximation}\label{sec:bipartite_hartree}

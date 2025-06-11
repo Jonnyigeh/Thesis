@@ -23,7 +23,7 @@ where $I$ is the identity operator. This relation guarantees that the basis set 
 
 %% Ops
 \subsection{Operators}
-A linear operator is a mathematical object that maps elements from one vector space $V$ to another space $W$. Meaning it is a mapping $\hat O: V \rightarrow W$, and has the following linearity properties:
+An operator is a mathematical object that maps elements from one vector space $V$ to itself (or, for some operators to a new vector space $W$)\cite{berera2021quantum}. Meaning it is a mapping $\hat O: V \rightarrow V$. In this work, and quantum mechanics in general, we focus on \emph{linear operators}. We require these operators to map onto itself, and have the following linearity properties:
 \begin{align*}
     \hat O(\alpha \mathbf{x} + \beta\mathbf{y}) = \alpha \hat O\mathbf{x} + \beta \hat O\mathbf{y}
 \end{align*}
@@ -43,14 +43,14 @@ and we can identify the action of the operator on the vector in this basis, as a
 \begin{align*}
     \hat O\ket{i} = \sum_j \ket{j}O_{ji}
 \end{align*}
-In quantum mechanics, certain operators play a fundamental role due to their specific mathematical properties. These operators represent key physical observables and transformations, which we will explore in detail in the quantum mechanics section. However, some of their defining mathematical characteristics are crucial to emphasize:
+In quantum mechanics, certain operators play a fundamental role due to their specific mathematical properties \cite{griffiths2018introduction, berera2021quantum}. These operators represent key physical observables and transformations, which we will explore in detail in the quantum mechanics section. However, some of their defining mathematical characteristics are crucial to emphasize:
 \begin{itemize}
     \item \textbf{Unitary:} A matrix $U$ is unitary if $U^*U = I$, meaning the inverse of the matrix $U$ is it's complex conjugate. This property of unitary matrices is such that they preserve the inner product of vectors, e.g $\braket{\psi|\phi} = \braket{U\psi|U\phi}$, and the unitary matrices also preserve the vector norm. Unitary matrices are used to represent time-evolution operators in quantum mechanics.
     \item \textbf{Hermitian:} A matrix $U$ is hermitian if $U = U^\dagger$, meaning the matrix is equal to its complex conjugate transpose\footnote{represented by a $\dagger = *^T$}. This is a special case of self-adjoint operators, living in a \emph{complex} Hilbert space, where the eigenvalues are real and the eigenvectors are orthogonal. These matrices are used to represent physical observables in quantum mechanics, like the Hamiltonian operator, which represents the total energy of a quantum mechanical system.
 \end{itemize}
 %% mr hilbert
 \subsection{Hilbert spaces}\label{sec:Hilbert_space}
-The concept of a Hilbert space is fundamental to quantum mechanics, as it provides the mathematical framework for which quantum states and operators are defined. A Hilbert space is a generalization of Euclidiean space, which allows for linear algerba and calculus to be applied to infinite-dimensional spaces. More formally, a Hilbert space is a complex complete inner product space, which means that it adhers to the following properties: \textcolor{red}{should add some references to the properties of Hilbert spaces, and maybe an illustration? could be cool}
+The concept of a Hilbert space is fundamental to quantum mechanics, as it provides the mathematical framework for which quantum states and operators are defined. A Hilbert space is a generalization of Euclidiean space, which allows for linear algerba and calculus to be applied to infinite-dimensional spaces. More formally, a Hilbert space is a complex complete inner product space, which means that it adhers to the following properties \cite{griffiths2018introduction}: \textcolor{red}{should add some references to the properties of Hilbert spaces, and maybe an illustration? could be cool}
 \begin{itemize}
     \item \textbf{Completeness:} Every Cauchy sequence $\{x_n\}$ in the space $V$ converges to a limit in the space. Specifically, $V$ is complete if:
     \begin{equation}
@@ -58,7 +58,7 @@ The concept of a Hilbert space is fundamental to quantum mechanics, as it provid
     \end{equation}
     \item \textbf{Positivity:} The inner product of a vector with itself is always positive, and zero if and only if the vector is the zero vector. That is:
     \begin{equation}
-        \braket{phi}{psi}\geq 0 \text{and} \braket{\phi|\phi} = 0 \iff \ket{\phi} = \ket{0} 
+        \braket{\phi|\psi}\geq 0 \text{and} \braket{\phi|\phi} = 0 \iff \ket{\phi} = \ket{0} 
     \end{equation}
     \item \textbf{Multiplicativity:} The inner product is linear in the second argument and conjugate linear in the first argument, meaning:
     \begin{equation}
@@ -73,16 +73,15 @@ for the complex-valued, continuous, state vectors $\ket{\phi}, \ket{\psi} \in V$
 \begin{align*}
     \braket{\psi_i|\psi_j} = \delta_{ij}
 \end{align*}
-where $\delta_{ij}$ is the Kronecker delta. This orthogonality relation is crucial in quantum mechanics, as it allows us to define a basis set of vectors that are orthogonal to each other. As elegant as this framework may be, the challenge of quantum many-body systems lies in the exponential scaling of the Hilbert space with the number of particles and degrees of freedom. For a system of $N$ particles, with $d$ degrees of freedom, the dimension of the Hilbert space is $d^N$, which quickly becomes intractable for classical computers. This rapid growth makes exact solutions for interacting many-body systems computationally infeasible, even in low-dimensional systems. 
+where $\delta_{ij}$ is the Kronecker delta. This orthogonality relation is crucial in quantum mechanics, as it allows us to define a basis set of vectors that are orthogonal to each other. As elegant as this framework may be, the challenge of quantum many-body systems lies in the exponential scaling of the Hilbert space with the number of particles and degrees of freedom. For a system of $N$ particles, with $d$ degrees of freedom, the dimension of the Hilbert space is $d^N$, which quickly becomes intractable for classical computers. This rapid growth makes exact solutions for interacting many-body systems computationally infeasible, even in low-dimensional systems.
 
 %% BASIS SETS
-\subsection{Quantum mechanical bases}\textcolor{red}{we should move this section?}
-The representation of state-vectors in a Hilbert space is not unique, and we are free to choose basis sets to express the vectors that spans our Hilbert space (or any space for that matter), as long as the basis of choice spans the Hilbert space\textcolor{red}{source?}. This is a powerful tool in quantum mechanics, as it allows us to choose the basis that best suits the problem at hand, and clever choices can simplify problems significantly. The flexibility in choosing a basis set is central to both theoretical insights and computational efficiency when solving quantum mechanical problems. \\
+\subsection{State representation}\label{sec:state_representation}
+The representation of state-vectors in a Hilbert space is not unique, and we are free to choose basis sets to express the vectors that spans our Hilbert space (or any space for that matter), as long as the basis of choice spans the Hilbert space\cite{griffiths2018introduction, berera2021quantum}. This is a powerful tool in quantum mechanics, as it allows us to choose the basis that best suits the problem at hand, and clever choices can simplify problems significantly. The flexibility in choosing a basis set is central to both theoretical insights and computational efficiency when solving quantum mechanical problems. \\
 
-Many modern many-body methods are built upon this principle, where the choice of basis set can make the difference between a computationally infeasible problem and a tractable one. For example, by exploting symmetry, localization, or energy scales, we can often reduce the dimensionality of the problem and focus on the most relevant degrees of freedom. The choice of basis is not just a mathematical convenience, it can also yield physical insights into th systems behaviour. For instance, in quantum chemistry, the choice of basis set can reflect the underlying symmetries of the molecular structure, leading to a more efficient representation of the wavefunction and its properties. Similarly, in condensed matter physics, the choice of basis can be guided by the crystal structure or electronic correlations present in the material. \textcolor{red}{Need souces for this}\\ \\
+Many modern many-body methods are built upon this principle, where the choice of basis set can make the difference between a computationally infeasible problem and a tractable one. For example, by exploting symmetry, localization, or energy scales, we can often reduce the dimensionality of the problem and focus on the most relevant degrees of freedom. The choice of basis is not just a mathematical convenience, it can also yield physical insights into the systems behaviour. For instance, in quantum chemistry, the choice of basis set can reflect the underlying symmetries of the molecular structure (such as the Born-Oppenheimer approximation)\cite{szabo1996modern}, leading to a more efficient representation of the wavefunction and its properties. Similarly, in condensed matter physics, the choice of basis can be guided by the crystal structure or electronic correlations present in the material \cite{baroni2001phonons, kittel2018introduction}. \\
 
-Furthermore, by finding a basis that diagonalizes the Hamiltonian matrix, we can directly solve for the energy eigenvalues and eigenstates. This principle underlies many techniques, such as using harmonic oscillator eigenfunctions for bound systems or plane waves for periodic potentials\textcolor{red}{souces?}. The search for an optimal basis is often guided by the specific features of the system under study, such as symmetry or localization, making it a central consideration in both theoretical and computational approaches to quantum mechanics. In this thesis, we will frequently use both the energy eigenbasis (i.e the eigenfunctions of the system Hamiltonian) and a grid-based Discrete Variable Representation (DVR) basis. These choices will be introduced and justified further on in later sections, particularly in the context of quantum mechanics (Section \ref{sec:quantum_mechanics}) and numerical implementations (Section \ref{sec:general_study})\textcolor{red}{fix references}
-\\ \\ 
+Furthermore, by finding a basis that diagonalizes the Hamiltonian matrix, we can directly solve for the energy eigenvalues and eigenstates. This principle underlies many techniques, such as using harmonic oscillator eigenfunctions for bound systems or plane waves for periodic potentials\cite{griffiths2018introduction, kittel2018introduction}. The search for an optimal basis is often guided by the specific features of the system under study, such as symmetry or localization, making it a central consideration in both theoretical and computational approaches to quantum mechanics. 
 
 Due to the flexible nature of quantum bases, we are often required to re-express our system in various bases, depending on the problem and what we are currently studying. Often, we will have to chang our bases during the course of our calculations and we thus require a mathematical framework to transform between the bases. 
 
@@ -108,5 +107,50 @@ And thus, we have the following transformation rule for operators under a basis 
     \hat O' &= U\hat OU^\dagger \\
     \hat O &= U^\dagger\hat O'U
 \end{align*}
+
+\subsection{Basis sets}\label{sec:basis_set}
+As we've mentioned, the choice of basis set is crucial in quantum mechanics, and somewhat arbitrary. Any complete set of orthonormal vectors can be used to express our state-vectors, and there are numerous choices available, each with its own advantages and disadvantages. The choice can greatly affect computational efficiency, numerical stability and the physical insights gained from the calculations. We will briefly outline some of the most common families of basis sets, and their usages before we present th choice made in this thesis:
+\begin{itemize}
+    \item \textbf{Discrete Variable Representation (DVR):} A grid-based approach that discretizes the continuous space into a finite set of points, with one basis function peaked at each grid point. This method makes coordinate operators diagonal in the basis, retaining analytical expressions for the kinetic energy operator making it both efficient and accurate for smooth potentials \cite{light1985generalized}. 
+    \item \textbf{Harmonic oscillator basis:} A set of orthonormal functions that are solutions to the quantum harmonic oscillator problem. As such, these are useful for bound systems exhibiting oscillatory behaviour, such as vibrational modes of molecules and quantum dot systems.
+    \item \textbf{Plane wave basis:} The natural choice for repersenting periodic systems, such as cystals, and is often employed in condensed matter physics. Their diagonalization of kinetic energy operators makes them particularly useful for systems with translational symmetry, such as electrons in a crystal lattice. \cite{kittel2018introduction}
+    \item \textbf{Gaussian-type orbitals (GTOs):} Common choice for initial approximations in quantum chemistry, particularly in the Hartree-Fock method. GTOs are computationally efficient, and reflect the atomic symmetries of atoms, making them suitable for molecular systems. \cite{szabo1996modern}
+\end{itemize}
+
+We focus on the Sinc-DVR basis \cite{colbert1992novel} for the analysis done in our thesis work, due to its simple structure and wide applicability to problems with smooth, localized potentials. The Sinc-DVR basis functions forms an orthonormal set on a uniformly spaced spatial grid, and exhibit Kronecker delta-like behaviour at the grid points, making them especially suited for representing localized states and sparse Hamiltonians, such as our bounded Morse double well system.
+\\ The Sinc-DVR basis funtions are mathematically defined as
+\begin{align*}
+    \phi_n(x) = \frac{1}{\sqrt{N}} \text{sinc}\left(\frac{x - x_n}{\Delta x}\right)\label{eq:sinc_dvr},
+\end{align*}
+where $N$ is the number of grid points, $x_n$ is the $n$th grid point, and $\Delta x$ is the grid spacing. The Sinc function is defined as
+\begin{align*}
+    \text{sinc}(x) = \begin{cases}
+        \frac{\sin(\pi x)}{\pi x} & \text{if } x \neq 0 \\
+        1 & \text{if } x = 0
+    \end{cases}.
+\end{align*}
+These basis functions are orthonormal, meaning that they satisfy the following relation:
+\begin{align*}
+    \int_{-\infty}^{\infty} \phi_n(x) \phi_m(x) dx = \delta_{nm},
+\end{align*}
+where $\delta_{nm}$ is the Kronecker delta function. This orthonormality property is crucial for ensuring that the basis functions can be used to represent quantum states accurately, and results in the Hilbert space being spanned by the basis functions. We shall in later sections discuss further on how we chose to implement the Sinc-DVR basis in our code, by number of grid points, grid spacing etc. 
+
+In the Discrete Variable Representation, the kinetic energy operator is expressed in matrix form using a grid-basis. Using atomic units, this operator is given by
+\begin{align*}
+    T = -\frac{1}{2} \frac{d^2}{dx^2} ,
+\end{align*}
+and the Sinc-DVR function defined on a uniform grid as presented above in \eqref{eq:sinc_dvr}. The kinetic energy operator matrix elements are then given by
+\begin{align*}
+    T_{nm} = \braket{\phi_n}{-\frac{1}{2} \frac{d^2}{dx^2}}{\phi_m}.
+\end{align*}
+Using the known analytical solution of these integrals with the sinc function properties (see for example Appendix A in \cite{colbert1992novel}), these matrix elements take the form 
+\begin{align*}
+    T_{nm} = \begin{cases}
+        -\frac{\pi^2}{6\Delta x^2} & \text{if } n = m \\
+        \frac{(-1)^(n-m)}{\Delta x^2(n - m)^2} & \text{if } n \neq m.
+    \end{cases}
+\end{align*}
+This provides us with a simple matrix expression for the Sinc-DVR Hamiltonian that is easily implemented numerically, as it removes the need for numerical differentiation.
+
 
 \end{document}

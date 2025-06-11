@@ -31,7 +31,7 @@ To make an assessment of the systems distinguishability we will firstly look at 
 If we are successful, we should find that for a certain distance between the wells, the "true" distinguishable energy will overlap with the indistinguishable HF-energy. Should this be the case, we can safely assume that the particles behave as distinguishable particles for our intents and purposes. 
 
 %% Optimization of the potential parameters
-\subsection{Optimization of the potential parameters}\label{sec:optimization_procedure}
+\subsection{Parameter optimization}\label{sec:optimization_procedure}
 As our goal is to realize single-qubit gates and the two-qubit iSwap gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we've discussed in earlier sections the two configurations we are looking for are:
 \begin{itemize}
     \item Config I: The measurement configuration, where all energy levels are distinct and there are minimal correlations between the two subsystems (particles). This corresponds to keeping all Von Neumann entropies in our system as close to zero as possible. With this, we know that our two-body energy eigenstates will have a product state structure, and maximal overlap with the Hartree product states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$.
@@ -107,45 +107,9 @@ The overall structure of the objective function is as follows:
 
 %%% DVR basis
 \subsection{Validation of Sinc-Discrete Variable Representation basis}\label{sec:sinc_dvr_validation}
-In this section, we validate the Sinc Discrete Variable Representation (Sinc-DVR) basis used throughout this thesis by comparing the results of the DVR basis against more traditional basis sets, such as the (exact) energy eigenbasis. We do so in a simplified system, where we have a single particle in a Morse potential. This will allow us to compare the results to known analytical solutions. We will also showcase how such a DVR basis, namely the Sinc-DVR\textcolor{red}{put source} is used to express quantum mechanical systems numerically, and how we choose to implement it in our code. 
+In this section, we validate the Sinc Discrete Variable Representation (Sinc-DVR) basis used throughout this thesis by comparing the results of the DVR basis against more traditional basis sets, such as the (exact) energy eigenbasis. We do so in a simplified system, where we have a single particle in a Morse potential. This will allow us to compare the results to known analytical solutions. 
 
-As a grid-based basis, DVR offers practical computational advantages, particularly when dealing with operators that are diagonally representable and/or localized states. Its effectiveness depends however, on the ability to accurately represent the relevant physical states of the system at hand. To test this, we examine how the DVR basis functions overlap with the exact energy eigenstates of the system, and we use the DVR basis to compute the ground state energy of the system, which we then compare to the result obtained from the exact energy eigenstates by diagonalizaton of the Hamiltonian. 
-\\
-\\
-We focus on the Sinc-DVR basis\textcolor{red}{put source} for the analysis done in our thesis work, due to its simple structure and wide applicability to problems with smooth, localized potentials\textcolor{red}{should cite something here}. The Sinc-DVR basis functions forms an orthonormal set on a uniformly spaced spatial grid, and exhibit Kronecker delta-like behaviour at the grid points, making them especially suited for representing localized states and sparse Hamiltonians.
-\\ The Sinc-DVR basis funtions are mathematically defined as
-\begin{align*}
-    \phi_n(x) = \frac{1}{\sqrt{N}} \text{sinc}\left(\frac{x - x_n}{\Delta x}\right)\label{eq:sinc_dvr},
-\end{align*}
-where $N$ is the number of grid points, $x_n$ is the $n$th grid point, and $\Delta x$ is the grid spacing. The Sinc function is defined as
-\begin{align*}
-    \text{sinc}(x) = \begin{cases}
-        \frac{\sin(\pi x)}{\pi x} & \text{if } x \neq 0 \\
-        1 & \text{if } x = 0
-    \end{cases}.
-\end{align*}
-These basis functions are orthonormal, meaning that they satisfy the following relation:
-\begin{align*}
-    \int_{-\infty}^{\infty} \phi_n(x) \phi_m(x) dx = \delta_{nm},
-\end{align*}
-where $\delta_{nm}$ is the Kronecker delta function. This orthonormality property is crucial for ensuring that the basis functions can be used to represent quantum states accurately, and results in the Hilbert space being spanned by the basis functions. We shall in later sections discuss further on how we chose to implement the Sinc-DVR basis in our code, by number of grid points, grid spacing etc. 
-
-In the Discrete Variable Representation, the kinetic energy operator is expressed in matrix form using a grid-basis. Using atomic units, this operator is given by
-\begin{align*}
-    T = -\frac{1}{2} \frac{d^2}{dx^2} ,
-\end{align*}
-and the Sinc-DVR function defined on a uniform grid as presented above in \eqref{eq:sinc_dvr}. The kinetic energy operator matrix elements are then given by
-\begin{align*}
-    T_{nm} = \braket{\phi_n}{-\frac{1}{2} \frac{d^2}{dx^2}}{\phi_m}.
-\end{align*}
-Using the known analytical solution of these integrals with the sinc function properties (see for example \cite{colbert1992novel}), these matrix elements take the form 
-\begin{align*}
-    T_{nm} = \begin{cases}
-        -\frac{\pi^2}{6\Delta x^2} & \text{if } n = m \\
-        \frac{(-1)^(n-m)}{\Delta x^2(n - m)^2} & \text{if } n \neq m.
-    \end{cases}
-\end{align*}
-This provides us with a simple matrix expression for the Sinc-DVR Hamiltonian that is easily implemented numerically, as it removes the need for numerical differentiation.
+As a grid-based basis, Sinc-DVR offers practical computational advantages, particularly when dealing with operators that are diagonally representable and/or localized states. Its effectiveness depends however, on the ability to accurately represent the relevant physical states of the system at hand. To test this, we examine how the DVR basis functions overlap with the exact energy eigenstates of the system, and we use the DVR basis to compute the ground state energy of the system, which we then compare to the result obtained from the exact energy eigenstates by diagonalizaton of the Hamiltonian. 
 \\ \\
 To validate the Sinc-DVR basis, we compare its performance to the exact energy eigenstates of the system, obtained by directly diagonalizing the Hamiltonian of the system. This mirrors the procedure used to solve the time-independent Schrödinger equation \eqref{eq:tise}, where the eigenvalues and eigenfunctions define the stationary states of the system.
 
