@@ -30,6 +30,7 @@ To make an assessment of the systems distinguishability we will firstly look at 
 
 If we are successful, we should find that for a certain distance between the wells, the "true" distinguishable energy will overlap with the indistinguishable HF-energy. Should this be the case, we can safely assume that the particles behave as distinguishable particles for our intents and purposes. 
 
+
 %% Optimization of the potential parameters
 \subsection{Parameter optimization}\label{sec:optimization_procedure}
 As our goal is to realize single-qubit gates and the two-qubit iSwap gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we've discussed in earlier sections the two configurations we are looking for are:
@@ -132,7 +133,7 @@ To compare the energy spectrum of the two basis sets, we set up a single Morse p
 \end{align*}
 where $N$ is the number of grid points used to sample the potential. This then results in a grid spacing $\Delta x = 5 / 200 = 0.025$, expressed in atomic units. We then construct the Hamiltonian matrix for the system, using the following expression:
 \begin{align*}
-    H = -\frac{}{2} \frac{d^2}{dx^2} + V(x),
+    H = -\frac{1}{2} \frac{d^2}{dx^2} + V(x),
 \end{align*}
 where $V(x)$ is the Morse potential. 
 

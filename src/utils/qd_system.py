@@ -69,10 +69,12 @@ class ODMorse():
         )
         ## Visualization, and comparison of analytical and numerical basis functions
         # self.setup_analytical_basis()
-        if self.anti_symmetric:
+        if self.anti_symmetric and not self.dvr:
             self.setup_fermionic_basis()
-        elif self.dvr:
+        elif self.dvr and not self.anti_symmetric:
             self.setup_DVR_basis()
+        elif self.anti_symmetric and self.dvr:
+            self.setup_fermionic_DVR_basis()
         else:
             self.setup_distinguishable_basis()
         if visualize:
@@ -149,8 +151,48 @@ class ODMorse():
         self._u = self._ulr.reshape(*self._h.shape)
         self.s = np.eye(self.l)
 
+    def setup_fermionic_DVR_basis(self):
+        self.dx = self.grid[1] - self.grid[0]
+        self.grid = self.grid[1:-1]  # Remove the boundary points to avoid singularities in the sinc function
+        N = self.num_grid_points - 2
+        self.dvr_basis = np.zeros((N, N), dtype=np.complex128)
+        for i in range(N):
+            self.dvr_basis[i] = self.sinc_dvr_func(self.grid, self.grid[i], self.dx)
+        V = np.clip(self._potential(self.grid), 0, 100) # clip potential at 100, more natural, also prevents bugs with infinite potential wall.
+        V -= np.min(V)  # Shift the potential to have a minimum of 0
+        V = np.diag(V)
+
+        T = np.zeros((N, N), dtype=np.complex128)
+        for i in range(N):
+            for j in range(N):
+                if i == j:
+                    T[i, j] = np.pi ** 2 / (6 * self.dx ** 2)
+                else:
+                    T[i, j] = self.sinc_dvr_kinetic(i, j, self.dx)
+        H = T + V
+        eps, C = scipy.linalg.eigh(H)
+        # truncate
+        eps = eps[:self.l]
+        C = C[:, :self.l]
+        self.spf = C.T
+        self.h = np.diag(eps)
+        self.s = np.eye(self.l)
+        coulomb = np.zeros((N, N), dtype=np.complex128)
+        for i in range(N):
+            coulomb[i] = _shielded_coulomb(self.grid[i], self.grid, self.alpha, self._a)
+        self.direct = np.einsum(
+            'ix, jy, xy, kx, ly -> ijkl', self.spf.conj(), self.spf.conj(), coulomb, self.spf, self.spf, optimize=True
+        )
+        self.exchange = np.einsum(
+            'ix, jy, xy, ky, lx -> ijkl', self.spf.conj(), self.spf.conj(), coulomb, self.spf, self.spf, optimize=True
+        )
+
+        self.u = self.direct - self.exchange
+
     def setup_DVR_basis(self):
         self.dx = self.grid[1] - self.grid[0]
+        self.grid = self.grid[1:-1]  # Remove the boundary points to avoid singularities in the sinc function
+        self.num_grid_points = len(self.grid)
         self.left_grid = self.grid[:self.num_grid_points // 2]
         self.right_grid = self.grid[self.num_grid_points // 2:]
         self.basis_func_left = np.zeros((self.num_grid_points // 2, self.num_grid_points // 2))
@@ -171,31 +213,37 @@ class ODMorse():
                     continue
                 h_l[i,j] = self.sinc_dvr_kinetic(i, j, self.dx) 
                 h_r[i,j] = self.sinc_dvr_kinetic(i, j, self.dx)
-        self.no_1bpot_h_l = h_l + np.diag(h_l_diag) / self.dx
-        self.no_1bpot_h_r = h_r + np.diag(h_r_diag) / self.dx
-        h_l += (np.diag(h_l_diag) + np.diag(V_l)) / self.dx
-        h_r += (np.diag(h_r_diag) + np.diag(V_r)) / self.dx
-        u = self.u_dvr()
+        self.no_1bpot_h_l = h_l + np.diag(h_l_diag) 
+        self.no_1bpot_h_r = h_r + np.diag(h_r_diag) 
+        h_l += (np.diag(h_l_diag) + np.diag(V_l)) 
+        h_r += (np.diag(h_r_diag) + np.diag(V_r)) 
+        u, u4 = self.u_dvr()
 
         self._h_l = h_l
         self._h_r = h_r
         self._ulr = u
+        self._ulr4d = u4
 
                 
 
     def u_dvr(self):
         coulomb = np.zeros((self.num_grid_points//2, self.num_grid_points//2), dtype=np.complex128)
+        # u4 = np.zeros((self.num_grid_points//2, self.num_grid_points//2, self.num_grid_points//2, self.num_grid_points//2), dtype=np.complex128)
         for i in range(self.num_grid_points // 2):
             for j in range(self.num_grid_points // 2):
-                coulomb[i, j] = _shielded_coulomb(self.left_grid[i], self.right_grid[j], self.alpha, self.a)
+                val = _shielded_coulomb(self.left_grid[i], self.right_grid[j], self.alpha, self.a)
+                coulomb[i, j] = val
+                # u4[i, j, i, j] = val
         
-        u = np.einsum('ik, kl, jl -> ij', self.basis_func_left / np.sqrt(self.dx), coulomb, self.basis_func_right / np.sqrt(self.dx), optimize=True)
-        
-        return u
+        # u = np.einsum('ik, kl, jl -> ij', self.basis_func_left / np.sqrt(self.dx), coulomb, self.basis_func_right / np.sqrt(self.dx), optimize=True)
+        # u = np.einsum('ik, kl, jl -> ij', self.basis_func_left, coulomb, self.basis_func_right, optimize=True)
+        u = coulomb
+        return u, 0
+        # return u, u4,
     
     def sinc_dvr_func(self, x, xi, dx):
         scaled_x = (x - xi) / dx
-        func = 1 / dx * np.sinc(scaled_x)
+        func = 1 / np.sqrt(dx) * np.sinc(scaled_x)
         return func
 
     def sinc_dvr_kinetic(self, i, j, dx):

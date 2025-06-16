@@ -1,7 +1,7 @@
 \documentclass{subfiles}
 \begin{document}
 \section{Quantum Mechanics}
-\subsection{The quantum mechanical wavefunction and the Schrödinger Equation}
+\subsection{The Schrödinger equation}
 The physical description of any quantum system, i.e the \emph{state space}, is given by the quantum mechanical \emph{wavefunction} (also often called a \emph{state vector})\cite{nielsen2010quantum}, which in Dirac notation\footnote{Named after the physicist Paul Dirac, who was one of the founding fathers of quantum mechanics.} is written as $\ket{\Psi(t)}$. 
 This function is a complex-valued function that gives a complete description of both static and dynamic properties of a given quantum system, and thus presents the analogue to the classical notion of a set of trajectories in phase space \cite{hochstuhl2014time}. 
 
@@ -16,7 +16,7 @@ This operator describes the total energy of the system, and is given by (in atom
 \end{align*}
 where $\nabla^2$ is the Laplacian operator, and $V(\mathbf{r})$ is the potential energy of the system, both external and internal.
 This equation gives the equation of motion for the wavefunction, and describes how the wavefunction evolves in time. Atommic units set fundamental constants like the speed of light $c$, Planck's constant $\hbar$, and the electron mass $m_e$ to unity, to simplify the equations and calculations. This is a common practice in quantum mechanics, as it allows for easier manipulation of the equations without losing generality. In this notation, lengths are measured in Bohr radii ($1 a_0 = 0.529Å$) and energies in Hartees ($1 \text{Ha} = 27.211 eV$) \cite{szabo1996modern}.
-\\ \\
+
 
 While the TDSE govern the time-evolution of the quantum system, many problems - particularly stationary or bound-state problems - are often more easily analysed through the \emph{Time-independent Schrödinger Equation} (TISE), which is obtained by separating the temporal and spatial variables in the TDSE. This gives us
 \begin{equation}
@@ -33,8 +33,10 @@ However, as the theory matured, it became clear that first quantization was inad
 
 Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles, and makes the statefunction also expressed in terms of operators. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in \emph{state} $i$?". \cite{szabo1996modern, shavitt2009many, helgaker2013molecular}.
 
-As such, second quantization is often referred to as the "occupation number representation" of quantum mechanics. This moves the focus from the individual particles to the orbitals they occupy. This reformulation also reduces much of the manipulation of the wavefunction to algebraic operations, which makes numerical implementations much more efficient, and easy to understand.\cite{helgaker2013molecular}.
-\\ \\ In second quantization, we introduce a set of creation and annihilation operators, $a^\dagger$ and $a$, which create and annihilate particles in a given state. An important thing to note, is that these operators differ depending on the type of particles. For bosons, these operators satisfy the following commutation relations:
+As such, second quantization is often referred to as the "occupation number representation" of quantum mechanics. This moves the focus from the individual particles to the orbitals they occupy. This reformulation also reduces much of the manipulation of the wavefunction to algebraic operations, which makes numerical implementations more efficient, and easier to understand \cite{helgaker2013molecular}.
+\\ 
+
+In second quantization, we introduce a set of creation and annihilation operators, $a^\dagger$ and $a$, which create and annihilate particles in a given state. An important thing to note, is that these operators differ depending on the type of particles. For bosons, these operators satisfy the following commutation relations:
 \begin{align}
     [a_i, a_j] = [a^\dagger_i, a^\dagger_j] = 0, \quad [a_i, a^\dagger_j] = \delta_{ij}\label{eq:commutation}
 \end{align}
@@ -63,9 +65,7 @@ For systems of indistinguishable particles, Fock spaces naturally incorporate th
 
 
 \subsection{Hartree approximation}\label{sec:bipartite_hartree}
-\textcolor{red}{should specify more clearly the lack of a exchange term in the integals, and be more clear on the Hartree states. AFter we move the HF section to an appendix, this section must inform the reader on these integrals and their importance.  }
-
-Accurately solving the Schrödinger equation for many-body systems is a formidable challenge—even a one-dimensional system with just a few interacting particles can become intractable very quickly. The core difficulty stems from the exponential growth of the Hilbert space as we add more degrees of freedom, coupled with particle interactions and, for identical particles, the need to enforce antisymmetry (the Pauli exclusion principle). In real-world applications—like molecular dynamics or solid-state physics - we often invoke the Born-Oppenheimer\textcolor{red}{cite} approximation to freeze out the nuclear motion, which drastically reduces the size of the electronic Hilbert space. Even after that simplification, however, finding an exact solution on a classical computer remains out of reach.
+Accurately solving the Schrödinger equation for many-body systems is a formidable challenge—even a one-dimensional system with just a few interacting particles can become intractable very quickly. The core difficulty stems from the exponential growth of the Hilbert space as we add more degrees of freedom, coupled with particle interactions and, for identical particles, the need to enforce antisymmetry (the Pauli exclusion principle). In real-world applications—like molecular dynamics or solid-state physics - we often invoke the Born-Oppenheimer\footnote{Formulated by Max Born and Robert J. Oppenheimer in their 1927 paper \cite{Born_Oppenheimer_1927}} approximation to freeze out the nuclear motion, which drastically reduces the size of the electronic Hilbert space \cite{helgaker2013molecular, szabo1996modern}. Even after that simplification, however, finding an exact solution on a classical computer remains out of reach.
 \\ \\ 
 Mean-field methods offer a practical way to approximate the many-body problem by replacing the full interacting Hamiltonian with an effective single-particle picture in which each particle feels an average field created by all the others. In quantum chemistry, the most familiar mean-field approach is Hartree-Fock (HF), which assumes the wavefunction is a single Slater determinant of orthonormal orbitals. A detailed derivation of the Hartree-Fock procedure can be found in appendix \ref{app:HF_theory}. Those orbitals are determined self-consistently, meaning iteratively until convergence, so that each one “sees” the averaged Coulomb repulsion (direct term) and exchange interactions from all the other electrons.
 \\
@@ -73,7 +73,9 @@ Central to any mean-field approach is the variational principle, which asserts t
 \begin{equation}
     E[\Psi] = \frac{\braket{\Psi|H|\Psi}}{\braket{\Psi|\Psi}}\label{eq:variational_principle},
 \end{equation}
-is always greater than or equal to the true ground state energy $E_0$. By choosing a trial wavefunction $\Psi$ with adjustable parameters (here, the singl-particl orbitals), we can minimize this expectation value until it converges to a local minimum. In Hartee-Fock theory this trial wavefunction is a slater-determinant; in Hartree, it becomes a simple product of single-particle orbitals, often called a \emph{Hartree product}. These single-particle orbitals are the solution of the one-electron Schrödinger equation, 
+is always greater than or equal to the true ground state energy $E_0$ (). By choosing a trial wavefunction $\Psi$ with adjustable parameters (here, the single-particle orbitals), we can minimize this expectation value until it converges to a local minimum\cite{helgaker2013molecular}\footnote{We refer the reader particularly to chapter 4.2 in \cite{helgaker2013molecular}}. 
+
+In Hartee-Fock theory this trial wavefunction is a slater-determinant; in Hartree, it becomes a simple product of single-particle orbitals, often called a \emph{Hartree product}. These single-particle orbitals are the solution of the one-electron Schrödinger equati on, 
 \begin{align*}
     \hat{h}\phi_i = \epsilon_i\phi_i
 \end{align*}
@@ -91,7 +93,6 @@ with corresponding eigenvalue $E = \epsilon_1 + \epsilon_2 + ... + \epsilon_N$, 
 In our double-well system, the two particles remain localized in separate wells and therefore behave like distinguishable subsystems rather than identical fermions. We still employ a mean-field strategy—now in the form of a Hartree approach—where the full two-particle wavefunction is approximated as a simple product of two single-particle orbitals (one in each well). Each orbital is chosen so that it minimizes the energy in the presence of the averaged Coulomb field generated by the other particle. This “bipartite Hartree” procedure allows us to incorporate the essential interaction effects while keeping the computational effort manageable.
 
 \\
-% The Hartree-Fock method is a powerful tool for solving many-body quantum mechanical problems, but it makes an assumption that the wavefunction is described by a single Slater determinant, which represents anti-symmetric wavefunctions and thus indistinguishable particles. As explained in the previous section, our system is set up in such a way that our two-particle system behaves like distinguishable particles. Therefore, we may express our wavefunction as a \emph{Hartree product}, as we've explained in earlier sections. We can derive a similar procedure to find optimal basis transformations as in the section on Hartree-Fock. \\
 To implement this method, we select a finite basis set $\{\chi_\alpha\}$ for each subsystem $M$ (left or right well), and expand the single-particle Hartree orbitals in this basis. 
 \begin{align*}
     \ket{\phi^M_i} = \sum_{\alpha=1}^{N^M} C^M_{\alpha i}\ket{\chi_\alpha}
@@ -127,19 +128,47 @@ where $N^M$ is the number of single-particle basis functions in subsystem $M$. M
 \end{align}
 where $\h_{\alpha\beta} = \bra{\chi_\alpha^M}h^M\ket{\chi_\beta^M}$ are the one-body integrals, and $u_{\alpha\beta,\gamma\delta} = \bra{\chi_\alpha^M\chi_\beta^N}u^{MN}\ket{\chi_\gamma^M\chi_\delta^N}$ are the two-body interaction integrals.  \\\\
 These eigenvalue equations are for subsystem A and B respectivly, and we can identify the \emph{Hartree matrix} (similar to the Fock matrix in Hartree-Fock theory) as the LHS inside the big paranthesis. These two coupled equations are solved iteratively, by updating the coefficients $C_{\alpha 0}^M$ until convergence is reached (self-consistency). By diagonalization of these Hartree matrices we gain the $N_M$ lowest energy orbitals $C^M_{\alpha i}$ and energy levels $\lambda^M_i=\epsilon^M_i$\cite{leinonen2024coulomb}, which we will use as our single-particle basis for each subsystem. The equations to be solved are
-\begin{align*}
-    \sum_{\beta=0}^{N_M} f_{\alpha\beta}^M C^M_{\beta i} = \epsilon_i^M C^M_{\alpha i}
-\end{align*}
+\begin{align}
+    \sum_{\beta=0}^{N_M} f_{\alpha\beta}^M C^M_{\beta i} = \epsilon_i^M C^M_{\alpha i}\label{eq:hartree_eigenvalue}
+\end{align}
 with the Hartree matrices from eqs. \ref{eq:bipartite_hartree}. This method to solve the interacting many-body problem is called the Hartree method, and is a simplification of the Hartree-Fock method where Hartree product states are applied, instead of anti-symmtric Slater determinants. This method will natually introduce a mean-field coulomb interaction between our two subsystems into their respective basis sets, and will be the basis for our study of the two-particle system.
+\subsection{Configuration Interaction}\label{sec:CI}
+Configuration Interaction (CI) refines the mean-field Hartree solution by expanding on the Hartree product state to include all possible configurations of the particles. The exact two-body wavefunction is then expanded in a basis of \emph{correlated} product states, which are constructed from the single-particle Hartree orbitals. This allows us to account for all possible correlations between the particles, and thus obtain a more accurate description of the system. If we include all possible configurations (i.e infinite number of basis states) we obtain Full Configuation Interaction (FCI), which is the exact solution to the many-body problem, but is intractable for all but the smallest systems \cite{helgaker2013molecular, szabo1996modern}. \\
+
+Starting from the Hartree orbitals for subsystem A and B (obtained by solving the eigenvalue equations \ref{eq:hartree_eigenvalue}), we can collect a truncated set of single-particle orbitals, $\{\phi^A_i\}$ and $\{\phi^B_j\}$, where $i,j<N$ are the orbital indices for subsystems A and B respectively, and $M=N^2$ is the number of single-particle orbitals we include in our basis set, and construct all possible two-particle product states
+\begin{align*}
+    \phi_i^A(\mathbf{r}_1)\phi_j^B(\mathbf{r}_2).
+\end{align*}  
+As mentioned, retaining all such product states leads to the exact solution within the one-particle basis approximation, but due to the combinatorial explosion of the number of product states, we choose to truncate the basis set include $\N$ function in each subsystem. 
+
+To enforce the Pauli exclusion principle - and regaining exhange effects omitted by the distinguishable-particle Hartree product - we construct anti-symmetrized linear combinations of the Hartree product states. Each such unorordered pair $(i,j)$ gives a Slater-type state
+\begin{align*}
+    \ket{\Psi_{ij}} = \frac{1}{\sqrt{2}}(\phi_i^A(\mathbf{r}_1)\phi_j^B(\mathbf{r}_2) - \phi_j^A(\mathbf{r}_1)\phi_i^B(\mathbf{r}_2)).
+\end{align*}
+which is equivalent to the Slater determinant\footnote{We refer the reader to ch. 2.2.3 in \cite{szabo1996modern} for details on the Slater Determinant}\textcolor{red}{TODO: Should we include theory on the SD?} for two particles in two different subsystems, that is, when accounting for the strict localization of the two particles the particle-swap terms are zero in the determinant. 
+
+Gathering all unique such pairs $i<j$ of Slater-type states, yields a basis set of $N^2$ two-particle states. We then build the many-body Hamiltonian matrix in this basis set, which is given by
+\begin{align*}
+    H_{ij,kl} = \bra{\Psi_{ij}}H\ket{\Psi_{kl}} = \bra{\phi_i^A\phi_j^B}H\ket{\phi_k^A\phi_l^B}
+\end{align*}
+by evaluating the one- and two-body integrals in the truncated CI basis, and diagonalizing it to obtain the CI eigenvalues and eigenvectors. 
+
+The energy difference
+\begin{align*}
+    \Delta E = E^{\text{Hartree}} - E^{\text{CI}}
+\end{align*}
+quantifies the correlation energy captured by the CI method within our truncated orbital space. This correlation energy is a measure of how well our distinguishable treatment of our system approximates the true many-body wavefunction, and is a key indicator for the validity of our approach.\textcolor{red}{TODO: Add more on how CI can be used to validate our two-qubit gate protocol further.}
+
 
 %%% MORSE  POTENTIAL
 \subsection{Morse potential}\label{sec:morse_potential}
-To build our qubit system, we need to define some form of potential trap that we can confine our particles within. In modern quantum computing many different potentials are used, tested and theorized. One of the most common potentials are the quantum harmonic oscillator potential (QHO), a very well known potential in quantum mechanics. This potential has been studied in great detail and has been used in many different quantum systems, and is very often used as a benchmark for more advanced symmetric potentials. \textcolor{red}{(Cite some sources here)}. The QHO basis sets are widely employed to study quantum dot systems\cite{Yuan_2017}, and are often used in quantum chemistry to describe molecular vibrations. 
+To build our qubit system, we need to define some form of potential trap that we can confine our particles within. In modern quantum computing many different potentials are used, tested and theorized. One of the most common potentials are the quantum harmonic oscillator potential (QHO), a very well known potential in quantum mechanics. This potential has been studied in great detail and has been used in many different quantum systems, and is very often used as a benchmark for more advanced symmetric potentials \cite{griffiths2018introduction, berera2021quantum}. The QHO basis sets are widely employed to study quantum dot systems\cite{Yuan_2017}, and are often used in quantum chemistry to describe molecular vibrations \cite{atkins2011molecular}. 
 
 
-\\ \\ One could think that using the QHO potential for our qubit would be a natural choice, but there are some nuances necessary to consider. The QHO double well potential is perfectly symmetric, meaning the energy levels are uniformly spaced, and equal across both wells. This is not ideal for our realization of the iSwap gate, as we need more control over eneregy levels in both wells. \\ \\ To achieve this, we will instead use the Morsee potential, first introduced by Philip M. Morse in 1929 as a solution to the Schrödinger equation representing the motion of the nuclei in a diatomic molecule\cite{morse1929diatomic}. This potential has non-uniform energy levels, and more parameters, and is widely used in quantum mechanics to describe anharmonic oscillators. An extension of the Morse potential, Morse/Long-rangee potential is one of the most popular potentials to model potential energy surfaces used for spectroscopy\cite{zhai2018constructing}. Given that this potential has already seen alot of study within quantum dot systems, and molecular systems in general, it is natural to belive that this potential, should we succeed in our study, prove to be a good candidate for a room-temperature qubit system. \\ \\ 
+\\ \\ One could think that using the QHO potential for our qubit would be a natural choice, but there are some nuances necessary to consider. The QHO double well potential is perfectly symmetric, meaning the energy levels are uniformly spaced, and equal across both wells. This is not ideal for qubit systems, as we need more control over eneregy levels in both wells - and the uniform energy spacing makes one-qubit operations unstable as we lack control over what energy levels we excite \cite{devoret2013superconducting}. 
 
-The Morse potential is given, first proposed by Morse, as
+To achieve this, we will instead use the Morsee potential, first introduced by Philip M. Morse in 1929 as a solution to the Schrödinger equation representing the motion of the nuclei in a diatomic molecule\cite{morse1929diatomic}. This potential has non-uniform energy levels, and more parameters, and is widely used in quantum mechanics to describe anharmonic oscillators. An extension of the Morse potential, Morse/Long-rangee potential is one of the most popular potentials to model potential energy surfaces used for spectroscopy\cite{zhai2018constructing}. Given that this potential has already seen alot of study within quantum dot systems, and molecular systems in general, it is natural to belive that this potential, should we succeed in our study, prove to be a promising candidate for a prototype (near) room-temperature qubit system\cite{khordad2014linear, hayrapetyan2015exciton, sargsian2021effects}. \\ \\ 
+The Morse potential is given as
 \begin{align*}
     V(r) = De^{-2a(r-r_0)} - 2De^{-a(r-r_0)}
 \end{align*}
@@ -152,7 +181,7 @@ which yields a simpler form, by factorization using the square binomial formula,
 \begin{align}
     V = D(e^{-a(r-r_0)} - 1)^2\label{eq:morse_potential}
 \end{align}
-where now, computationally, we need only evaluate the exponential function once, and the rest of the potential is simple algebraic operations. This makes our computations more efficient, as the evaluation of the expoenntial function is computationally expensive\cite{sauce?}, and algebraic operations are much faster. Expanding a Taylor series about the well minima, we can see that the potential is approximativly harmonic. From this, we can identify Hookes law, and also identify the spring constant in this potential. Expanding around $r_0$
+where now, computationally, we need only evaluate the exponential function once, and the rest of the potential is simple algebraic operations. This makes our computations more efficient, as the evaluation of the expoenntial function is computationally expensive, since computing exponentials generally requires many more CPU cycles than simple arithmetic, it is advantageous to reduce their number. Expanding a Taylor series about the well minima, we can see that the potential is approximatively harmonic. From this, we can identify Hookes law, and also identify the spring constant in this potential. Expanding around $r_0$
 \begin{align*}
     V(r) = V(r_0) + V'(r_0)(r-r_0) + \frac{1}{2}V''(r_0)(r-r_0)^2 + ...
 \end{align*}
@@ -182,16 +211,12 @@ Now, we would like to make a potential trap for \emph{two} separate particles, a
 \begin{equation}
     V(r) = D_L(e^{-c_L(r-r_{0,L})} - 1)^2 + D_R(e^{c_R(r-r_{0,R})} - 1)^2\label{eq:double_well_morse_potential}
 \end{equation}
-where the subscripts L and R correspond to left and right well, respectively. The parameter $D$ controls the depth of the potential well, whilst $c$ has some control over the width of the well, through the steepness of the exponential functions decay (and thus the curvature, and width, of the well). A smaller $c$ parameter constitues a wider well as the function would then decay slowly. The parameter $r_0$ is the position of the well minima. 
-
-\begin{itemize}
-    \item Presentation of the actual potential
-    \item Why it is used, and where
-    \item Connection to the long-range morse that is very popular
-    \item Why we use it
-    \item Form of the potential
-    \item our construction of a double Morse potential well
-    \item Some plots of the potential, and it's energy levels (show that they are quantized, but not equally spaced)
-\end{itemize}
+where the subscripts L and R correspond to left and right well, respectively. The parameter $D$ controls the depth of the potential well, whilst $c$ has some control over the width of the well, through the steepness of the exponential functions decay (and thus the curvature, and width, of the well). A smaller $c$ parameter constitues a wider well as the function would then decay slowly. The parameter $r_0$ is the position of the well minima. It is this potential that we shall study in great detail in this thesis, and we will use it to construct our qubit system. The parameters will be tuned throughout the time-evolution to achieve the desired energy level structure, and thus control the qubit system parametrically.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{placeholder_image.jpeg}
+    \caption{TODO: Replace this placeholder image with a relevant figure. A visual representation of the double Morse potential, with the two wells, and the energy levels. Parameters for this visualization are $D_L=12, D_R=10, k_l=4, k_r=5, r_{0,L}=-5, r_{0,R}=5$. The energy levels are the 5 lowest energy levels of the double Morse potential.}
+    \label{fig:double_well_morse_potential}
+\end{figure}
 
 \end{document}

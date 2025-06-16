@@ -56,8 +56,8 @@ def TIHF(h, u, num_func, n_particles, max_iters=10_000, epsilon=1e-10, verbose=T
 
             return fock, density_matrix
 
-        energy, C = scipy.linalg.eigh(np.eye(h.shape[0]))#, subset_by_index=[0, num_func - 1])
-        # energy, C = scipy.linalg.eigh(h)#, subset_by_index=[0, num_func - 1])
+        # energy, C = scipy.linalg.eigh(np.eye(h.shape[0]), subset_by_index=[0, num_func - 1])
+        energy, C = scipy.linalg.eigh(h, subset_by_index=[0, num_func - 1])
         fock, density_matrix = fill_fock_matrix(C)
         converged=False
         delta_E = 0.0
@@ -68,7 +68,7 @@ def TIHF(h, u, num_func, n_particles, max_iters=10_000, epsilon=1e-10, verbose=T
                 colour="green",
                 leave=True) as pbar:
             for i in range(max_iters):
-                energy_new, C_ = scipy.linalg.eigh(fock)#, subset_by_index=[0, num_func - 1])
+                energy_new, C_ = scipy.linalg.eigh(fock, subset_by_index=[0, num_func - 1])
                 e_list.append(energy_new[0])
                 delta_E = np.linalg.norm(energy_new - energy) / len(energy)
                 pbar.set_description(
@@ -112,37 +112,8 @@ def construct_slater_determinants(spf_l, spf_r):
     return sd
 
 def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func, l, n_particles, num_grid_points_sinc=400):
-    # Hartree-product WF
-    # disting_basis = qs.ODMorse(
-    #     l=l,
-    #     grid_length=grid_length,
-    #     num_grid_points=num_grid_points,
-    #     _a=a,
-    #     alpha=alpha,
-    #     potential=potential
-    # )
-    # grid = disting_basis.grid
-    # num_l = num_func
-    # num_r = num_func
-    # disting_bhs = BHS(
-    #     h_l=disting_basis.h_l,
-    #     h_r=disting_basis.h_r,
-    #     u_lr=disting_basis._ulr,
-    #     num_basis_l=num_l,
-    #     num_basis_r=num_r,
-    # )
-    # disting_eps_l, disting_c_l, disting_eps_r, disting_c_r = disting_bhs.solve()
-    # disting_h_l = disting_c_l.conj().T @ disting_basis.h_l @ disting_c_l
-    # disting_h_r = disting_c_r.conj().T @ disting_basis.h_r @ disting_c_r
-    # disting_u_lr = np.einsum('ia, jb, ijkl, kc, ld -> abcd', disting_c_l.conj(), disting_c_r.conj(), disting_basis._ulr, disting_c_l, disting_c_r)
-
-    # disting_h = np.kron(disting_h_l, np.eye(*disting_h_l.shape)) + np.kron(np.eye(*disting_h_r.shape), disting_h_r)
-    # disting_u = disting_u_lr.reshape(*disting_h.shape)
-    
-    # disting_H = disting_h + disting_u
-    # disting_eps, disting_C = np.linalg.eigh(disting_H)
     # # Sinc basis Hartree-product WF
-    num_grid_points_sinc = 1600
+    num_grid_points_sinc = 800
     basis = ODMorse(
         l=l,
         grid_length=grid_length,
@@ -152,8 +123,6 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
         potential=potential,
         dvr=True,
     )
-    # H = basis.H
-    # E, C = np.linalg.eigh(H)
     h_l = basis._h_l
     h_r = basis._h_r
     u_lr = basis._ulr
@@ -165,14 +134,12 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     c_r = bhs.c_r
     h_l = c_l.conj().T @ h_l @ c_l
     h_r = c_r.conj().T @ h_r @ c_r
-    # u_lr = np.einsum('ai, bj, ab, ak, bl -> ijkl', c_l.conj(), c_r.conj(), u_lr, c_l, c_r)
-    u_lr = c_l.conj().T @ u_lr @ c_r
-    u_diag = u_lr.flatten()
-    U = np.diag(u_diag)
+    # New attempt nr.2, using two-step einsum to avoid memory issues. Possible due to sparsity in u matrix (i!=j, k!=l is zero by construction) 
+    M = np.einsum('ia, ij, ic -> acj', bhs.c_l.conj(), u_lr, bhs.c_l, optimize=True)
+    u_lr = np.einsum('acj, jb, jd -> abcd', M, bhs.c_r.conj(), bhs.c_r, optimize=True)
     H_ = np.kron(h_l, np.eye(*h_l.shape)) + np.kron(np.eye(*h_r.shape), h_r) 
-    # U = u_lr.reshape(*H_.shape)
+    U = u_lr.reshape(*H_.shape)
     H = H_ + U
-
     M = h_l.shape[0]               # number of one-particle functions
     pairs = [(i, j) for i in range(M) for j in range(i)]
 
@@ -186,71 +153,124 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
 
     H_antisym = P.conj().T @ H @ P
     eps_asym, C_asym = np.linalg.eigh(H_antisym)
-    E_fermion_exact = np.real(eps_asym[0])
-    print("Exact antisymmetric ground energy:", E_fermion_exact)
-    breakpoint()
-    exit()
-    # --- end snippet ---
-
-    # (Optional) If you still want the full product‐space spectrum:
     disting_eps, disting_C = np.linalg.eigh(H)
+    exch_energy = abs(eps_asym[0] - 0.5*(disting_eps[1] + disting_eps[2]))
+    print(f"Exchange:{abs(eps_asym[0] - 0.5*(disting_eps[1] + disting_eps[2])):.5f}")
 
-    # Anti-symmetric WF 
-    indisting_basis = ODMorse(
-        l=l,
-        grid_length=grid_length,
-        num_grid_points=num_grid_points,
-        _a=a,
-        alpha=alpha,
-        potential=potential,
-        anti_symmetric=True
-    )
-    indisting_eps, indisting_C = TIHF(indisting_basis.h, indisting_basis.u, num_func=l, n_particles=n_particles)
-    rho = np.zeros((indisting_basis.l,indisting_basis.l), dtype=np.complex128)
-    for i in range(n_particles):
-        rho += np.outer(indisting_C[:,i], np.conj(indisting_C[:,i]).T)
-    # Find total HF energy
-    E_2body = 0
-    for i in range(indisting_basis.l):
-        for j in range(indisting_basis.l):
-            E_2body += 0.5 * rho[i, i] * rho[j, j] * (indisting_basis.u[i, j, i, j] - indisting_basis.u[i, j, j, i])
-    E_1body = np.sum(np.einsum('ij,ij->ij', indisting_basis.h, rho))
-    E = E_1body + E_2body
-    # calculate ground state overlap
-    d_C = disting_C[:,0]
-    ind_C = indisting_C[:16,0]
-    S = np.abs(np.vdot(np.conj(d_C), ind_C))**2
-    print(f"Overlap between distinguishable and indistinguishable ground state: {S:.5f}")
-    print(f"Distinguishable energies: {disting_eps[:6]}")
-    print(f"Distinguishable fermionic energies: {eps_asym[:6]}")
-    print(f"Indistuinguishable energies: {indisting_eps[:6]}")
-    print(f"HF energy: {E}")
-    print(f"Deviation in ground state estimate: {np.abs(disting_eps[0] - E):.5f}")
-    print(f"Deviation between fermionic energies: {np.abs(E_fermion_exact - E):.5f}")
-    print(f'Relative error: {np.abs(disting_eps[0] - E) / E.real:.5f}')
-    print(f'Relative error fermionic: {np.abs(E_fermion_exact - E) / E.real:.5f}')
 
-    return eps_asym, E, disting_eps, S
+    # # Anti-symmetric WF 
+    # indisting_basis = ODMorse(
+    #     l=l,
+    #     grid_length=grid_length,
+    #     num_grid_points=num_grid_points_sinc,
+    #     _a=a,
+    #     alpha=alpha,
+    #     potential=potential,
+    #     anti_symmetric=True,
+    #     dvr=True,
+    # )
+    # eps_hf, C_hf = TIHF(indisting_basis.h, indisting_basis.u, num_func=num_func, n_particles=n_particles)
+    # h_mo = C_hf.conj().T @ indisting_basis.h @ C_hf       # shape (L,L)
+    # u_mo = np.einsum(
+    #     'ip, jq, ijkl, kr, ls -> pqrs',
+    #     C_hf.conj(), C_hf.conj(), indisting_basis.u, C_hf, C_hf,
+    #     optimize=True
+    # )
+    # occ = [0,1]
+    # J = np.zeros((n_particles, n_particles))
+    # K = np.zeros((n_particles, n_particles))
+    # for i in occ:
+    #     for j in occ:
+    #         J[i, j] = u_mo[i, i, j, j]
+    #         K[i, j] = u_mo[i, j, j, i]
+    # E_HF = sum(eps_hf[i] for i in occ) \
+    #     - 0.5 * sum(J[i, j] - K[i, j] for i in occ for j in occ)
+    # print(f"HF energy: {E_HF:.5f}")
+    return exch_energy, eps_asym, disting_eps, 
+    # rho = np.zeros((indisting_basis.l,indisting_basis.l), dtype=np.complex128)
+    # for i in range(n_particles):
+    #     rho += np.outer(indisting_C[:,i], np.conj(indisting_C[:,i]).T)
+    # # Find total HF energy
+    # E_2body = 0
+    # E_ex = 0
+    # E_dir = 0
+    # for i in range(n_particles):
+    #     for j in range(n_particles):
+    #         E_2body += 0.5 * rho[i, i] * rho[j, j] * (indisting_basis.u[i, j, i, j] - indisting_basis.u[i, j, j, i])
+    #         # Compute the diect and exchange terms
+    #         E_ex += 0.5 * rho[i, i] * rho[j, j] * indisting_basis.exchange[i, j, i, j].real
+    #         E_dir += 0.5 * rho[i, i] * rho[j, j] * indisting_basis.direct[i, j, i, j].real
+    # # E_1body = np.sum(np.einsum('ij,ij->ij', indisting_basis.h, rho))
+    # E_1body = np.trace(indisting_basis.h @ rho).real
+    # E = E_1body + E_2body
+    # # 1) Build MO‐transformed integrals
+    # h_mo = indisting_C.conj().T @ indisting_basis.h @ indisting_C       # shape (L,L)
+    # u_mo = np.einsum(
+    #     'pi, qj, ijkl, rk, sl -> pqrs',
+    #    indisting_C.conj(), indisting_C.conj(), indisting_basis.u, indisting_C, indisting_C,
+    #     optimize=True
+    # )
+
+    # # 2) Identify occupied orbitals (first n_particles)
+    # occ = range(n_particles)
+
+    # # 3) Compute Coulomb & exchange sums
+    # J = np.zeros((n_particles,n_particles))
+    # K = np.zeros((n_particles,n_particles))
+    # for i in occ:
+    #     for j in occ:
+    #         J[i,j] = u_mo[i,i,j,j]
+    #         K[i,j] = u_mo[i,j,j,i]
+
+    # # 4) HF total energy
+    # E_HF = sum(indisting_eps[i] for i in occ) \
+    #     - 0.5 * sum(J[i,j] - K[i,j] for i in occ for j in occ)
+    # print("HF energy =", E_HF)
+    
+    
+    
+    
+    
+    
+    # # calculate ground state overlap
+    # S = 0
+    
+    # print(f"Overlap between distinguishable and indistinguishable ground state: {S:.5f}")
+    # print(f"Distinguishable energies: {disting_eps[:6]}")
+    # print(f"Indistuinguishable energies: {indisting_eps[:6]}")
+    # print(f"HF energy: {E}")
+    # print(f"Deviation in ground state estimate: {np.abs(disting_eps[0] - E):.5f}")
+    # print(f'Relative error: {np.abs(disting_eps[0] - E) / E.real:.5f}')
+    # print(f"Exchange energy: {E_ex:.5f}")
+    # print(f"Direct energy: {E_dir:.5f}")
+    # print(f"Exchange fraction: {E_ex.real / (E_ex.real + E_dir.real):.5%}")
+    
+    breakpoint()
+    # return eps_asym, E, disting_eps, S, E_ex, E_dir, 
 if __name__ == "__main__":
-    # separations = [5, 10, 15, 25, 50, 75, 100]
-    separations = [20, 50, 100, 150]
+    separations = [5, 10, 15, 25, 50, 75, 100]
+    separations = [20]
+    separations = [1, 2, 3, 5, 10, 20, 25]
     alpha = 1.0
     a = 0.25
     num_grid_points = 4_001
     l = 10
     n = 2 # Number of particles
     num_func = 4
-    grid_length = 800
+    grid_length = 400
     asym_en = []
     E_n = []   
     prod_e = []
     overlaps = []
+    exchange_term = []
+    direct_term = []
     for d in separations:    
         params_close = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, d]
         # params0306 = [63.68144808, 43.05416999 ,10.69127355 ,10.90371128, d] #16.02656697]
         # paramsI_also_long = [ 95.70685722 , 76.66934364 , 54.2000149  , 10., d]
         # params = [61.48354464, 37.12075554, 22.36820274, 8.1535532, 16.58949561]
         params = params_close
+        params = [76.50992129, 48.1146782 , 13.351184 ,  13.68434784 , d]
         print(f"Separation: {d}")
         # Should maybe test this also, and put in thesis for parameters in th emiddle of config I and config II?
         # Currently use params found from config II
@@ -262,20 +282,51 @@ if __name__ == "__main__":
                 # k_b=25,
                 # d=d
             )
-
-        eps_asym, E, prod_en, S_ = make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
+        exchange_en, eps_asym, eps, = make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
+        exchange_term.append(exchange_en)
         asym_en.append(eps_asym[0])
-        E_n.append(E)
-        prod_e.append(prod_en[0])
-        overlaps.append(S_)
-        print("\n")
-    
+        E_n.append(0.5 * (eps[2] + eps[1] ))
+        # eps_asym, E, prod_en, S_, exch, direct = make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
+        # asym_en.append(eps_asym[0])
+        # E_n.append(E)
+        # exchange_term.append(exch)
+        # direct_term.append(direct)
+        # prod_e.append(prod_en[0])
+        # overlaps.append(S_)
+        # print("\n")
+    matplotlib.style.use('seaborn-v0_8-deep')
+    colors = sns.color_palette()
+    b = colors[0]
+    g = colors[1]
+    r = colors[2]
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.45))
+    ax[0].plot(separations, E_n, 'x-', color=b, label='Hartree energy')
+    ax[0].plot(separations, asym_en, 'x-', color=r, label='CI energy')
+    ax[0].set_xlabel('Separation (a.u.)')
+    ax[0].set_ylabel('Energy (a.u.)')
+    ax[0].set_title('Ground state energies')
+    ax[1].plot(separations, np.asarray(exchange_term) *  27.211, 'x-', color=g, label='Exchange energy')
+    ax[1].set_xlabel('Separation (a.u.)')
+    ax[1].set_ylabel('Energy (eV)')
+    ax[1].set_title('Exchange energy')
+    ax[0].legend()
+    ax[1].legend()
+    plt.tight_layout()
+    fig.subplots_adjust(left=0.1,
+                    right=0.9,  # increased margin on the right
+                    top=0.9,
+                    bottom=0.15,
+                    wspace=0.3)
+    plt.savefig("../doc/figs/exchange_shift.pdf")
+    plt.show()
+    exit()
     data = {
         "separations": separations,
         "asym_energies": asym_en,
-        "prod_energies": prod_en,
+        "prod_energies": prod_e,
         "E_n": E_n,
         "overlaps": overlaps,
+        "exchange_terms": exchange_term,
     }
     # import pickle
     # with open("data/distinguishable_particle_breakdown0306.pkl", "wb") as f:
@@ -292,7 +343,7 @@ if __name__ == "__main__":
     E_n = data['E_n']
     separations = data['separations']
     asym_en = data['asym_energies']
-        
+    breakpoint()
     # separations = data['separations']
     # asym_en = data['asym_energies']
     # prod_e = data['prod_energies']

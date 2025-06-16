@@ -83,7 +83,7 @@ Many modern many-body methods are built upon this principle, where the choice of
 
 Furthermore, by finding a basis that diagonalizes the Hamiltonian matrix, we can directly solve for the energy eigenvalues and eigenstates. This principle underlies many techniques, such as using harmonic oscillator eigenfunctions for bound systems or plane waves for periodic potentials\cite{griffiths2018introduction, kittel2018introduction}. The search for an optimal basis is often guided by the specific features of the system under study, such as symmetry or localization, making it a central consideration in both theoretical and computational approaches to quantum mechanics. 
 
-Due to the flexible nature of quantum bases, we are often required to re-express our system in various bases, depending on the problem and what we are currently studying. Often, we will have to chang our bases during the course of our calculations and we thus require a mathematical framework to transform between the bases. 
+Because no single basis is optimal for every task at hand, we are often required to re-express states and operators in different bases during calculations, depending on the problem and what we are currently studying. 
 
 The transformation between two basis sets $\{\ket{i}\}$ and $\{\ket{j}\}$ is given by the unitary transformation matrix $U$:
 \begin{align*}
@@ -93,11 +93,15 @@ where the matrix elements of $U$ are given by the inner product of the basis vec
 \begin{align*}
     U_{\alpha i} = \braket{\alpha|i}
 \end{align*}
-here assuming the basis sets are complete, meaning the following holds:
+here assuming the basis sets are complete, meaning they obey the \emph{completeness relation}:
 \begin{align*}
     \sum_i \ket{i}\bra{i} = \sum_\alpha \ket{\alpha}\bra{\alpha} = I
 \end{align*}
-This is powerful, and we can also investigate how the matrix representation of an operator change under a basis transformation between complete orthonormal basis sets.\cite{szabo1996modern} \\
+This relation allows the insertion of the identity operator in calculations, to expand state-vectors and operators in the basis of our choice. This underpins many mathematical tools in quantum mechanics, from the spectral decomposition of operators\footnote{See for example chapter 5.5 in \cite{strang2000linear}} to perturbation-theory expansions\cite{griffiths2018introduction, berera2021quantum, sakurai1986modern}. \\
+
+
+We can also study how the matrix representation of an operator change under a basis transformation between complete orthonormal basis sets.\cite{szabo1996modern}
+
 Assume that $\hat O$ is an operator in the basis $\{\ket{i}\}$, and $\hat O'$ is the same operator expressed in the basis $\{\ket{\alpha}\}$, then the transformation between the two operators is given by:
 \begin{align*}
     O'_{\alpha\beta} = \braket{\alpha|\hat O|\beta} = \sum_{ij}\bra{\alpha}\ket{i}\bra{i}\hat O\ket{j}\bra{j}\ket{\beta} = \sum_{ij}U_{\alpha i}O_{ij}U^\dagger_{j\beta}
@@ -107,7 +111,7 @@ And thus, we have the following transformation rule for operators under a basis 
     \hat O' &= U\hat OU^\dagger \\
     \hat O &= U^\dagger\hat O'U
 \end{align*}
-
+which allow us to freely move between coordinate, momentum, energy or grid-based representations as needed.
 \subsection{Basis sets}\label{sec:basis_set}
 As we've mentioned, the choice of basis set is crucial in quantum mechanics, and somewhat arbitrary. Any complete set of orthonormal vectors can be used to express our state-vectors, and there are numerous choices available, each with its own advantages and disadvantages. The choice can greatly affect computational efficiency, numerical stability and the physical insights gained from the calculations. We will briefly outline some of the most common families of basis sets, and their usages before we present th choice made in this thesis:
 \begin{itemize}
@@ -135,13 +139,13 @@ These basis functions are orthonormal, meaning that they satisfy the following r
 \end{align*}
 where $\delta_{nm}$ is the Kronecker delta function. This orthonormality property is crucial for ensuring that the basis functions can be used to represent quantum states accurately, and results in the Hilbert space being spanned by the basis functions. We shall in later sections discuss further on how we chose to implement the Sinc-DVR basis in our code, by number of grid points, grid spacing etc. 
 
-In the Discrete Variable Representation, the kinetic energy operator is expressed in matrix form using a grid-basis. Using atomic units, this operator is given by
+In the Discrete Variable Representation, the kinetic energy operator is expressed in matrix form using a grid-basis. In atomic units, this operator is given by
 \begin{align*}
     T = -\frac{1}{2} \frac{d^2}{dx^2} ,
 \end{align*}
-and the Sinc-DVR function defined on a uniform grid as presented above in \eqref{eq:sinc_dvr}. The kinetic energy operator matrix elements are then given by
+and the Sinc-DVR function defined on a uniform grid as in \eqref{eq:sinc_dvr}. The kinetic energy operator matrix elements are then given by
 \begin{align*}
-    T_{nm} = \braket{\phi_n}{-\frac{1}{2} \frac{d^2}{dx^2}}{\phi_m}.
+    T_{nm} = \braket{\phi_n|-\frac{1}{2} \frac{d^2}{dx^2}|\phi_m}.
 \end{align*}
 Using the known analytical solution of these integrals with the sinc function properties (see for example Appendix A in \cite{colbert1992novel}), these matrix elements take the form 
 \begin{align*}

@@ -39,7 +39,7 @@ def fill_fock_matrix(C):
 
 
 %%% HARTREE METHOD
-\section{Bipartite Hartree}
+\section{Hartree method}
 As presented in section \ref{sec:bipartite_H}, the Hartree method is also a self-consistent field method, where we solve the coupled eigenvalue equations for the two subsystems (particles) iteratively. The method is very similar to the Hartree-Fock method, and the main difference is that we do not include an exchange term and the wavefunction itself a single hartree product state. The general method is as follows:
 \begin{itemize}
     \item Construct an initial guess for the single-particle orbitals, $\{\chi_i\}$.
@@ -54,7 +54,7 @@ We make an initial ansatz for th single-particle orbitals by constructing the Fo
 \end{align*}
 where $M$ is the subsystem index, and $\alpha, \beta$ are the basis functions. This yields our initial set of orbitals, but does not include any interaction between the two subsystems. We then, in the next iterations construct new Fock matrices, and diagonalize them to obtain new orbitals. The new Fock matrix for the i'th iteration is constructed as
 \begin{align*}
-    f_{\alpha\beta}^{M(i)} = h_{\alpha\beta}^M + \sum_{i}^{N} u_{\alpha\gamma\beta\delta}^{M} \rho_{\gamma\delta}^{M}
+    f_{\alpha\beta}^{M(i)} = h_{\alpha\beta}^M + \sum_{i}^{N} u_{\alpha\gamma\beta\delta}^{M} \rho_{\gamma\delta}^{M},
 \end{align*}
 where the density matrix $\rho_{\gamma\delta}^{M}$ is constructed from the previous set of orbitals, and used to calculate the interaction term \emph{for subsystem $M$ specifically}. This differs from Hartree-Fock where the interaction term is calculated from the total density matrix \eqref{eq:hf_equations}. In the following code snippet the density matrix is not used directly, but an equivalent einstein summation is performed, following the equations \eqref{eq:bipartite_hartree} in section \ref{sec:bipartite_H}.
 \begin{lstlisting}[language=Python]
@@ -68,8 +68,48 @@ def diagonalize_fock_matrices(self, f_l, f_r):
     eps_r, c_r = scipy.linalg.eigh(f_r, subset_by_index=[0, self.num_basis_r - 1])
     return eps_l, c_l, eps_r, c_r
 \end{lstlisting}
-With these two functions we set up and iterative loop that repeatedly constructs the Fock matrices, diagonalizes them, and constructs new Fock matrices until the energy converges within a pre-set threshold for the two subsystems, or we reach a maximum number of iterations (and have divergence). We use the \texttt{scipy.linalg}\cite{2020SciPy-NMeth} package and it's hermitian eigensolver \texttt{eigh} to diagonalize the Fock matrices, selecting the subset of functions we wish to extract, corresponding to the number of available basis functions in each subsystem. \textcolor{red}{(Not finished, need to write more about the convergence criteria, and the iterative loop perhaps?)}
+With these two functions we set up and iterative loop that repeatedly constructs the Fock matrices, diagonalizes them, and constructs new Fock matrices until the energy converges within a pre-set threshold for the two subsystems, or we reach a maximum number of iterations (and have divergence). We use the \texttt{scipy.linalg}\cite{2020SciPy-NMeth} package and its hermitian eigensolver \texttt{eigh} to diagonalize the Fock matrices, selecting the subset of functions we wish to extract, corresponding to the number of available basis functions in each subsystem. \textcolor{red}{(Not finished, need to write more about the convergence criteria, and the iterative loop perhaps?)}
 
 
+\subsection{Configuation Interaction}\label{sec:CI_method}
+Building on the Hartree method, our CI implementation projects the full two-particle product state Hamiltonian into a smaller subspace of anti-symmetrized basis states. Recall from Section \ref{sec:CI}, that in practice we do the following:
+\begin{itemize}
+    \item Truncate to the lowest $N$ ($N<M$) orbitals in each well.
+    \item Form all unordered pairs of these orbitals, i.e. $\{\phi_i, \phi_j\}$ where $i \neq j$.
+    \item Build the CI Hamiltonian by calculating the matrix elements of the two-particle Hamiltonian in this reduced basis.
+    \item Diagonalize the CI Hamiltonian to obtain the energy eigenstates and eigenvalues.
+\end{itemize}
+To perform the CI procedure, we build a linear map $P$ that projects any vector in the $M$-dimensional product-state Hilbert space down onto our anti-symmtric subspace of dimension $\binom{N}{2}$. Concretely, this means that we enumrate all possible unordered pair of orbitals with $0\leq i < j < N$, and for each pair construct the anti-symmetric basis state
+\begin{align*}
+    \ket{\phi_i, \phi_j} = \frac{1}{\sqrt{2}}(\ket{\phi_i}\otimes\ket{\phi_j} - \ket{\phi_j}\otimes\ket{\phi_i}).
+\end{align*}
+This flattened representation of the anti-symmetric basis state will build the columns of the projection matrix $P$, which ensures $P^\dagger P = \mathcal{I}$, where $\mathcal{I}$ is the identity matrix. 
+
+Once $P$ is constructed, we can project the full two-particle Hamiltonian $H$ onto the anti-symmetric subspace by
+\begin{align*}
+    H_{\text{CI}} = P^\dagger H_{\text{prod}} P.
+\end{align*}
+Because $H_{\text{prod}}$ contains all the one- and two-body terms of the product basis, the projected Hamiltonian $H_{\text{CI}}$ will contain all the relevant interactions between the two particles in the anti-symmetric subspace. This gives us a reduced Hamiltonian that can be diagonalized to obtain the energy eigenstates and eigenvalues of the system. The CI method thus allows us to efficiently explore the low-energy spectrum of the two-particle system while maintaining the anti-symmetry required by quantum mechanics. 
+
+The following code snippet illustrates how we construct the projection matrix $P$ and the CI Hamiltonian $H_{\text{CI}}$ in practice:
+\begin{lstlisting}[language=Python]
+h_l = ... # Single-particle Hamiltonian for left well
+h_r = ... # Single-particle Hamiltonian for right well
+u_lr = ... # Two-body interaction matrix elements
+H = np.kron(h_l, np.eye(M)) + np.kron(np.eye(M), h_r) + u_lr  # Full two-particle Hamiltonian in product basis
+M = h_l.shape[0]               # number of one-particle functions
+pairs = [(i, j) for i in range(M) for j in range(i)]
+
+P = np.zeros((M*M, len(pairs)), dtype=complex)
+for idx, (i, j) in enumerate(pairs):
+    e_i = np.zeros(M); e_i[i] = 1
+    e_j = np.zeros(M); e_j[j] = 1
+    psi_ij = np.kron(e_i, e_j)
+    psi_ji = np.kron(e_j, e_i)
+    P[:, idx] = (psi_ij - psi_ji) / np.sqrt(2)
+H_CI = P.conj().T @ H @ P  # Projected CI Hamiltonian
+eps_CI, C_CI = np.linalg.eigh(H_CI)  # Diagonalize CI Hamiltonian
+\end{lstlisting}
+This code constructs the projection matrix $P$ by iterating over all pairs of orbitals, creating the anti-symmetric basis states, and then projecting the full two-particle Hamiltonian onto this subspace. The resulting CI Hamiltonian $H_{\text{CI}}$ can then be diagonalized to obtain the energy eigenstates and eigenvalues of the system in the anti-symmetric subspace.
 
 \end{document}

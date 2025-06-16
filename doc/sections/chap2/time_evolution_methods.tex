@@ -137,8 +137,6 @@ for t in time:
     psi_t.append(psi_new)
     psi = psi_new  # Update the wavefunction for the next iteration
 \end{lstlisting}
-\\\\
-
 
 \subsubsection{Runge-Kutta method}
 In contrast to the Crank-Nicolson method, the Runge-Kutta method trades off unitarity and exact norm preservation for simplicity, flexibility and short-term accuracy. As such, it provides a versatile and widely used tool for initial value problems, and is particularly useful for systems with smooth dynamics. The RK4 method, in particular, is a fourth-order explicit integration scheme that offers high accuracy and ease of implementation.
@@ -149,7 +147,7 @@ Returning to the TDSE\eqref{eq:TDSE}, we can recast it as a first-order differen
 \end{align*}
 The Runge-Kutta methods are designed to solve ODEs of the form $\frac{dy}{dt} = f(t, y)$, where $y$ is the dependent variable (in our case, the wavefunction $\ket{\Psi(t)}$) and $f(t, y)$ is a function that describes the dynamics of the system (i.e the Hamiltonian). It does so by approximating the solution at successive time steps using a weighted average of the derivatives (slopes) evaluated at different intermediate points within the time step. The RK4 method, in particular, uses four evaluations of the derivative to achieve fourth-order accuracy, and provides a balanced trade-off between accuracy and computational efficiency and is a common choice in quantum dynamics when unitarity is not strictly required. The RK4 update rule is given by:
 \begin{align*}
-    k_1 &= f(t, \Psi(t))) = -\frac{i}{\hbar}H(t)\ket{\Psi(t)} \\
+    k_1 &= f(t, \Psi(t)) = -\frac{i}{\hbar}H(t)\ket{\Psi(t)} \\
     k_2 &= f(t + \frac{\Delta t}{2}, \Psi(t) + \frac{\Delta t}{2}k_1) \\
     k_3 &= f(t + \frac{\Delta t}{2}, \Psi(t) + \frac{\Delta t}{2}k_2) \\
     k_4 &= f(t + \Delta t, \Psi(t) + \Delta t k_3)
@@ -316,5 +314,10 @@ t > T_{\mathrm{tot}} - T_{\mathrm{end}}.
 \label{eq:lambda_ramp}
 \end{equation*}
 At each time step, we evaluate the potential parameters $C(t)$ using the interpolation function \eqref{eq:interpolation_function} and the ramping parameter $\lambda(t)$ and update the Hamiltonian accordingly in the main evolution loop. By varying the various ramping parameters, we can test, and control, how efficintly the system transitions, how well entanglement is induced, and how robust the protocol remain under various numerical methods. The ramping routine thus slots directly into our existing time-evolution framework, and provides a controlleed way to explore the dynamics of the double-well Morse potential system.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{placeholder_image.jpeg}
+    \caption{TODO: Add plot. Example of a cosine ramping protocol as described in \eqref{eq:lambda_ramp}. The protocol smoothly transitions the system parameters from the initial configuration $C_I$ to the degenerate configuration $C_{II}$ and back again, allowing for controlled entanglement dynamics. The x-axis is time, and the y-axis is the ramping parameter $\lambda(t)$. In this illustration we've set $T_{\mathrm{start}} = 0.1$, $T_{\mathrm{up}} = 0.2$, $T_{\mathrm{hold}} = 0.3$, $T_{\mathrm{down}} = 0.2$, and $T_{\mathrm{end}} = 0.1$. TODO: Edit correct parameters.}
+\end{figure}
 
 \end{document}
