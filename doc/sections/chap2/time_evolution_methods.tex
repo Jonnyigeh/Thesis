@@ -244,7 +244,9 @@ To test the performance of our numerical implementations, we will evolve an init
     \end{itemize}
     \item We will also qualitatively investigate how the various methods behave near the avoided crossing. \textcolor{red}{TODO: will we do this?}
 \end{itemize}
-\\ \\ We numerically propagate an initial wavefunction prepared in the ground state of the uncoupled system (the \emph{diabatic basis}), and compute the final transition probability $P_{12}$, which is defined as the probability of finding the system in the excited state at time $t_f$, given analytically by \eqref{eq:landau_zener_trans_prob}. \\
+\\ 
+
+We numerically propagate an initial wavefunction prepared in the ground state of the uncoupled system (the \emph{diabatic basis}), and compute the final transition probability $P_{12}$, which is defined as the probability of finding the system in the excited state at time $t_f$, given analytically by \eqref{eq:landau_zener_trans_prob}. \\
 
 The system is initialized in the state $$\ket{\Psi(0)} = \ket{\Psi_1} = \begin{pmatrix} 1 \\ 0 \end{pmatrix},$$ and we compute the final transition probability $$P_{12} = |\langle \Psi(t_f) | \Psi_2 \rangle|^2,$$ where $\ket{\Psi_2}$ is the excited diabatic state of the system. This process is repeated for various numerical methods using a fixed time step $\Delta t$, while varying the length of simulation $2T$. The Landau-Zener transition probability is derived in the infinite time-limit, i.e $t\rightarrow \pm \infty$, this analysis illustrate how each numerical method converges to the analytical solution as the simulation time increases.
 \begin{figure}{h!}
@@ -316,7 +318,7 @@ t > T_{\mathrm{tot}} - T_{\mathrm{end}}.
 At each time step, we evaluate the potential parameters $C(t)$ using the interpolation function \eqref{eq:interpolation_function} and the ramping parameter $\lambda(t)$ and update the Hamiltonian accordingly in the main evolution loop. By varying the various ramping parameters, we can test, and control, how efficintly the system transitions, how well entanglement is induced, and how robust the protocol remain under various numerical methods. The ramping routine thus slots directly into our existing time-evolution framework, and provides a controlleed way to explore the dynamics of the double-well Morse potential system.
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\textwidth]{placeholder_image.jpeg}
+    \includegraphics[width=0.5\textwidth]{figs/placeholder_image.jpeg}
     \caption{TODO: Add plot. Example of a cosine ramping protocol as described in \eqref{eq:lambda_ramp}. The protocol smoothly transitions the system parameters from the initial configuration $C_I$ to the degenerate configuration $C_{II}$ and back again, allowing for controlled entanglement dynamics. The x-axis is time, and the y-axis is the ramping parameter $\lambda(t)$. In this illustration we've set $T_{\mathrm{start}} = 0.1$, $T_{\mathrm{up}} = 0.2$, $T_{\mathrm{hold}} = 0.3$, $T_{\mathrm{down}} = 0.2$, and $T_{\mathrm{end}} = 0.1$. TODO: Edit correct parameters.}
 \end{figure}
 
