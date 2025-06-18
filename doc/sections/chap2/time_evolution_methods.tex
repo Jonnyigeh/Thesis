@@ -301,17 +301,31 @@ To set the ramping protocol we partition the evolution into five segments:
 
 To implement this ramping protocol, we define the time-dependent parameter $\lambda(t)$ as follows, using a cosine ramping function:
 \begin{equation*}
-    \lambda(t) = \begin{cases}
-0, &
-t \le T_{\mathrm{start}}, \\[6pt]
-\dfrac{1 - \cos\!\bigl(\pi \,\tfrac{t - T_{\mathrm{start}}}{T_{\mathrm{up}}}\bigr)}{2}, &
-T_{\mathrm{start}} < t \le T_{\mathrm{start}} + T_{\mathrm{up}}, \\[8pt]
-1, &
-T_{\mathrm{start}} + T_{\mathrm{up}} < t \le T_{\mathrm{tot}} - T_{\mathrm{end}} - T_{\mathrm{down}}, \\[6pt]
-\dfrac{1 + \cos\!\bigl(\pi \,\tfrac{t - \bigl(T_{\mathrm{tot}} - T_{\mathrm{end}} - T_{\mathrm{down}}\bigr)}{T_{\mathrm{down}}}\bigr)}{2}, &
-T_{\mathrm{tot}} - T_{\mathrm{end}} - T_{\mathrm{down}} < t \le T_{\mathrm{tot}} - T_{\mathrm{end}}, \\[6pt]
-0, &
-t > T_{\mathrm{tot}} - T_{\mathrm{end}}.
+\lambda(t)=
+\begin{cases}
+0,
+&
+t \;\le\;
+t_{\mathrm{start}},
+\\[6pt]
+\dfrac{\,1-\cos\!\bigl(\pi\,\tfrac{t - t_{\mathrm{start}}}{t_{\mathrm{up}}}\bigr)\,}{2},
+&
+t_{\mathrm{start}} < t \;\le\; t_{\mathrm{start}} + t_{\mathrm{up}},
+\\[8pt]
+1,
+&
+t_{\mathrm{start}} + t_{\mathrm{up}} < t \;\le\;
+t_{\mathrm{start}} + t_{\mathrm{up}} + t_{\mathrm{hold}},
+\\[6pt]
+\dfrac{\,1+\cos\!\bigl(\pi\,\tfrac{\,t - (t_{\mathrm{start}}+t_{\mathrm{up}}+t_{\mathrm{hold}})\,}{t_{\mathrm{down}}}\bigr)\,}{2},
+&
+t_{\mathrm{start}} + t_{\mathrm{up}} + t_{\mathrm{hold}}
+< t \;\le\;
+t_{\mathrm{start}} + t_{\mathrm{up}} + t_{\mathrm{hold}} + t_{\mathrm{down}},
+\\[6pt]
+0,
+&
+t > t_{\mathrm{start}} + t_{\mathrm{up}} + t_{\mathrm{hold}} + t_{\mathrm{down}}.
 \end{cases}
 \label{eq:lambda_ramp}
 \end{equation*}

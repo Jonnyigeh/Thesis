@@ -39,8 +39,8 @@ def fill_fock_matrix(C):
 
 
 %%% HARTREE METHOD
-\section{Hartree method}
-As presented in section \ref{sec:bipartite_H}, the Hartree method is also a self-consistent field method, where we solve the coupled eigenvalue equations for the two subsystems (particles) iteratively. The method is very similar to the Hartree-Fock method, and the main difference is that we do not include an exchange term and the wavefunction itself a single hartree product state. The general method is as follows:
+\section{Hartree method}\label{sec:Hartree_method}
+As presented in section \ref{sec:hartree_theory}, the Hartree method is also a self-consistent field method, where we solve the coupled eigenvalue equations for the two subsystems (particles) iteratively. The method is very similar to the Hartree-Fock method, and the main difference is that we do not include an exchange term and the wavefunction itself a single hartree product state. The general method is as follows:
 \begin{itemize}
     \item Construct an initial guess for the single-particle orbitals, $\{\chi_i\}$.
     \item Diagonalize the Hartree matrix to obtain a new set of orbitals, $\{\phi_i\}$, and calculate the energy.
@@ -71,7 +71,7 @@ def diagonalize_fock_matrices(self, f_l, f_r):
 With these two functions we set up and iterative loop that repeatedly constructs the Fock matrices, diagonalizes them, and constructs new Fock matrices until the energy converges within a pre-set threshold for the two subsystems, or we reach a maximum number of iterations (and have divergence). We use the \texttt{scipy.linalg}\cite{2020SciPy-NMeth} package and its hermitian eigensolver \texttt{eigh} to diagonalize the Fock matrices, selecting the subset of functions we wish to extract, corresponding to the number of available basis functions in each subsystem. \textcolor{red}{(Not finished, need to write more about the convergence criteria, and the iterative loop perhaps?)}
 
 
-\subsection{Configuation Interaction}\label{sec:CI_method}
+\section{Configuation Interaction}\label{sec:CI_method}
 Building on the Hartree method, our CI implementation projects the full two-particle product state Hamiltonian into a smaller subspace of anti-symmetrized basis states. Recall from Section \ref{sec:CI}, that in practice we do the following:
 \begin{itemize}
     \item Truncate to the lowest $N$ ($N<M$) orbitals in each well.
