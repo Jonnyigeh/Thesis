@@ -51,7 +51,7 @@ for t in time:
     psi_t.append(psi_new)
     psi = psi_new
 \end{lstlisting}
-where \texttt{H} is the Hamiltonian matrix, \texttt{t} is the time, and \texttt{dt} is the time step. This code snippet outlines how the \texttt{expm} function is used to compute the time-evolution operator, and how this operator is used in a time loop to evolve the wavefunction \texttt{psi}. The time-evolution operator is computed at each time step, and the wavefunction is updated accordingly. The \texttt{psi\_t} variable is used to store the wavefunction at each time step, and can be used to visualize the dynamics of the wavefunction throughout the time-evolution procedure. \\ \\ 
+where \texttt{H} is the Hamiltonian matrix, \texttt{t} is the time, and \texttt{dt} is the time step. This code snippet outlines how the \texttt{expm} function is used to compute the time-evolution operator, and how this operator is used in a time loop to evolve the wavefunction \texttt{psi}. The time-evolution operator is computed at each time step, and the wavefunction is updated accordingly. The \texttt{psi\_t} variable is used to store the wavefunction at each time step, and can be used to visualize the dynamics of the wavefunction throughout the time-evolution procedure. \\ 
 While matrix exponentiation provides a robust method for computing the time-evolution operator, its accuracy for time-dependent Hamiltonians depends on how the Hamiltonian is evaluated at each time step. In particular, since $U(t, t_0) \approx \text{exp}(-iH(t)\Delta t)$, the choice of how to evaluate $H(t)$ on the interval $[t, t + \Delta t]$ can significantly affect the accuracy of the time-evolution operator. Some examples are
 \begin{itemize}
     \item \textbf{Euler (explicit first order):} $U(t + \Delta t, t) = \text{exp}(-iH(t)\Delta t)$. This method is simple and fast, but inaccurate for rapidly varying Hamiltonians and/or large time steps. 
@@ -61,7 +61,9 @@ While matrix exponentiation provides a robust method for computing the time-evol
 The choice of evaluation method depends on the specific system, and in this work, we primarily use the Euler method for simplicity and speed. \textcolor{red}{TODO: Add more details, possibly validate against the other two evaluation methods.} \\ In the next section we will discuss the different approach of using numerical integration methods to solve the time-evolution operator, namely the Crank-Nicolson method and the Runge-Kutta method. These methods are more general and can be used for time-dependent Hamiltonians, but are also more complex and computationally expensive.
 
 \subsection{Numerical integrators}
-As we have seen, direct matrix exponentiation provides a robust and unitary method for approximating the time-evolution operator. However, it becomes increasingly inefficient and impractical for high-dimensional systems, due to the computational complexity of evaluating the matrix exponential of the Hamiltonian in each time step. To address this, we resort to \emph{numerical integratorion methods},which offer more scalable alternatives for evolving the quantum system, and propagating the wavefunction through time.  \\\\ These numerical methods treat the Schrödinger equation \eqref{eq:TDSE} as a first-order differential equation in time and aim to approximate the solution iteratively over successive time steps. This foregoes the need to explicitly compute the time-evolution operator \eqref{eq:time_evolution_operator}, and instead focus on the evolution of the wavefunction itself. \\\\ 
+As we have seen, direct matrix exponentiation provides a robust and unitary method for approximating the time-evolution operator. However, it becomes increasingly inefficient and impractical for high-dimensional systems, due to the computational complexity of evaluating the matrix exponential of the Hamiltonian in each time step. To address this, we resort to \emph{numerical integratorion methods},which offer more scalable alternatives for evolving the quantum system, and propagating the wavefunction through time.  \\
+
+These numerical methods treat the Schrödinger equation \eqref{eq:TDSE} as a first-order differential equation in time and aim to approximate the solution iteratively over successive time steps. This foregoes the need to explicitly compute the time-evolution operator \eqref{eq:time_evolution_operator}, and instead focus on the evolution of the wavefunction itself. \\
 
 
 Unlike direct matrix exponentiation - which preserves unitarity by construction - numerical integrators must be carefully designed to ensure that important physical properties, like norm conservation, are maintainted over time. Some integrators, like the Crank-Nicolson method, are specifically designed to preserve unitarity and are well-suited for long-time simulations. Others, like the Runge-Kutta method, may not preserve unitarity exactly, but is more flexible and can provide highly accurate results for a wide range of systems, and for shorter time simulations. \\ \\ In this section, we present and suggest procedures to implement two widely used numerical integration schemes:
@@ -77,8 +79,9 @@ These methods are implemented in Python, and we will provide code snippets to il
 Building on the limitations of the simple method of Euler-Cromer, and to improve upon the computational cost of direct matrix exponentiation, the \emph{Crank-Nicolson method} offers a compelling, and physically grounded alternative. As mentioned, this is a semi-implicit, second-order finite-difference method that aims to solve the TDSE\eqref{eq:TDSE} iteratively over time. The weighted average of states used makes an approximative time-evolution operator - which in turn makes the method unitary by construction - and thus is key to preserve essential physical properties like \textbf{norm conservation} and \textbf{unitarity}. \\\\
 At its core, the Crank-Nicolson method applies the trapezoidal rule to the Schrödinger equation, treating the Hamiltonian propagator as an average of its behaviour at the beginning and end of each time interval. This in turn leads to scheme that does not explicitly compute the time-evolution operator, but still approximates its action through a symmetric update rule. As stated, we apply the trapezoidal rule to the time-derivative in the TDSE\eqref{eq:TDSE}:
 \begin{align*}
-    \frac{\ket{\Psi(t + \Delta t)} - \ket{\Psi(t)}}{\Delta t} \approx \frac{-i}{2\hbar}\bigg[H(t + \Delta t)\ket{\Psi(t + \Delta t)} - H(t)\ket{\Psi(t)}\bigg]
-    \ket{\Psi(t + \Delta t)} \approx \ket{\Psi(t)} - \frac{i\Delta t}{2\hbar}\bigg[H(t + \Delta t)\ket{\Psi(t + \Delta t)} + H(t)\ket{\Psi(t)}\bigg]
+    \frac{\ket{\Psi(t + \Delta t)} - \ket{\Psi(t)}}{\Delta t} &\approx \frac{-i}{2\hbar}\bigg[H(t + \Delta t)\ket{\Psi(t + \Delta t)} - H(t)\ket{\Psi(t)}\bigg]
+    \ket{\Psi(t + \Delta t)} \\
+    &\approx \ket{\Psi(t)} - \frac{i\Delta t}{2\hbar}\bigg[H(t + \Delta t)\ket{\Psi(t + \Delta t)} + H(t)\ket{\Psi(t)}\bigg]
 \end{align*}
 Rearranging the terms of this equation, yields the Crank-Nicolson update rule:
 \begin{align*}
@@ -210,81 +213,14 @@ for t in time:
     psi = psi_new  # Update the wavefunction for the next iteration
 \end{lstlisting}
 This code snippet outlines a suggested procedure, however - in our work, we shall instead use the \texttt{scipy.integrate} packages \texttt{RK45}\footnote{See \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.RK45.html}} method, which is a built-in implementation of the RK4 method. This package provides a convenient and efficient way to perform numerical integration of ODEs, and is well-suited for our purposes.  \\\\
-In the next section, we will compare the performance and qualitative behaviour of the Crank-Nicolson and RK4 methods when applied to the Landau-Zener system \eqref{eq:landau_zener}, providing insight into their respective advantages and limitations in a controlled testbed scenario.
-
-    %% Simple system
-\subsection{Numerical validation: Landau-Zener model}
-To systematically validate our implementation of the aforementiond numerical methods, we require a simple yet representative quantum system that exhibits non-trivial dynamics but still has closed form solutions for comparison. For this purpose, we will once again turn to the simple Landau-Zener model \eqref{eq:landau_zener}, introduced in the section on avoided crossings \ref{sec:avoided_crossings}. This simple two-level system is governed by a time-dependent Hamiltonian. It captures the essential features of quantum dynamics, making it an ideal testbed for our numerical methods in preparation for the more complex double-well Morse potential system we shall study. \\\\
-
-Once again, the Hamiltonian for the Landau-Zener model is given by:
-\begin{align*}
-    H(t) = \begin{pmatrix}
-        vt & V \\
-        V & -vt
-\end{pmatrix}
-\end{align*}
-where $v$ is the sweeping velocity, $V$ is the coupling strength, and $t$ is the time. 
-
-At $t=0$, the uncoupled system would have a degeneracy, but the coupling $V$ opens a gap (lifts the degeneracy), resulting in an avoided crossing as we saw in section \ref{sec:avoided_crossings}. Thus, this minimal system captures one of the simplest non-trivial dyanmics of a quantum system which also leads to a well known analytical solution for the transition probability \eqref{eq:landau_zener_trans_prob}. 
-
-This system is particularly useful for validating our numerical methods, and serves as a suitable testbed for benchmarking due to several reasons, of which some are listed below:
-\begin{itemize}
-    \item \textbf{Low dimensionality:} The Landau-Zener model is a two-level system, making it computationally efficient to simulate and analyze. This allows us to focus on the numerical methods without being overwhelmed by the computational complexity of the system.
-    \item \textbf{Non-trivial dynamics:} The system exhibits interesting dynamics, such as transitions betweeen states, which require the numerical implementations to accurately capture the time evolution of the wavefunction. This provides a meaningful test for the accuracy and stability of the numerical methods.
-    \item \textbf{Analytical reference:} The Landau-Zener model has well-known analytical solutions for the transition probabilities and wavefunction dynamics, allowing us to directly compare the results of our numerical methods against these exact solutions. This serves as a benchmark for assessing the performance of the numerical methods.
-\end{itemize}
-
-To test the performance of our numerical implementations, we will evolve an initial state $\ket{\Psi(0)} = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$, which corresponds to the ground state of the uncoupled system, from an initial time $t_0<0$ to a final time $t_f>0$. We will then compare:
-\begin{itemize}
-    \item The performance of each integrator by
-    \begin{itemize}
-        \item Global error vs. time step $\Delta t$.
-        \item Runtime efficiency
-        \item Stability and accuracy under varying conditions. 
-    \end{itemize}
-    \item We will also qualitatively investigate how the various methods behave near the avoided crossing. \textcolor{red}{TODO: will we do this?}
-\end{itemize}
-\\ 
-
-We numerically propagate an initial wavefunction prepared in the ground state of the uncoupled system (the \emph{diabatic basis}), and compute the final transition probability $P_{12}$, which is defined as the probability of finding the system in the excited state at time $t_f$, given analytically by \eqref{eq:landau_zener_trans_prob}. \\
-
-The system is initialized in the state $$\ket{\Psi(0)} = \ket{\Psi_1} = \begin{pmatrix} 1 \\ 0 \end{pmatrix},$$ and we compute the final transition probability $$P_{12} = |\langle \Psi(t_f) | \Psi_2 \rangle|^2,$$ where $\ket{\Psi_2}$ is the excited diabatic state of the system. This process is repeated for various numerical methods using a fixed time step $\Delta t$, while varying the length of simulation $2T$. The Landau-Zener transition probability is derived in the infinite time-limit, i.e $t\rightarrow \pm \infty$, this analysis illustrate how each numerical method converges to the analytical solution as the simulation time increases.
-\begin{figure}{h!}
-\centering
-\includegraphics[width=1.0\textwidth]{figs/landau_zener_convergence_benchmark.pdf}
-\caption{Final transition probability computed using various numerical methods for increasing total simulation time $
-2T$. All methods converge toward the analytical Landau-Zener probability (dashed line), with RK4 showing good accuracy until instability sets in at longer times due to lack of normalization. Euler becomes unstable very early. The x-axis is in logarithmic scale.}
-\end{figure}
-
-As we can see in figure \eqref{fig:landau_zener_convergence_benchmark}, all methods used converge to the analytical solution, but not exactly. The two Taylor-expansion methods (Euler and RK4) show good agreement but quickly become unstable, with Euler diverging first, as we've seen already in figure \eqref{fig:landau_zener}. Both of these methods can be improved upon by introducing norm corrections, at a computational cost (albeit minimal). The Crank-Nicolson method, on the other hand, remains stable and accurate for longer simulation times, as it preserves unitarity by construction. 
-\\ \\ 
-
-To assess the computational performance of the numerical methods, a full Landau-Zener simulation was measured using the \texttt{time.perf\_counter()} function in Python, which provides a high-resolution timer suitable for short time measurements.This measurement also includes system overhead, yielding realistic performance metrics to evaluate each method. 
-
-The benchmark was performed for the two-level system with sweeping parameter $v=7.0$, coupling strength $V=1.0$, and a time integration interval of $t \in [-5, 5]$ with $100{,}000$ time steps, i.e a time-step of $\Delta t = 10^{-4}$s. The results are presented in the following table \eqref{tab:landau_zener_runtime}, which summarizes the runtime of each method, along with remarks on their performance characteristics.
-
-\begin{table}[h!]
-\centering
-\caption{Runtime comparison of time propagation methods for the Landau-Zener model ($v = 7.0$, $\Delta = 1.0$, $t \in [-5, 5]$, 100,000 steps). Timing measured using \texttt{time.perf\_counter()}.}
-\begin{tabular}{l c l}
-\toprule
-\textbf{Method} & \textbf{Time (ms)} & \textbf{Remarks} \\
-\midrule
-Matrix Exponential & 5942.1 & Most accurate, but very slow \\
-Euler              & 828.6  & Fastest, but unstable \\
-RK4                & 2621.0 & Balanced performance \\
-Crank--Nicholson   & 1953.6 & Stable and efficient \\
-\bottomrule
-\end{tabular}\label{tab:landau_zener_runtime}
-\end{table}
-We see here that the more accurate, direct matrix exponentiation method is the slowest by a good margin, while the Euler method is the
+In Section \ref{sec:numerical_validation_landau_zener}, we compare the performance and qualitative behaviour of the Crank-Nicolson and RK4 methods when applied to the Landau-Zener system \eqref{eq:landau_zener}, providing insight into their respective advantages and limitations in a controlled testbed scenario.
 
 \subsection{Ramping protocols}
 \textcolor{red}{TODO: Add a plot visualizing an example ramp for the lambda parameter?} \\\\
 In the context of time-evolution methods, ramping protocols refer to the controlled variation of system parameters over time, allowing for smooth transitions between different potential configurations. In our double-well Morse potential system, we will employ ramping protocols to gradually change the potential parameters during the simulation, to encur mixing of the states between the two wells. \\\\
 In order to steer our system from the separable configuration $C_I$ into the degenerate, entanglging configuration $C_{II}$ (and back again), we implement a time-dependent ramping protocol for the Morse potential parameters. This protocol is crucial to avoid diabatic transitions and to maintain a level of quantum control over the induced entanglement.
-
-\\\\ We begin by choosing a total evolution time $T_\text{total}$ and a fixed time step $\Delta t$. We also define an interpolation function that smoothly varies the potential parameters from their initial values in configuration $C_I$ to their final values in configuration $C_{II}$. The function of choice is a linear interpolation, which is simple and effective for our purposes. The potential parameters are defined as functions of time:
+\\
+We begin by choosing a total evolution time $T_\text{total}$ and a fixed time step $\Delta t$. We also define an interpolation function that smoothly varies the potential parameters from their initial values in configuration $C_I$ to their final values in configuration $C_{II}$. The function of choice is a linear interpolation, which is simple and effective for our purposes. The potential parameters are defined as functions of time:
 \begin{equation}
     C(t) = (1 - \lambda(t))C_I + \lambda(t)C_{II}\label{eq:interpolation_function}
 \end{equation}
@@ -332,8 +268,8 @@ t > t_{\mathrm{start}} + t_{\mathrm{up}} + t_{\mathrm{hold}} + t_{\mathrm{down}}
 At each time step, we evaluate the potential parameters $C(t)$ using the interpolation function \eqref{eq:interpolation_function} and the ramping parameter $\lambda(t)$ and update the Hamiltonian accordingly in the main evolution loop. By varying the various ramping parameters, we can test, and control, how efficintly the system transitions, how well entanglement is induced, and how robust the protocol remain under various numerical methods. The ramping routine thus slots directly into our existing time-evolution framework, and provides a controlleed way to explore the dynamics of the double-well Morse potential system.
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\textwidth]{figs/placeholder_image.jpeg}
-    \caption{TODO: Add plot. Example of a cosine ramping protocol as described in \eqref{eq:lambda_ramp}. The protocol smoothly transitions the system parameters from the initial configuration $C_I$ to the degenerate configuration $C_{II}$ and back again, allowing for controlled entanglement dynamics. The x-axis is time, and the y-axis is the ramping parameter $\lambda(t)$. In this illustration we've set $T_{\mathrm{start}} = 0.1$, $T_{\mathrm{up}} = 0.2$, $T_{\mathrm{hold}} = 0.3$, $T_{\mathrm{down}} = 0.2$, and $T_{\mathrm{end}} = 0.1$. TODO: Edit correct parameters.}
+    \includegraphics[width=1.0\textwidth]{figs/ramp_protocol.pdf}
+    \caption{Example of a cosine ramping protocol as described in \eqref{eq:lambda_ramp}. The protocol smoothly transitions the system parameters from the initial configuration $C_I$ to the degenerate configuration $C_{II}$ and back again, allowing for controlled entanglement dynamics. The x-axis is time in atomic units (a.u), and the y-axis is the ramping parameter $\lambda(t)$, a dimensionless scalar value. In this illustration we've set $T_{\mathrm{start}} = 3$ a.u, $T_{\mathrm{up}} = 3$ a.u, $T_{\mathrm{hold}} = 5$ a.u, $T_{\mathrm{down}} = 3$ a.u, and $T_{\mathrm{end}} = 3$ a.u. This ramping protocol is symmetric, and is not necessarily optimal for our system, but shows the general structure of such a protocol.}
 \end{figure}
 
 \end{document}

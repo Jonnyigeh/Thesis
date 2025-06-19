@@ -4,11 +4,14 @@ import scipy.special
 import scipy.linalg
 import time
 
-
-from utils.potential import (
-    MorsePotentialDW
-)
-
+try:
+    from utils.potential import (
+        MorsePotentialDW
+    )
+except ModuleNotFoundError:
+    from potential import (
+        MorsePotentialDW
+    )
 @numba.njit
 def _shielded_coulomb(x_1, x_2, alpha, a):
     return alpha / np.sqrt((x_1 - x_2) ** 2 + a**2)

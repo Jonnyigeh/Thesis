@@ -65,9 +65,8 @@ where $\ket{i_B}$ are the basis states of subsystem $B$. The reduced density mat
     S(\rho_A) = -\text{Tr}(\rho_A \ln \rho_A)
 \end{equation}
 and it can easily be shown that $S(\rho_A) = S(\rho_B)$, meaning the entanglement is symmetric between the two subsystems, which is to be expected. 
+\\
 
-
-\\\\ 
 Another useful aspect of the density matrix formalism is that it naturally ties together with measurements in quantum mechanics. Let us consider a quantum system expressed by a density matrix $\rho$ as in \eqref{eq:density_matrix}, and we want to measure an observable $O$ in the system. The expectation value of the observable is given as
 \begin{align*}
     \braket{O} = \sum_i w_i\bra{\psi_i}O\ket{\psi_i} = \sum_i w_i\text{Tr}\big(\ket{\psi_i}\bra{\psi_i}O\big) = \text{Tr}\big(\sum_i w_i \ket{\psi_i}\bra{\psi_i}O\big) = \text{Tr}(\rho O)
@@ -96,11 +95,11 @@ Consider now a dynamical system, where there is some explicit time-dependence in
         E(t) & V \\
         V & -E(t)
     \end{pmatrix} = \begin{pmatrix}
-        vt & V \\
-        V & -vt
+        kt & V \\
+        V & -kt
     \end{pmatrix} \label{eq:landau_zener}
 \end{align}
-where $E(t)$ is the time-dependent energy level of the system, with $v$ the sweeping parameter, that sweep the energy levels towards each other (they are equal at $t=0$). 
+where $E(t)$ is the time-dependent energy level of the system, with $k$ the sweeping parameter, that sweep the energy levels towards each other (they are equal at $t=0$). 
 
 Simulating for a time starting from $t<0$, where the energy levels are degenerate we will highlight the avoided crossing at $t=0$, and we get what is called a \emph{Landau-Zener transition} \cite{landau1932theorie, zener1932non}. 
 \begin{figure}[h!]

@@ -1,0 +1,103 @@
+\documentclass{subfiles}
+\begin{document}
+\section{General study of basis sets and numerical methods}\label{sec:general_study_results}
+\textcolor{red}{TODO: Clean up this section. Are we happy with title?}
+\subsection{Sinc-DVR basis validation}
+\subsubsection*{Energy eigenstates}
+A natural validation of the Sinc-DVR basis is to check that the Sinc-DVR basis functions closely match the exact energy eigenstates of the system. We require that the functions that the Sinc-DVR basis is constructed to have a high degree of overlap with the exact energy eigenstates of the system. Otherwise, we risk losing important information about dynamics of the system, dynamics that may have a significant impact on the quantum control protocols we wish to implement.\\ 
+
+To do so, we compute the overlap matrix $S$ between the Sinc-DVR basis functions and the exact energy eigenstates of the Morse potential. Recall from Section \ref{sec:sinc_dvr_validation}, the overlap matrix is defined as:
+\begin{align*}
+    S_{ij} = \int \psi_i(x) \psi_j(x) dx
+\end{align*}
+where $\psi_i(x)$ and $\psi_j(x)$ are the Sinc-DVR basis and exact energy eigenstates, respectively. \textcolor{red}{TODO: Fill in more.}
+
+The overlap matrix $S$ is then a measure of how well the Sinc-DVR basis functions represent the exact energy eigenstates of the system. The results are shown in figure \ref{fig:dvr_validation_overlap}, where we see that the overlap between the Sinc-DVR basis functions and the exact energy eigenstates is quite high, especially for the lowest lying states. We see that the overlap matrix is close to the identity matrix, indicating a near perfect overlap between the two basis sets.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{figs/dvr_validation_overlap.pdf}
+    \caption{Overlap between the Sinc-DVR basis functions and the exact energy eigenstates of the Morse potential. The parameters used for the Morse potential are $D = 10.0$, $a = 1.0$, and $x_0 = 0.0$. The grid spacing is $\Delta x = 0.025$, and the number of grid points is $N = 200$.}
+    \label{fig:dvr_validation_overlap}
+\end{figure}
+\\
+
+In summary, we have shown that the Sinc-DVR basis is a valid choice for representing quantum mechanical systems, and that it can be used to accurately compute the energy spectrum and energy eigenstates of the system. We have also shown that the Sinc-DVR basis functions closely match the exact energy eigenstates of the system, especially for the lowest lying states. This gives us confidence in our choice of basis set, and we can safely proceed with our analysis of the double-well potential.\textcolor{red}{TODO: This is placed in the wrong spot? Fill in more discussions and reflections here and cite some papers.}
+\subsubsection*{Energy spectrum}
+To assess further the validity of the Sinc-DVR basis, we compute the energy spectrum of the Morse potential using the Sinc-DVR basis and compare it to the exact energy eigenstates, found using finite-differences to approximate the spatial derivate in the Schrödinger equation \eqref{eq:TISE}\textcolor{red}{TODO: Add a minor section on finite-differences?}. We follow the procedure outlined in section \ref{sec:sinc_dvr_validation}, and the resulting energies are shown in figure \ref{fig:dvr_validation}. The energy spectrum is shown in atomic units, and we see that the energy levels of the Sinc-DVR basis closely match the exact energy eigenstates of the system, especially for the lowest lying states - of which we are mostly interested in. This is a great indication that our choice of Sinc-DVR basis is trustworthy approximation and we can safely proceed with our analysis of the double-well potential. 
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{figs/dvr_validation.pdf}
+    \caption{Comparison of the energy spectrum of the Morse potential using the Sinc-DVR basis and the exact energy eigenstates. The parameters used for the Morse potential are $D = 10.0$, $a = 1.0$, and $x_0 = 0.0$. The grid spacing is $\Delta x = 0.025$, and the number of grid points is $N = 200$. The energy spectrum is shown in atomic units. The absolute deviances is plotted logarithmically.}
+    \label{fig:dvr_validation}
+\end{figure}
+
+
+
+\subsection{Numerical validation: Landau-Zener model}
+To systematically validate our implementation of the aforementiond numerical methods, we require a simple yet representative quantum system that exhibits non-trivial dynamics but still has closed form solutions for comparison. For this purpose, we will once again turn to the simple Landau-Zener model \eqref{eq:landau_zener}, introduced in the section on avoided crossings \ref{sec:avoided_crossings}. This simple two-level system is governed by a time-dependent Hamiltonian. It captures the essential features of quantum dynamics, making it an ideal testbed for our numerical methods in preparation for the more complex double-well Morse potential system we shall study. \\\\
+
+Once again, the Hamiltonian for the Landau-Zener model is given by:
+\begin{align*}
+    H(t) = \begin{pmatrix}
+        vt & V \\
+        V & -vt
+\end{pmatrix}
+\end{align*}
+where $v$ is the sweeping velocity, $V$ is the coupling strength, and $t$ is the time. 
+
+At $t=0$, the uncoupled system would have a degeneracy, but the coupling $V$ opens a gap (lifts the degeneracy), resulting in an avoided crossing as we saw in section \ref{sec:avoided_crossings}. Thus, this minimal system captures one of the simplest non-trivial dyanmics of a quantum system which also leads to a well known analytical solution for the transition probability \eqref{eq:landau_zener_trans_prob}. 
+
+This system is particularly useful for validating our numerical methods, and serves as a suitable testbed for benchmarking due to several reasons, of which some are listed below:
+\begin{itemize}
+    \item \textbf{Low dimensionality:} The Landau-Zener model is a two-level system, making it computationally efficient to simulate and analyze. This allows us to focus on the numerical methods without being overwhelmed by the computational complexity of the system.
+    \item \textbf{Non-trivial dynamics:} The system exhibits interesting dynamics, such as transitions betweeen states, which require the numerical implementations to accurately capture the time evolution of the wavefunction. This provides a meaningful test for the accuracy and stability of the numerical methods.
+    \item \textbf{Analytical reference:} The Landau-Zener model has well-known analytical solutions for the transition probabilities and wavefunction dynamics, allowing us to directly compare the results of our numerical methods against these exact solutions. This serves as a benchmark for assessing the performance of the numerical methods.
+\end{itemize}
+
+To test the performance of our numerical implementations, we will evolve an initial state $\ket{\Psi(0)} = \begin{pmatrix} 1 \\ 0 \end{pmatrix}$, which corresponds to the ground state of the uncoupled system, from an initial time $t_0<0$ to a final time $t_f>0$. We will then compare:
+\begin{itemize}
+    \item The performance of each integrator by
+    \begin{itemize}
+        \item Global error vs. time step $\Delta t$.
+        \item Runtime efficiency
+        \item Stability and accuracy under varying conditions. 
+    \end{itemize}
+    \item We will also qualitatively investigate how the various methods behave near the avoided crossing. \textcolor{red}{TODO: will we do this?}
+\end{itemize}
+\\ 
+
+We numerically propagate an initial wavefunction prepared in the ground state of the uncoupled system (the \emph{diabatic basis}), and compute the final transition probability $P_{12}$, which is defined as the probability of finding the system in the excited state at time $t_f$, given analytically by \eqref{eq:landau_zener_trans_prob}. \\
+
+The system is initialized in the state $$\ket{\Psi(0)} = \ket{\Psi_1} = \begin{pmatrix} 1 \\ 0 \end{pmatrix},$$ and we compute the final transition probability $$P_{12} = |\langle \Psi(t_f) | \Psi_2 \rangle|^2,$$ where $\ket{\Psi_2}$ is the excited diabatic state of the system. This process is repeated for various numerical methods using a fixed time step $\Delta t$, while varying the length of simulation $2T$. The Landau-Zener transition probability is derived in the infinite time-limit, i.e $t\rightarrow \pm \infty$, this analysis illustrate how each numerical method converges to the analytical solution as the simulation time increases.
+\begin{figure}[h!]
+\centering
+\includegraphics[width=1.0\textwidth]{figs/landau_zener_convergence_benchmark.pdf}
+\caption{Final transition probability computed using various numerical methods for increasing total simulation time $
+2T$. All methods converge toward the analytical Landau-Zener probability (dashed line), with RK4 showing good accuracy until instability sets in at longer times due to lack of normalization. Euler becomes unstable very early. The x-axis is in logarithmic scale.}
+\end{figure}
+
+As we can see in figure \eqref{fig:landau_zener_convergence_benchmark}, all methods used converge to the analytical solution, but not exactly. The two Taylor-expansion methods (Euler and RK4) show good agreement but quickly become unstable, with Euler diverging first, as we've seen already in figure \eqref{fig:landau_zener}. Both of these methods can be improved upon by introducing norm corrections, at a computational cost (albeit minimal). The Crank-Nicolson method, on the other hand, remains stable and accurate for longer simulation times, as it preserves unitarity by construction. 
+\\ \\ 
+
+To assess the computational performance of the numerical methods, a full Landau-Zener simulation was measured using the \texttt{time.perf\_counter()} function in Python, which provides a high-resolution timer suitable for short time measurements.This measurement also includes system overhead, yielding realistic performance metrics to evaluate each method. 
+
+The benchmark was performed for the two-level system with sweeping parameter $v=7.0$, coupling strength $V=1.0$, and a time integration interval of $t \in [-5, 5]$ with $100{,}000$ time steps, i.e a time-step of $\Delta t = 10^{-4}$s. The results are presented in the following table \eqref{tab:landau_zener_runtime}, which summarizes the runtime of each method, along with remarks on their performance characteristics.
+
+\begin{table}[h!]
+\centering
+\caption{Runtime comparison of time propagation methods for the Landau-Zener model ($v = 7.0$, $\Delta = 1.0$, $t \in [-5, 5]$, 100,000 steps). Timing measured using \texttt{time.perf\_counter()}.}
+\begin{tabular}{l c l}
+\toprule
+\textbf{Method} & \textbf{Time (ms)} & \textbf{Remarks} \\
+\midrule
+Matrix Exponential & 5942.1 & Most accurate, but very slow \\
+Euler              & 828.6  & Fastest, but unstable \\
+RK4                & 2621.0 & Balanced performance \\
+Crank--Nicholson   & 1953.6 & Stable and efficient \\
+\bottomrule
+\end{tabular}\label{tab:landau_zener_runtime}
+\end{table}
+We see here that the more accurate, direct matrix exponentiation method is the slowest by a good margin, while the Euler method \textcolor{red}{TODO: Finish up this section. Write it to fit better as a RESULT section.}
+
+
+\end{document}

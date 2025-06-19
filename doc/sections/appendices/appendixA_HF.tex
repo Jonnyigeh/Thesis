@@ -73,4 +73,43 @@ which is now a pseduo-eigenvalue equation that we need to solve iteratively. To 
     \item Variational principle should be mentioned
     \item 
 \end{itemize}
+
+%% METHOD PART OF IT
+% \section{Hartree-Fock}\textcolor{red}{This section is somewhat obsolete, we want HF in the appenix, what to do with the implementation?}
+% As mentioned in the theory section\ref{sec:HF_theory}, the Hartree-Fock method is an iterative method to obtain optimal basis functions (single particle orbitals) that would minimize the energy, and by the variational method, converge towards the true ground state energy. This is inherently an approximaton, where we imagine that the electrons occupy the lowest possible single-particle orbitals, and it has been proven many times that this is a rather accurate approximation for many systems. \textcolor{red}{(Cite some sources here)}.
+% We will now outline the method without much information, before diving into each step in more detail and provide insights into the computational aspects of the method.
+% \begin{itemize}
+%     \item Construct an initial guess for the single-particle orbitals, $\{\phi_i\}$, often using atomic orbitals or other basis sets.
+%     \item Diagonalize the Fock matrix to obtain a new set of orbitals, $\{\phi_i\}$, and calculate Hartree-Fock energy, $E_{HF}$.
+%     \item Repeat the process until the energy converges, i.e. the change in energy between iterations is below a certain threshold.
+%     \item Calculate the total energy of the system, and the electron density, and use this to calculate other properties of the system.
+% \end{itemize}
+% The first step in the Hartree-Fock procedure is to define an initial ansatz for the trial wavefunction, which is typically represented as a Slater determinant, as discussed earlier. This ansatz requires an initial choice of basis set, which plays a crucial role in the overall success of the method. The initial basis set serves as a starting point for constructing orbitals and significantly influences the convergence of the self-consistent field (SCF) procedure.\\  
+% \\ Choosing an appropriate basis set is a nuanced and complex task. A well-chosen basis can simplify numerical calculations and accelerate convergence, whereas a poor choice may lead to slow convergence or even failure to converge. 
+% \\ \\
+
+
+% There are a multitude of basis sets to choose from, and the choice is guided by the nature of the system. For instance, in quantum dots systems with strong confinement, the quantum harmonic oscillator basis sets are often used to great success\cite{Yuan_2017}. A different procedure to using pre-defined basis sets, is to solve the Schrödinger equation for the non-interacting system, and use these single-particle orbitals as the initial basis set. The latter may often yield quicker convergence due to the functions being specifically tailored for the potential, but at the cost of more computational resources, and in some cases may not even be possible. 
+% \\
+% \\ With the initial basis, we construct the Fock matrix, which is a matrix representation of the Fock operator in the basis of the single-particle orbitals as seen in section \ref{sec:HF_theory}. The Fock matrix is given by
+% \begin{align}
+%     F_{pq} = h_{pq} + \sum_{i,j}^N u_{piqj}\rho_{ij} \label{eq:fock_matrix}
+% \end{align}
+% where $\rho_{ij}$ is the density matrix formed from the eigenvectors of the anti-symmetrized system hamiltonian (\textcolor{red}{Dette bør nok nevnes i seksjon 1.2.1 Hartree-Fock, og refereres til hvordan interaksjonleddet gjørs anti-symmtrisk $u = u_ijab - u_ijba$}). The following snippet 
+% \begin{lstlisting}[language=Python]
+% h = ...
+% u = ...
+% def fill_fock_matrix(C):
+%     fock = np.zeros(h.shape, dtype=np.complex128)
+%     density_matrix = np.zeros((h.shape[0],h.shape[0]), dtype=np.complex128)
+%     for i in range(n_particles):
+%         density_matrix += np.outer(C[:, i], np.conj(C[:, i]))
+%     fock = np.einsum('ij, aibj->ab', density_matrix, u, dtype=np.complex128)        # Compute the two-body operator potential
+%     fock += h                                                                       # Add the one-body operator hamiltonian
+
+%     return fock
+% \end{lstlisting}
+
+% \textcolor{red}{not finished}
+
 \end{document}

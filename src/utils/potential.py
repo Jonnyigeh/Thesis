@@ -14,7 +14,7 @@ class MorsePotentialDW():
     b: Width of the right well
     d: Distance between center of the wells
     """
-    def __init__(self, D_a=20, D_b=20, k_a=1.0, k_b=1.0, d=4):
+    def __init__(self, D_a=20, D_b=20, k_a=10.0, k_b=10.0, d=6):
         self.D_a = D_a 
         self.D_b = D_b
         self.a = np.sqrt(k_a / (2 * D_a))

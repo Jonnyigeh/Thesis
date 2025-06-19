@@ -2,7 +2,7 @@
 \begin{document}
 \section{Quantum Mechanics}
 \subsection{The Schrödinger equation}
-The physical description of any quantum system, i.e the \emph{state space}, is given by the quantum mechanical \emph{wavefunction} (also often called a \emph{state vector})\cite{nielsen2010quantum}, which in Dirac notation\footnote{Named after the physicist Paul Dirac, who was one of the founding fathers of quantum mechanics.} is written as $\ket{\Psi(t)}$. 
+The physical description of any quantum system, i.e the \emph{state space}, is given by the quantum mechanical \emph{wavefunction} (also often called a \emph{state vector})\cite{nielsen2010quantum}, which in Dirac notation is written as $\ket{\Psi(t)}$. 
 This function is a complex-valued function that gives a complete description of both static and dynamic properties of a given quantum system, and thus presents the analogue to the classical notion of a set of trajectories in phase space \cite{hochstuhl2014time}. 
 
 The dynamics of the wavefunction is governed by the \emph{Time-dependent Schrödinger Equation} (TDSE),
@@ -24,7 +24,11 @@ While the TDSE govern the time-evolution of the quantum system, many problems - 
 \end{equation}
 where $\psi_n(x)$ are the \emph{energy eigenstates} of the system, and $E_n$ are the corresponding \emph{energy eigenvalues}. As is clear from the equation \eqref{eq:tise}, the energy eigenvalues are the diagonal elements of the diagonalized Hamiltonian operator. In practice, these eigenvalues are obtained by diagonalizing the Hamiltonian operator (regardless of time-dependency), and the associated eigenvectors forming a basis of energy eigenfunctions. \\
 
-The energy eigenstates are the stationary states of the system, and they form an complete orthonormal basis for the Hilbert space of the system. This means that any wavefunction can be expressed as a linear combination of the energy eigenstates, and in our work, it will serve as an important reference point to validate our choice basis sets. \textcolor{red}{TODO: Remove/clarify. We compare enrgy state in the validation part, but we do not simulate in energy states? Must be okay tho.}
+The energy eigenstates are the stationary states of the system, and they form a complete orthonormal basis for the Hilbert space of the system. This means that any wavefunction can be expressed as a linear combination of the energy eigenstates, and in our work, it will serve as an important reference point to validate our choice basis sets. To be precise, any state function $\Psi(x, t)$ can be expressed as a linear combination of the energy eigenstates $\psi_n(x)$ as
+\begin{align*}
+    \Psi(x, t) = \sum_n c_n\psi_n(x)
+\end{align*}
+where $c_n$ are the coefficients of the linear combination, which are determined by the initial conditions of the system. This is a direct consequence of the linearity of the Schrödinger equation, and it allows us to express any state function as a superposition of energy eigenstates \cite{griffiths2018introduction, berera2021quantum}.
 
 %% 2nd quantization
 \subsection{Second Quantization}
@@ -45,13 +49,16 @@ where $[A, B] = AB - BA$, and for fermions, the \emph{anti-}commutation relation
     \{a_i, a_j\} = \{a^\dagger_i, a^\dagger_j\} = 0, \quad \{a_i, a^\dagger_j\} = \delta_{ij}\label{eq:anti_commutation}
 \end{align}
 where $\{A, B\} = AB + BA$.
+\textcolor{red}{TODO: Nice section but is it necessary to include? }
 \subsection{Fock Space}
 In the framework of second quantization, the concept of a \emph{Fock space}\footnote{First introduced by V. A. Fock in \cite{fock1932konfigurationsraum}} emerge naturally as a mathematical structure for describing quantum systems with variable, or uknown, number of particles. A Fock space is a direct sum of Hilbert spaces, 
 \begin{align*}
     \mathcal{F} = \bigotimes_{n=0}^\infty S_{\pm} \mathcal{H}_n
 \end{align*}
-where each space, $\mathcal{H}_n$ represents a state with fixed a number of particles, and $S_{\pm}$ is the symmetrization operator for bosons ($+$) and fermions ($-$). Meaning, the zero-particle states, one-particle states, two-particle states etc. This encapsulates all possible configurations of a many-body system elegantly. Using the occupation number representation introduced in second quantization, a state in Fock space is not expressed by momenta or position, but rather by the number of particles occupying certain quantum states. \\
-For instance, the state $\ket{n_1, n_2, ...}$ informs that $n_1$ particles occupy state $1$, $n_2$ particles  in state $2$. The annihilation and creation operators act on the Fock states by increasing, or decreasing, the occupation numbers of the corresponding states. E.g. the action of the creation operator on a state is given by
+where each space, $\mathcal{H}_n$ represents a state with fixed a number of particles, and $S_{\pm}$ is the symmetrization operator for bosons ($+$) and fermions ($-$). Meaning, the zero-particle states, one-particle states, two-particle states etc. This encapsulates all possible configurations of a many-body system elegantly. Using the occupation number representation introduced in second quantization, a state in Fock space is not expressed by momenta or position, but rather by the number of particles occupying certain quantum states\cite{helgaker2013molecular}. 
+\\
+
+For instance, the state $\ket{n_1, n_2, ...}$ informs that $n_1$ particles occupy state $1$, $n_2$ particles  in state $2$. The annihilation and creation operators act on the Fock states by increasing, or decreasing, the occupation numbers of the corresponding states. Meaning, the action of the creation operator on a state is given by
 \begin{align*}
     a^\dagger_i\ket{n_1, n_2, ...} = \sqrt{n_i + 1}\ket{n_1, n_2, ..., n_i + 1, ...}.
 \end{align*}
@@ -182,11 +189,13 @@ which yields a simpler form, by factorization using the square binomial formula,
 \begin{align}
     V = D(e^{-a(r-r_0)} - 1)^2\label{eq:morse_potential}
 \end{align}
-where now, computationally, we need only evaluate the exponential function once, and the rest of the potential is simple algebraic operations. This makes our computations more efficient, as the evaluation of the expoenntial function is computationally expensive, since computing exponentials generally requires many more CPU cycles than simple arithmetic, it is advantageous to reduce their number. Expanding a Taylor series about the well minima, we can see that the potential is approximatively harmonic. From this, we can identify Hookes law, and also identify the spring constant in this potential. Expanding around $r_0$
+where now, computationally, we need only evaluate the exponential function once, and the rest of the potential is simple algebraic operations. This makes our computations more efficient, as the evaluation of the expoenntial function is computationally expensive, since computing exponentials generally requires many more CPU cycles than simple arithmetic, it is advantageous to reduce their number. Here the $D$ parameter is the dissociation energy, which is the depth of the potential well, and $a$ is a parameter that controls the width of the well, and thus the curvature of the potential. The parameter $r_0$ is the position of the well minima, and can be used to shift the potential to any desired position.\\
+
+Expanding a Taylor series about the well minima, we can see that the potential is approximatively harmonic. From this, we can identify Hookes law, and also identify the spring constant in this potential. Expanding around $r_0$
 \begin{align*}
     V(r) = V(r_0) + V'(r_0)(r-r_0) + \frac{1}{2}V''(r_0)(r-r_0)^2 + ...
 \end{align*}
-Since we are operating about the minima, higher order terms can be neglected as they become very small. As $r_0$ is now the zero-point of the potential (after shifting), we have $V(r_0) = 0$. Furthermore, as $r_0$ is a minima of the potential, $V'(r_0) = 0$, as the slope of the potential function is flat at this point. This simplifies our expression to
+and, since we are operating around the minima, higher order terms can be neglected as they become very small ($\Delta r^n = (r - r_0)^n\to 0$ for $n>2$\textcolor{red}{TODO: Should we instead writ this as $\mathcal{O}(\Delta r^n)$? or something along these lines.}). By shifting the zero point of the potential to $r_0$, we have $V(r_0) = 0$. Furthermore, as $r_0$ is a minima of the potential, $V'(r_0) = 0$, as the slope of the potential function is flat at this point\textcolor{red}{TODO: This is a trivial statement, do we need to cite or prove?}. This simplifies our expression to
 \begin{align*}
     V(r) = \frac{1}{2}V''(r_0)(r-r_0)^2
 \end{align*}
@@ -197,28 +206,28 @@ which we identify as the harmonic oscillator potential, with the spring constant
     V''(r_0) &= 2Da^2 \\
     k &= 2Da^2 \rightarrow a = \sqrt{\frac{k}{2D}}
 \end{align*} 
-
-\begin{figure}
+\begin{figure}[h!]
     \centering
     \includegraphics[width=1.0\textwidth]{figs/potential_spf.pdf}
-    \caption{The Morse potential and the 5 lowest energy levels and energy eigenfunctions. The dissociation energy, $D$, is highlighted by the black dashed line. The parameters for this visualization of a Morse potential are $D=10, a=0.5, x_0=0$.}
+    \caption{The Morse potential and the 5 lowest energy levels and energy eigenfunctions. Dissociation energy, $D$, is highlighted by the black dashed line, and the parameters for this visualization of a Morse potential are $D=10, a=0.5, x_0=0$. We can see how the lowest lying states are populatied near the well minima, while the higher order states are spreading out further towards the dissacociation curve (to the right), as opposed to the potential wall at the left side. The energy levels are anharmonic, and the spacing non-uniform, as is expected from the Morse potential. }
     \label{fig:morse_potential}
 \end{figure}
-\textcolor{red}{TODO: Fix the figsize so text is correct size.}
+Figure \ref{fig:morse_potential} shows the Morse potential, with the 5 lowest energy levels and corresponding energy eigenfunctions. \\
+
 
 %% Double well
-\\ 
-
 Now, we would like to make a potential trap for \emph{two} separate particles, as our qubit system will be a two-particle system. To do so, we construct a double Morse potential well, simply by adding two Morse potentials together. We flip the right potential well, so that the minima are at the same position, and the potential is symmetric (given symmetric parameters). This gives us the double Morse potential as
 \begin{equation}
-    V(r) = D_L(e^{-c_L(r-r_{0,L})} - 1)^2 + D_R(e^{c_R(r-r_{0,R})} - 1)^2\label{eq:double_well_morse_potential}
+    V(r) = D_L(e^{-a_L(r-r_{0,L})} - 1)^2 + D_R(e^{a_R(r-r_{0,R})} - 1)^2\label{eq:double_well_morse_potential}
 \end{equation}
-where the subscripts L and R correspond to left and right well, respectively. The parameter $D$ controls the depth of the potential well, whilst $c$ has some control over the width of the well, through the steepness of the exponential functions decay (and thus the curvature, and width, of the well). A smaller $c$ parameter constitues a wider well as the function would then decay slowly. The parameter $r_0$ is the position of the well minima. It is this potential that we shall study in great detail in this thesis, and we will use it to construct our qubit system. The parameters will be tuned throughout the time-evolution to achieve the desired energy level structure, and thus control the qubit system parametrically.
-\begin{figure}
+where the subscripts L and R correspond to left and right well, respectively. The parameter $D$ controls the depth of the potential well, whilst $a$ has some control over the width of the well, through the steepness of the exponential functions decay (and thus the curvature, and width, of the well). A smaller $a$ parameter constitues a wider well as the function would then decay slowly, recall also this parameters relation with the spring-like constant $k=2Da^2$, which is the parameter we shall use instead\textcolor{red}{TODO: Change the expressions for the potentials so that $k$ is used instead? Or leave as is?}. The parameter $r_0$ is the position of the well minima. It is this potential that we shall study in great detail in this thesis, and we will use it to construct our qubit system. The parameters will be tuned throughout the time-evolution to achieve the desired energy level structure, and thus control the qubit system parametrically.
+
+\begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\textwidth]{figs/placeholder_image.jpeg}
-    \caption{TODO: Replace this placeholder image with a relevant figure. A visual representation of the double Morse potential, with the two wells, and the energy levels. Parameters for this visualization are $D_L=12, D_R=10, k_l=4, k_r=5, r_{0,L}=-5, r_{0,R}=5$. The energy levels are the 5 lowest energy levels of the double Morse potential.}
+    \includegraphics[width=1.0\textwidth]{figs/double_well_potential.pdf}
+    \caption{A visual representation of the double Morse potential, with the two wells, and the energy levels. Parameters for this visualization are $D_L=10$, $D_R=11$, $k_l=7$, $k_r=7$, $r_{0,L}=-2$, $r_{0,R}=2$, with a grid length of $5.3$, with $N=400$ grid points. The deviance between well depths ($D_L \neq D_R$) is what gives the asymmetrical shape of the potential, and subsequently will give degenerate single-particle energy levels.} 
     \label{fig:double_well_morse_potential}
 \end{figure}
-
+Figure \ref{fig:double_well_morse_potential} shows the double Morse potential, with the two wells. This is an example visualization, and shows how the qubit system can be constructed by tuning the parameters of the potential and placing a single particle in each well minima. With a sufficiently high barrier between the two wells, we can ensure that the particles remain localized in their respective wells, and thus behave like distinguishable subsystems. The asymmetric shape of the potential is due to the difference in well depths, $D_L \neq D_R$, which will give us distinct single-particle energies in each well, and thus a non-degenerate energy level structure.  
+\newpage
 \end{document}

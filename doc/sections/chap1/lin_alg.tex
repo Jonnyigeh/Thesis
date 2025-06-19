@@ -50,7 +50,7 @@ In quantum mechanics, certain operators play a fundamental role due to their spe
 \end{itemize}
 %% mr hilbert
 \subsection{Hilbert spaces}\label{sec:Hilbert_space}
-The concept of a Hilbert space is fundamental to quantum mechanics, as it provides the mathematical framework for which quantum states and operators are defined. A Hilbert space is a generalization of Euclidiean space, which allows for linear algerba and calculus to be applied to infinite-dimensional spaces. More formally, a Hilbert space is a complex complete inner product space, which means that it adhers to the following properties \cite{griffiths2018introduction}: \textcolor{red}{should add some references to the properties of Hilbert spaces, and maybe an illustration? could be cool}
+The concept of a Hilbert space is fundamental to quantum mechanics, as it provides the mathematical framework for which quantum states and operators are defined. A Hilbert space is a generalization of Euclidiean space, which allows for linear algerba and calculus to be applied to infinite-dimensional spaces. More formally, a Hilbert space is a complex complete inner product space, which means that it adhers to the following properties \cite{griffiths2018introduction, berera2021quantum}: 
 \begin{itemize}
     \item \textbf{Completeness:} Every Cauchy sequence $\{x_n\}$ in the space $V$ converges to a limit in the space. Specifically, $V$ is complete if:
     \begin{equation}
@@ -148,12 +148,12 @@ and the Sinc-DVR function defined on a uniform grid as in \eqref{eq:sinc_dvr}. T
     T_{nm} = \braket{\phi_n|-\frac{1}{2} \frac{d^2}{dx^2}|\phi_m}.
 \end{align*}
 Using the known analytical solution of these integrals with the sinc function properties (see for example Appendix A in \cite{colbert1992novel}), these matrix elements take the form 
-\begin{align*}
+\begin{align}
     T_{nm} = \begin{cases}
         -\frac{\pi^2}{6\Delta x^2} & \text{if } n = m \\
         \frac{(-1)^(n-m)}{\Delta x^2(n - m)^2} & \text{if } n \neq m.
-    \end{cases}
-\end{align*}
+    \end{cases}\label{eq:sinc_dvr_kinetic}
+\end{align}
 This provides us with a simple matrix expression for the Sinc-DVR Hamiltonian that is easily implemented numerically, as it removes the need for numerical differentiation.
 
 

@@ -96,11 +96,11 @@ def landau_zener_benchmark(v, Delta,
         
         
         # Symmetric 2nd order method
-        # H_now = H(t)
-        # U_sym = (np.eye(2) - 1j * H_now * dt / 2) @ (np.eye(2) - 1j * H_now * dt / 2)
-        # psi_sym = U_sym @ psi_sym
-        # pop_sym.append(np.abs(psi_sym[1])**2)
-        # norm_sym.append(np.linalg.norm(psi_sym)**2)
+        H_now = H(t)
+        U_sym = (np.eye(2) - 1j * H_now * dt / 2) @ (np.eye(2) - 1j * H_now * dt / 2)
+        psi_sym = U_sym @ psi_sym
+        pop_sym.append(np.abs(psi_sym[1])**2)
+        norm_sym.append(np.linalg.norm(psi_sym)**2)
 
         # Crank-Nicholson method
         # Crank-Nicolson update
@@ -123,7 +123,7 @@ def landau_zener_benchmark(v, Delta,
 
 
 
-    return t_values, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, error_rk4, error_cn, error_euler
+    return t_values, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, error_rk4, error_cn, error_euler, pop_sym, norm_sym
 
 def landau_zener_probability(v, Delta):
     return np.exp(-np.pi * Delta**2 / v)
@@ -191,154 +191,97 @@ def landau_zener_efficiency_benchmark(v, Delta, t_values=np.linspace(-5, 5, 1000
 
 
 # Set up the plotting style
-matplotlib.style.use('seaborn-v0_8')
+matplotlib.style.use('seaborn-v0_8-deep')
 colors = sns.color_palette()
 b = colors[0]
 g = colors[1]
 r = colors[2]
+benchmark=False
+if benchmark:
+    v = 7.0
+    Delta = 1.0
+    t_values = np.linspace(-5, 5, 100_000)
+    # res = landau_zener_efficiency_benchmark(v=v, Delta=Delta, t_values=t_values)
+    # import pickle
+    # with open('data/lz_runtime_benchmark.pkl', 'wb') as f:
+    #     pickle.dump(res, f)
+    # breakpoint()
+    # exit()
+    # Convergence benchmark for Landau-Zener transition probability
+    Delta = 1.0
+    v = 7.0
+    dt = 0.01
+    t1 = np.linspace(-1, 1, 10_000)
+    t2 = np.linspace(-5, 5 , 10_000)
+    t3 = np.linspace(-10, 10, 10_000)
+    t4 = np.linspace(-20, 20, 10_000)
+    t5 = np.linspace(-50, 50, 10_000)
+    t6 = np.linspace(-100, 100, 10_000)
+    t7 = np.linspace(-300, 300, 10_000)
+    P_LZ = np.exp(-2 * np.pi * Delta ** 2 / v)
+    # # # Store intermediate results
+    tags = ["t1", "t2", "t3", "t4", "t5", "t6", "t7"]
+    i=0
+    probs = {}
+    errors = {}
 
-v = 7.0
-Delta = 1.0
-t_values = np.linspace(-5, 5, 100_000)
-res = landau_zener_efficiency_benchmark(v=v, Delta=Delta, t_values=t_values)
-import pickle
-with open('data/lz_runtime_benchmark.pkl', 'wb') as f:
-    pickle.dump(res, f)
-breakpoint()
-exit()
+    for t in tqdm([t1, t2, t3, t4, t5, t6, t7], desc="Running benchmarks"):
+        t, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, error_rk4, error_cn, error_euler = landau_zener_benchmark(v=v, Delta=Delta, t_values=t)
+        P_exp = pop_exp[-1]
+        P_cn = pop_cn[-1]
+        P_rk4 = pop_rk4[-1]
+        P_euler = pop_euler[-1]
 
+        # Store results
+        probs[tags[i]] = {
+            "P_exp": P_exp,
+            "P_cn": P_cn,
+            "P_rk4": P_rk4,
+            "P_euler": P_euler
+        }
+        errors[tags[i]] = {
+            "error_rk4": error_rk4,
+            "error_cn": error_cn,
+            "error_euler": error_euler
+        }
+        i += 1
 
+    import pickle
+    try:
+        with open('data/lz_benchmark_results_constdt_1906.pkl', 'wb') as f:
+            pickle.dump(probs, f)
+        with open('data/lz_benchmark_errors_constdt_1906.pkl', 'wb') as f:
+            pickle.dump(errors, f)
+    except:
+        print("Failed to save results to file.")
+        breakpoint()
+    # with open('data/lz_benchmark_results_constdt.pkl', 'rb') as f:
+    #     probs = pickle.load(f)
+    # with open('data/lz_benchmark_errors_constdt.pkl', 'rb') as f:
+    #     errors = pickle.load(f)
+    windows =[2.0, 10.0, 20.0, 40.0, 100.0, 200.0, 600.0] # seconds
+    P_exp = [probs[tag]["P_exp"] for tag in tags]
+    P_cn = [probs[tag]["P_cn"] for tag in tags]
+    P_rk4 = [probs[tag]["P_rk4"] for tag in tags]
+    P_euler = [probs[tag]["P_euler"] for tag in tags]
 
-
-### Convergence benchmark for Landau-Zener transition probability
-# Delta = 1.0
-# v = 7.0
-# dt = 0.01
-# t_1 = 0.4
-# t_2 = 1.0
-# t_3 = 5.0
-# t_4 = 10.
-# t_5 = 20
-# t_6 = 50
-# t_7 = 100
-# t1 = np.linspace(-t_1, t_1, int(2 * t_1 / dt) + 1)
-# t2 = np.linspace(-t_2, t_2, int(2 * t_2 / dt) + 1)
-# t3 = np.linspace(-t_3, t_3, int(2 * t_3 / dt) + 1)
-# t4 = np.linspace(-t_4, t_4, int(2 * t_4 / dt) + 1)
-# t5 = np.linspace(-t_5, t_5, int(2 * t_5 / dt) + 1)
-# t6 = np.linspace(-t_6, t_6, int(2 * t_6 / dt) + 1)
-# t7 = np.linspace(-t_7, t_7, int(2 * t_7 / dt) + 1)
-# # t1 = np.linspace(-0.5, 0.5, 10_000)
-# # t2 = np.linspace(-1, 1, 10_000)
-# # t3 = np.linspace(-2, 2 , 10_000)
-# # t4 = np.linspace(-4, 4, 10_000)
-# # t5 = np.linspace(-10, 10, 10_000)
-# # t6 = np.linspace(-20, 20, 10_000)
-# # t7 = np.linspace(-50, 50, 10_000)
-# P_LZ = np.exp(-2 * np.pi * Delta ** 2 / v)
-# # Store intermediate results
-# tags = ["t1", "t2", "t3", "t4", "t5", "t6", 't7']
-# i=0
-# probs = {}
-# errors = {}
-
-# for t in tqdm([t1, t2, t3, t4, t5, t6, t7], desc="Running benchmarks"):
-#     t, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, error_rk4, error_cn, error_euler = landau_zener_benchmark(v=v, Delta=Delta, t_values=t)
-#     P_exp = pop_exp[-1]
-#     P_cn = pop_cn[-1]
-#     P_rk4 = pop_rk4[-1]
-#     P_euler = pop_euler[-1]
-
-#     # Store results
-#     probs[tags[i]] = {
-#         "P_exp": P_exp,
-#         "P_cn": P_cn,
-#         "P_rk4": P_rk4,
-#         "P_euler": P_euler
-#     }
-#     errors[tags[i]] = {
-#         "error_rk4": error_rk4,
-#         "error_cn": error_cn,
-#         "error_euler": error_euler
-#     }
-#     i += 1
-
-# # import pickle
-# # try:
-# #     with open('data/lz_benchmark_results_constdt.pkl', 'wb') as f:
-# #         pickle.dump(probs, f)
-# #     with open('data/lz_benchmark_errors_constdt.pkl', 'wb') as f:
-# #         pickle.dump(errors, f)
-# # except:
-# #     print("Failed to save results to file.")
-# #     breakpoint()
-# # with open('data/lz_benchmark_results.pkl', 'rb') as f:
-# #     probs = pickle.load(f)
-# # with open('data/lz_benchmark_errors.pkl', 'rb') as f:
-# #     errors = pickle.load(f)
-
-# windows =[0.8, 2.0, 10.0, 20.0, 40.0, 100.0, 200.0] # seconds
-# P_exp = [probs[tag]["P_exp"] for tag in tags]
-# P_cn = [probs[tag]["P_cn"] for tag in tags]
-# P_rk4 = [probs[tag]["P_rk4"] for tag in tags]
-# P_euler = [probs[tag]["P_euler"] for tag in tags]
-
-# fig, ax = plt.subplots(figsize=find_figsize(1.2, 0.4))
-# ax.plot(windows, P_exp, 'o-', label='Matrix Exponential')
-# ax.plot(windows, P_cn, 's-', label='Crank-Nicholson')
-# ax.plot(windows, P_rk4, '^-', label='RK4 (un-normalized)')
-# ax.plot(windows, P_euler, 'x--', label='Euler')
-# ax.axhline(P_LZ, color='k', linestyle='--', label='Analytical $P_{LZ}$')
-# ax.set_ylim([-0.2, 1])
-# ax.set_xscale("log")
-# ax.set_xlabel(r"Total simulation time window $2T$ [s]")
-# ax.set_ylabel(r"Transition probability $P_{|0\rangle \to |1\rangle}$")
-# ax.set_title("Numerical convergence toward Landau-Zener transition probability")
-# ax.legend()
-# ax.grid(True)
-# plt.tight_layout()
-# plt.savefig('../doc/figs/landau_zener_convergence_benchmark.pdf')
-# plt.show()
-# exit()
-
-
-# t, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, error_rk4, error_cn, error_euler = landau_zener_benchmark(v=v, Delta=Delta)
-# labels = ["Landau-Zener (Analytical)", "Matrix Exp.", "Crank-Nicholson", "RK4"]
-# P_LZ = np.exp(-2 * np.pi * Delta ** 2 / v)
-# P_exp = pop_exp[-1]
-# P_cn = pop_cn[-1]
-# P_rk4 = pop_rk4[-1]
-# # P_euler = pop_euler[-1]
-# values = [P_LZ, P_exp, P_cn, P_rk4,]
-# plt.figure(figsize=(8, 5))
-# bars = plt.bar(labels, values, color=colors, edgecolor="k", alpha=0.8)
-# plt.ylabel("Transition Probability")
-# plt.title(r"Comparison of Final Transition Probabilities, $P_{|0\rangle \to |1\rangle}$")
-# plt.xticks(rotation=15)
-# plt.grid(axis="y", linestyle="--", alpha=0.5)
-# plt.tight_layout()
-
-# # Optionally, annotate values
-# for bar in bars:
-#     height = bar.get_height()
-#     plt.text(bar.get_x() + bar.get_width() / 2, height + 0.01,
-#              f"{height:.3f}", ha='center', va='bottom')
-
-# plt.show()
-# exit()
-
-# errors = [error_euler, error_rk4, error_cn]
-# labels = ['Euler-Cromer', 'RK4', 'Crank-Nicholson']
-# plt.figure(figsize=find_figsize(1.2, 0.4))
-# plt.plot(t, error_cn, label='Crank-Nicholson')
-# plt.plot(t, error_rk4, label='RK4')
-# plt.legend(loc='upper right')
-# # plt.plot(t, error_euler, label='Euler-Cromer', lw=2, color=r)
-# plt.ylabel(r'$||\Psi_\mathrm{method} - \Psi_\mathrm{expm}||$')
-# plt.title('Final-State Error vs. Matrix Exponential')
-# plt.tight_layout()
-# plt.show()
-exit()
+    fig, ax = plt.subplots(figsize=find_figsize(1.2, 0.4))
+    ax.plot(windows, P_exp, 'o-', label='Matrix Exponential')
+    ax.plot(windows, P_cn, 's-', label='Crank-Nicholson')
+    ax.plot(windows, P_rk4, '^-', label='RK4')
+    ax.plot(windows, P_euler, 'x--', label='Euler')
+    ax.axhline(P_LZ, color='k', linestyle='--', label='Analytical $P_{LZ}$')
+    ax.set_ylim([-0.2, 1])
+    ax.set_xscale("log")
+    ax.set_xlabel(r"Total simulation time window $2T$ [s]")
+    ax.set_ylabel(r"Transition probability $P_{|0\rangle \to |1\rangle}$")
+    ax.set_title("Numerical convergence toward Landau-Zener transition probability")
+    ax.legend()
+    ax.grid(True)
+    plt.tight_layout(rect=[0, 0, 0.95, 1])
+    plt.savefig('../doc/figs/landau_zener_convergence_benchmark.pdf')
+    plt.show()
+    exit()
 
 
 # fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4))
@@ -370,42 +313,43 @@ exit()
 # fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.15, wspace=0.3)
 # plt.savefig('../doc/figs/landau_zener_numerical_methods.pdf')
 # plt.show()
-exit()
+# exit()
 
 
 
 
 ### PLOT IN THEORY: LANDAU ZENER COMPARISON OF EXPONENTIAL VS TAYLOR EXPENSAION
-# t, pop_exp, pop_euler, pop_sym, pop_cn, norm_exp, norm_euler, norm_sym, norm_cn = landau_zener_benchmark(v=1.0, Delta=1.0)
-if False:
-    # fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4))
+# t, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, _,_,_, pop_sym, norm_sym = landau_zener_benchmark(v=1.0, Delta=1.0)
+method_comparison = False
+if method_comparison:
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4))
 
-    # # Excited state population
+    # Excited state population
 
-    # ax[0].plot(t, pop_exp, label='Matrix Exp.', lw=2, color=b)
-    # ax[0].plot(t, pop_euler, '--', label='Euler-Cromer', alpha=0.8)
-    # ax[0].plot(t, pop_sym, ':', label='Second order', alpha=0.8)
-    # ax[0].plot(t, pop_cn, '-.', label='Crank-Nicholson', alpha=0.8)
+    ax[0].plot(t, pop_exp, label='Matrix Exp.', lw=2, color=b)
+    ax[0].plot(t, pop_euler, '--', label='Euler-Cromer', alpha=0.8)
+    ax[0].plot(t, pop_sym, ':', label='Second order', alpha=0.8)
+    ax[0].plot(t, pop_cn, '-.', label='Crank-Nicholson', alpha=0.8)
 
-    # ax[0].set_xlabel('Time')
-    # ax[0].set_ylabel('Population')
-    # ax[0].set_title('Population transfer')
-    # ax[0].legend(loc='upper left', )
+    ax[0].set_xlabel('Time')
+    ax[0].set_ylabel('Population')
+    ax[0].set_title('Population transfer')
+    ax[0].legend(loc='upper left', )
 
-    # # Norms
-    # ax[1].plot(t, norm_exp, label='Matrix Exp.', lw=2, color=b)
-    # ax[1].plot(t, norm_euler, '--', label='Euler-Cromer', alpha=0.8)
-    # ax[1].plot(t, norm_sym, ':', label='Second order', alpha=0.8)
-    # ax[1].plot(t, norm_cn, '-.', label='Crank-Nicholson', alpha=0.8)
-    # ax[1].set_xlabel('Time')
-    # ax[1].set_ylabel(r'Norm of $\Psi$')
-    # ax[1].set_title('Norm preservation')
-    # ax[1].legend(loc='upper left', )
+    # Norms
+    ax[1].plot(t, norm_exp, label='Matrix Exp.', lw=2, color=b)
+    ax[1].plot(t, norm_euler, '--', label='Euler-Cromer', alpha=0.8)
+    ax[1].plot(t, norm_sym, ':', label='Second order', alpha=0.8)
+    ax[1].plot(t, norm_cn, '-.', label='Crank-Nicholson', alpha=0.8)
+    ax[1].set_xlabel('Time')
+    ax[1].set_ylabel(r'Norm of $\Psi$')
+    ax[1].set_title('Norm preservation')
+    ax[1].legend(loc='upper left', )
 
-    # plt.tight_layout()
-    # fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.15, wspace=0.3)
+    plt.tight_layout()
+    fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.15, wspace=0.3)
     # plt.savefig('../doc/figs/landau_zener_numerical_methods.pdf')
-    # plt.show()
+    plt.show()
     exit()
 
 
@@ -413,50 +357,52 @@ if False:
 
 
 
-
-# t_values, psi_t, energies, nonint_energies = landau_zener(2.0, 1.0)
-# psi_t = np.array(psi_t)
-# # Compute probabilities
-# P1 = np.abs(psi_t[:, 0])**2
-# P2 = np.abs(psi_t[:, 1])**2
-# fig, ax = plt.subplots(figsize=find_figsize(1.2, 0.4))
-# ax.plot(t_values, energies[:,0], linestyle='-', color=r, label=r'$E_1$ (coupled)')
-# ax.plot(t_values, nonint_energies[:,0], color=r, linestyle='--', label=r'$E_1$')
-# ax.plot(t_values, energies[:,1], linestyle='-', color=b, label=r'$E_2$ (coupled)')
-# ax.plot(t_values, nonint_energies[:,1], linestyle='--', color=b, label=r'$E_2$')
-# # ax.plot(t_values[::50], analytical_eigenvalues(t_values[::50])[0,:], 'ro', t_values[::50], analytical_eigenvalues(t_values[::50])[1,:], 'bo')
-# # ax.scatter(t_values, energies[:,0], t_values, energies[:,1])
-# ax.set_xlabel('Time [s]')
-# ax.set_ylabel('Energy [a.u.]')
-# ax.set_title('Landau-Zener Transition')
-# ax.legend(loc='upper right', bbox_to_anchor=(1, 0.75))
-# # plt.tight_layout()
-# fig.subplots_adjust(left=0.15, right=0.87, top=0.9, bottom=0.15)
-# plt.savefig('../doc/figs/avoided_crossing.pdf')
-# plt.show()
-# exit()
-
-# t1, psi1, e1, nonint_e1 = landau_zener(10.0, 1.0)
-# t2, psi2, e2, nonint_e2 = landau_zener(1.0, 1.0)
-# p11 = np.abs(psi1[:, 0])**2
-# p12 = np.abs(psi1[:, 1])**2
-# p21 = np.abs(psi2[:, 0])**2
-# p22 = np.abs(psi2[:, 1])**2
-# # Plot results
-# fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4), sharex=True)
-# ax[0].plot(t1, p11, label=r'$\psi_0(t)$', color=b)
-# ax[0].plot(t1, p12, label=r'$\psi_1(t)$', color=r)
-# ax[1].plot(t2, p21, label=r'$\psi_0(t)$', color=b)
-# ax[1].plot(t2, p22, label=r'$\psi_1(t)$', color=r)
-# ax[0].set_title(r'$k = 10.0,\quad V=1.0$')
-# ax[1].set_title(r'$k = 1.0,\quad V=1.0$')
-# ax[0].set_xlabel('Time [s]')
-# ax[1].set_xlabel('Time [s]')
-# ax[0].set_ylabel('Population')
-# ax[1].set_ylabel('Population')
-# ax[1].legend(loc='upper right', bbox_to_anchor=(1, 0.75))
-# plt.tight_layout()
-# fig.subplots_adjust(left=0.1, right=0.9, top=0.85, bottom=0.15)
-# fig.suptitle('Landau-Zener Transition')
-# plt.savefig('../doc/figs/landau_zener.pdf')
-# plt.show()
+crossing=False
+if crossing:
+    t_values, psi_t, energies, nonint_energies = landau_zener(2.0, 1.0)
+    psi_t = np.array(psi_t)
+    # Compute probabilities
+    P1 = np.abs(psi_t[:, 0])**2
+    P2 = np.abs(psi_t[:, 1])**2
+    fig, ax = plt.subplots(figsize=find_figsize(1.2, 0.4))
+    ax.plot(t_values, energies[:,0], linestyle='-', color=r, label=r'$E_1$ (coupled)')
+    ax.plot(t_values, nonint_energies[:,0], color=r, linestyle='--', label=r'$E_1$')
+    ax.plot(t_values, energies[:,1], linestyle='-', color=b, label=r'$E_2$ (coupled)')
+    ax.plot(t_values, nonint_energies[:,1], linestyle='--', color=b, label=r'$E_2$')
+    # ax.plot(t_values[::50], analytical_eigenvalues(t_values[::50])[0,:], 'ro', t_values[::50], analytical_eigenvalues(t_values[::50])[1,:], 'bo')
+    # ax.scatter(t_values, energies[:,0], t_values, energies[:,1])
+    ax.set_xlabel('Time [s]')
+    ax.set_ylabel('Energy [a.u.]')
+    ax.set_title('Landau-Zener Transition')
+    ax.legend(loc='upper right', bbox_to_anchor=(1, 0.75))
+    # plt.tight_layout()
+    fig.subplots_adjust(left=0.15, right=0.87, top=0.9, bottom=0.15)
+    # plt.savefig('../doc/figs/avoided_crossing.pdf')
+    plt.show()
+    exit()
+pop_transfer=False
+if pop_transfer
+    t1, psi1, e1, nonint_e1 = landau_zener(10.0, 1.0)
+    t2, psi2, e2, nonint_e2 = landau_zener(1.0, 1.0)
+    p11 = np.abs(psi1[:, 0])**2
+    p12 = np.abs(psi1[:, 1])**2
+    p21 = np.abs(psi2[:, 0])**2
+    p22 = np.abs(psi2[:, 1])**2
+    # Plot results
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4), sharex=True)
+    ax[0].plot(t1, p11, label=r'$\psi_0(t)$', color=b)
+    ax[0].plot(t1, p12, label=r'$\psi_1(t)$', color=r)
+    ax[1].plot(t2, p21, label=r'$\psi_0(t)$', color=b)
+    ax[1].plot(t2, p22, label=r'$\psi_1(t)$', color=r)
+    ax[0].set_title(r'$k = 10.0,\quad V=1.0$')
+    ax[1].set_title(r'$k = 1.0,\quad V=1.0$')
+    ax[0].set_xlabel('Time [s]')
+    ax[1].set_xlabel('Time [s]')
+    ax[0].set_ylabel('Population')
+    ax[1].set_ylabel('Population')
+    ax[1].legend(loc='upper right', bbox_to_anchor=(1, 0.75))
+    plt.tight_layout()
+    fig.subplots_adjust(left=0.1, right=0.9, top=0.85, bottom=0.15)
+    fig.suptitle('Landau-Zener Transition')
+    # plt.savefig('../doc/figs/landau_zener.pdf')
+    plt.show()

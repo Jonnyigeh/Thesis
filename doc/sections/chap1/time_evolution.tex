@@ -86,12 +86,10 @@ Direct matrix exponentiation, however, quickly becomes intractable for most comp
 Despite these limitations, numerical integration methods are widely used in quantum dynamics simulations, and they can provide accurate results for a wide range of systems. In this work, we will explore matrix exponentiation as a baseline method for time propagation, and we will compare it to other numerical integration methods. This will allow us to assess the accuracy and efficiency of different approaches for simulating quantum dynamics in our system. 
 \\
 
-Returning to our simple system, the time-evolution of a two-level system under a time-varying Hamiltonian is illustated in figure \ref{fig:landau_zener}, where the population transfer and avoided crossing reflect the dynamics driven by the time-evolution operator applied using direct matrix exponentiation. In the following figure, we highlight how some of the simplest methods diverge when evolving the simple system previously introduced in section \ref{sec:avoided_crossings}.
+Returning to our simple system, the time-evolution of a two-level system under a time-varying Hamiltonian is illustated in figure \ref{fig:landau_zener}, where the population transfer between the two first energy eigenlevels $\phi_0$ and $\phi_1$, and avoided crossing reflect the dynamics driven by the time-evolution operator applied using direct matrix exponentiation. In the following figure, we highlight how some of the simplest methods diverge when evolving the simple system previously introduced in section \ref{sec:avoided_crossings}.
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1.0\textwidth]{figs/landau_zener_numerical_methods.pdf}
     \caption{Time evolution of a two-level system under a time-varying Hamiltonian. Population transfer between $\ket{0}$ and $ket{1}$ and wavefunction norm are shown, demonstrating how the simpler Euler-Cromer and second-order symmetric methods deviate from the exact solution, while Crank-Nicolson remains both norm-preserving and more accurate, and overlaps well with the exact direct matrix exponentiation.}\label{fig:landau_zener}
 \end{figure}
-\textcolor{red}{TODO: We should clarify that population transfer occurs between diabatic state $\ket{0}$ and $ \ket{1}$}
-
 \end{document}
