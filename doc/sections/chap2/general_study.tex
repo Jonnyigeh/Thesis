@@ -12,7 +12,7 @@ In this secton we will outline the methods used to study our system in general. 
 %% Distinguishability of the particles
 \subsection{Distinguishability of the particles}\label{sec:distinguishability}
 One of the core features of our system - and the foundation of our qubit design - is that the two particles confined in our potential trap act as \emph{distinguishable} particles. As we are looking to trap electrons, indistinguishable particles, we are dealing with fermions, and the Pauli exclusion principle states clearly that two fermions cannot occupy the same quantum state. This fundamental principle would normally prevent us from constructing product states, as the quantum state of any fermionic system must be anti-symmetric under particle exchange.\textcolor{red}{is this really true? and if not, WHEN is it true?}
-\\ However, we are assuming that the potential trap can be constructed in such a way that there are minimal correlations between the two particles, and that the wavefunction can be approximated as a product state. In this analysis we shall look at how "distinguishable" our system actually is, and find a distance between wells where we can safely assume the particles to be distinguishable. \\ \\
+\\ However, we are assuming that the potential trap can be constructed in such a way that there are minimal correlations between the two particles, and that the wavefunction can be approximated as a product state. In this analysis we shall look at how "distinguishable" (or separable) our system actually is, and find a distance between wells where we can safely assume the particles to be distinguishable. \\ \\
 To make an assessment of the systems distinguishability we will firstly look at the eigen-energies of the system given that we either:
 \begin{itemize}
     \item Assume the particles to be distinguishable: \\ We construct the wavefunction as a product state,
@@ -35,8 +35,8 @@ If we are successful, we should find that for a certain distance between the wel
 \subsection{Parameter optimization}\label{sec:optimization_procedure}
 As our goal is to realize single-qubit gates and the two-qubit iSwap gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we've discussed in earlier sections the two configurations we are looking for are:
 \begin{itemize}
-    \item Config I: The measurement configuration, where all energy levels are distinct and there are minimal correlations between the two subsystems (particles). This corresponds to keeping all Von Neumann entropies in our system as close to zero as possible. With this, we know that our two-body energy eigenstates will have a product state structure, and maximal overlap with the Hartree product states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$.
-    \item Config II: The entangled configuration, where we have a degeneracy in the energy levels of our system. This degeneracy will give rise to an avoided crossings in the energy spectrum for the first and second energy eigenstates. In this configuration, the 1st and 2nd energy eigenstates are maximally entangled, while the other energy eigenstates are kept as pure as possible (product states). This corresponds to an entropy equal to 1 for $\ket{\phi_1}$ and $\ket{\phi_2}$, and 0 for $\ket{\phi_0}$ and $\ket{\phi_4}$. 
+    \item \textbf{Config I}: The measurement configuration, where all energy levels are distinct and there are minimal correlations between the two subsystems (particles). This corresponds to keeping all Von Neumann entropies in our system as close to zero as possible. With this, we know that our two-body energy eigenstates will have a product state structure, and maximal overlap with the Hartree product states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$.
+    \item \textbf{Config II}: The entangled configuration, where we have a degeneracy in the energy levels of our system. This degeneracy will give rise to an avoided crossings in the energy spectrum for the first and second energy eigenstates. In this configuration, the 1st and 2nd energy eigenstates are maximally entangled, while the other energy eigenstates are kept as pure as possible (product states). This corresponds to an entropy equal to 1 for $\ket{\phi_1}$ and $\ket{\phi_2}$, and 0 for $\ket{\phi_0}$ and $\ket{\phi_4}$. 
 \end{itemize}
 As an initial search, we make a grid search over the potential parameters, mostly to map out the landscape of the potential and find regions where we expect to find the desired configuations. Our grid search will be over the following parameters:
 \begin{table}
@@ -136,12 +136,12 @@ We construct the Hamiltonian matrix for the system, using the following expressi
 \end{align*}
 where $V(x)$ is the Morse potential. For the exact energy eigenstates, we can compute the Hamiltonian matrix by discretizing the second derivative operator using finite differences, more specifically, we use the central difference approximation for the second derivative \cite{langtangen2017finite}\footnote{This is a common numerical method for approximating derivatives, and is widely used in numerical analysis. For more details, we refer specifically to ch. 1.1.2 of \cite{langtangen2017finite}.}:
 \begin{align}
-    \frac{d^2}{dx^2} \approx \frac{f(x + \Delta x) - 2f(x) + f(x - \Delta x)}{\Delta x^2}, 
+    \frac{d^2}{dx^2} \approx \frac{f(x + \Delta x) - 2f(x) + f(x - \Delta x)}{\Delta x^2}\label{eq:finite_difference_2nd_derivative}, 
 \end{align}
-where $\Delta x$ is the grid spacing. As is evident, this approximation converges to the true second derivative as $\Delta x \to 0$. The Sinc-DVR kinetic elements are given analytically as in \eqref{eq:sinc_dvr_kinetic}. With these definitions, we have the full one-body Hamiltonian matrix elements for our single particl trapped in a Morse potential.
+where $\Delta x$ is the grid spacing. As is evident, the approximation \eqref{eq:finite_difference_2nd_derivative} converges to the exact second derivative as $\Delta x \to 0$. The Sinc-DVR kinetic elements are given analytically as in \eqref{eq:sinc_dvr_kinetic}. With these definitions, we have the full one-body Hamiltonian matrix elements for our single particl trapped in a Morse potential.
 \\ 
 In the following code snippet, we highlight some of the key steps in the construction of the quantum mechanical system and the diagonalization of the Hamiltonian matrix, which is used to obtain the energy eigenstates and eigenvalues of the system. 
-\begin{lstlisting}[language=Python]\label{lst:dvr_validation}
+\begin{lstlisting}[language=Python, label=lst:dvr_validation]
 N = 200
 x = np.linspace(-1, 2, N)
 dx = x[1] - x[0]
@@ -180,15 +180,6 @@ E_dvr, psi_dvr = np.linalg.eigh(H_dvr)
 E_true, psi_true = np.linalg.eigh(H_true)
 \end{lstlisting}
 
-
-% , as shown in figure \ref{fig:dvr_validation}. The energy spectrum is shown in atomic units, and we see that the energy levels of the Sinc-DVR basis closely match the exact energy eigenstates of the system, especially for the lowest lying states - of which we are mostly interested in. This is a great indication that our choice of Sinc-DVR basis is trustworthy and we can safely proceed with our analysis of the double-well potential. 
-% \begin{figure}[h!]
-%     \centering
-%     \includegraphics[width=\textwidth]{figs/dvr_validation.pdf}
-%     \caption{Comparison of the energy spectrum of the Morse potential using the Sinc-DVR basis and the exact energy eigenstates. The parameters used for the Morse potential are $D = 10.0$, $a = 1.0$, and $x_0 = 0.0$. The grid spacing is $\Delta x = 0.025$, and the number of grid points is $N = 200$. The energy spectrum is shown in atomic units.}
-%     \label{fig:dvr_validation}
-% \end{figure}
-
 \subsubsection*{Energy eigenstates}
 To compare the energy eigenstates of the two basis sets, we compute the overlap between the Sinc-DVR basis functions and the exact energy eigenstates of the system. The overlap is defined as
 \begin{align*}
@@ -209,16 +200,6 @@ for i in range(n_levels):
         overlap = np.sum(psi_dvr[:, i].conj() * psi_true[:, j])
         S[i, j] = np.abs(overlap)
 \end{lstlisting}
-where \texttt{n\_levels} is the number of energy levels we are interested in. The reader might notice the lack of $\Delta x$ in the overlap integral, this is due to how \texttt{numpy} produces normalized basis sets from diagonalization in the \texttt{eigh} function, so their (discrete) normalization is already accounted for. The overlap matrix $S$ is then a $n_{\text{levels}} \times n_{\text{levels}}$ matrix, where each element $S_{nm}$ represents the overlap between the $n$th Sinc-DVR basis function and the $m$th exact energy eigenstate of the system. \\ 
+where \texttt{n\_levels} is the number of energy levels we are interested in. The reader might notice the lack of $\Delta x$ in the overlap integral, this is due to how \texttt{numpy} produces normalized basis sets from diagonalization in the \texttt{eigh} function, so their (discrete) normalization is already accounted for. The overlap matrix $S$ is then a $n_{\text{levels}} \times n_{\text{levels}}$ matrix, where each element $S_{nm}$ represents the overlap between the $n$th Sinc-DVR basis function and the $m$th exact energy eigenstate of the system.
 
-% The overlap matrix $S$ is then a measure of how well the Sinc-DVR basis functions represent the exact energy eigenstates of the system. The results are shown in figure \ref{fig:dvr_validation_overlap}, where we see that the overlap between the Sinc-DVR basis functions and the exact energy eigenstates is quite high, especially for the lowest lying states. We see that the overlap matrix is close to the identity matrix, indicating a near perfect overlap between the two basis sets.
-% \begin{figure}[h!]
-%     \centering
-%     \includegraphics[width=\textwidth]{figs/dvr_validation_overlap.pdf}
-%     \caption{Overlap between the Sinc-DVR basis functions and the exact energy eigenstates of the Morse potential. The parameters used for the Morse potential are $D = 10.0$, $a = 1.0$, and $x_0 = 0.0$. The grid spacing is $\Delta x = 0.025$, and the number of grid points is $N = 200$.}
-%     \label{fig:dvr_validation_overlap}
-% \end{figure}
-% \\
-
-% In summary, we have shown that the Sinc-DVR basis is a valid choice for representing quantum mechanical systems, and that it can be used to accurately compute the energy spectrum and energy eigenstates of the system. We have also shown that the Sinc-DVR basis functions closely match the exact energy eigenstates of the system, especially for the lowest lying states. This gives us confidence in our choice of basis set, and we can safely proceed with our analysis of the double-well potential.
 \end{document}

@@ -12,10 +12,10 @@ The dynamics of the wavefunction is governed by the \emph{Time-dependent Schröd
 where $H$ a linear hermitian operator often referred to as the \emph{Hamiltonian} \cite{griffiths2018introduction, berera2021quantum}. Here $x$ is the position of the particle, and $t$ is the time. 
 This operator describes the total energy of the system, and is given by (in atomic units)
 \begin{align*}
-    H = -\nabla^2 + V(\mathbf{r})
+    H = -\nabla^2 + V(x)
 \end{align*}
-where $\nabla^2$ is the Laplacian operator, and $V(\mathbf{r})$ is the potential energy of the system, both external and internal.
-This equation gives the equation of motion for the wavefunction, and describes how the wavefunction evolves in time. Atommic units set fundamental constants like the speed of light $c$, Planck's constant $\hbar$, and the electron mass $m_e$ to unity, to simplify the equations and calculations. This is a common practice in quantum mechanics, as it allows for easier manipulation of the equations without losing generality. In this notation, lengths are measured in Bohr radii ($1 a_0 = 0.529Å$) and energies in Hartees ($1 \text{Ha} = 27.211 eV$) \cite{szabo1996modern}.
+where $\nabla^2$ is the Laplacian operator, and $V(x)$ is the potential energy of the system, both external and internal.
+This equation gives the equation of motion for the wavefunction, and describes how the wavefunction evolves in time. Atomic units (a.u) transform fundamental constants like the speed of light $c$, Planck's constant $\hbar$, and the electron mass $m_e$ to unity, to simplify equations and calculations. This is a common practice in quantum mechanics, as it allows for easier manipulation of the equations without loss of generality. In this notation, lengths are measured in Bohr radii ($ a_0 = 0.529Å$), energies in Hartees ($ \text{Ha} = 27.211 eV$) and time in  \cite{szabo1996modern}.
 
 
 While the TDSE govern the time-evolution of the quantum system, many problems - particularly stationary or bound-state problems - are often more easily analysed through the \emph{Time-independent Schrödinger Equation} (TISE), which is obtained by separating the temporal and spatial variables in the TDSE. This gives us
@@ -33,11 +33,9 @@ where $c_n$ are the coefficients of the linear combination, which are determined
 %% 2nd quantization
 \subsection{Second Quantization}
 As the earliest formulations of quantum mechanics introduced the ground-breaking concept that physical properties such as energy, momentum and angular momentum are inherently quantized, this formulation is now often referred to as "first quantization". In first quantization, observables are represented by linear operators with real eigenvalues and each individual particle is assigned a wavefunction in a fixed $N$-dimensional Hilbert space.
-However, as the theory matured, it became clear that first quantization was inadequate to describe true many-body systems - like systems with indistinguishable particles, where one must (anti-)symmetrize the $N-$ particle wavefunction, or natural processes like particle creation and annihilation, as occurs in chemical reactions or in high-energy physical processes. In these cases the wavefunction must account for all possible particle configurations (outcomes), which quickly becomes unwieldy. The number of terms grows exponentially with the number of particles, making both manipulation and storage intractable.
+However, as the theory matured, it became clear that first quantization was inadequate to describe true many-body systems - like systems with indistinguishable particles, where one must (anti-)symmetrize the $N-$ particle wavefunction, or natural processes like particle creation and annihilation, as occurs in chemical reactions or in high-energy physical processes. In these cases the wavefunction must account for all possible particle configurations (outcomes), which quickly becomes unwieldy. The number of terms grows exponentially with the number of particles, making both manipulation and storage intractable \cite{helgaker2013molecular, szabo1996modern}\\
 
-Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles, and makes the statefunction also expressed in terms of operators. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in \emph{state} $i$?". \cite{szabo1996modern, shavitt2009many, helgaker2013molecular}.
-
-As such, second quantization is often referred to as the "occupation number representation" of quantum mechanics. This moves the focus from the individual particles to the orbitals they occupy. This reformulation also reduces much of the manipulation of the wavefunction to algebraic operations, which makes numerical implementations more efficient, and easier to understand \cite{helgaker2013molecular}.
+Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles, and makes the statefunction also expressed in terms of operators. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in \emph{state} $i$?". \cite{szabo1996modern, shavitt2009many, helgaker2013molecular}. As such, second quantization is often referred to as the "occupation number representation" of quantum mechanics. This moves the focus from the individual particles to the orbitals they occupy. This reformulation also reduces much of the manipulation of the wavefunction to algebraic operations, which makes numerical implementations more efficient, and easier to understand \cite{helgaker2013molecular}.
 \\ 
 
 In second quantization, we introduce a set of creation and annihilation operators, $a^\dagger$ and $a$, which create and annihilate particles in a given state. An important thing to note, is that these operators differ depending on the type of particles. For bosons, these operators satisfy the following commutation relations:
@@ -49,8 +47,9 @@ where $[A, B] = AB - BA$, and for fermions, the \emph{anti-}commutation relation
     \{a_i, a_j\} = \{a^\dagger_i, a^\dagger_j\} = 0, \quad \{a_i, a^\dagger_j\} = \delta_{ij}\label{eq:anti_commutation}
 \end{align}
 where $\{A, B\} = AB + BA$.
-\textcolor{red}{TODO: Nice section but is it necessary to include? }
-\subsection{Fock Space}
+\textcolor{red}{TODO: Nice section but is it necessary to include? Yeah we probably need to, as we have the section on Fock space (which we need. Should probably make sure to mention fock space more explicitly further on?)}
+%% FOCKSPACE
+\subsection{Fock Space}\textcolor{red}{TODO: We are not really using the Fock space, that is not where our product states live. Should we maybe exclude this section? What to replace it with? We kinda use the Fock Space when we compare anti-symmetric states to our distinguishable product states, but we do not use the Fock space formalism. Maybe we should just mention it briefly, and then refer to the literature?}
 In the framework of second quantization, the concept of a \emph{Fock space}\footnote{First introduced by V. A. Fock in \cite{fock1932konfigurationsraum}} emerge naturally as a mathematical structure for describing quantum systems with variable, or uknown, number of particles. A Fock space is a direct sum of Hilbert spaces, 
 \begin{align*}
     \mathcal{F} = \bigotimes_{n=0}^\infty S_{\pm} \mathcal{H}_n
@@ -67,22 +66,24 @@ and the action of the hermitian conjugate annihilation operator is given by
     a_i\ket{n_1, n_2, ...} = \sqrt{n_i}\ket{n_1, n_2, ...,n_i-1, n_i - 1, ...}.
 \end{align*}
 From this, these operators can describe particle interactions, transitions and dynamics in a many-body system. As the Fock space is constructed by direct sums, two states of different particle numbers are inherently orthogonal, i.e. $\braket{n|m} = \delta_{nm}$, where $n$ and $m$ are the number of particles in the two states. This orthogonality is crucial for the mathematical consistency of the notation \cite{helgaker2013molecular, shavitt2009many}.
-\\\\ 
-For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \ref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \ref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation \cite{pethick2008bose}.
+\\
+
+For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \eqref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \eqref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation \cite{pethick2008bose}.
 
 
 \subsection{Hartree approximation}\label{sec:hartree_theory}
 Accurately solving the Schrödinger equation for many-body systems is a formidable challenge—even a one-dimensional system with just a few interacting particles can become intractable very quickly. The core difficulty stems from the exponential growth of the Hilbert space as we add more degrees of freedom, coupled with particle interactions and, for identical particles, the need to enforce antisymmetry (the Pauli exclusion principle). In real-world applications—like molecular dynamics or solid-state physics - we often invoke the Born-Oppenheimer\footnote{Formulated by Max Born and Robert J. Oppenheimer in their 1927 paper \cite{Born_Oppenheimer_1927}} approximation to freeze out the nuclear motion, which drastically reduces the size of the electronic Hilbert space \cite{helgaker2013molecular, szabo1996modern}. Even after that simplification, however, finding an exact solution on a classical computer remains out of reach.
-\\ \\ 
-Mean-field methods offer a practical way to approximate the many-body problem by replacing the full interacting Hamiltonian with an effective single-particle picture in which each particle feels an average field created by all the others. In quantum chemistry, the most familiar mean-field approach is Hartree-Fock (HF), which assumes the wavefunction is a single Slater determinant of orthonormal orbitals. A detailed derivation of the Hartree-Fock procedure can be found in appendix \ref{app:HF_theory}. Those orbitals are determined self-consistently, meaning iteratively until convergence, so that each one “sees” the averaged Coulomb repulsion (direct term) and exchange interactions from all the other electrons.
+\\ 
+
+Mean-field methods offer a practical way to approximate the many-body problem by replacing the full interacting Hamiltonian with an effective single-particle picture in which each particle feels an average field created by all the other particles. In quantum chemistry, the most familiar mean-field approach is Hartree-Fock (HF), which assumes the wavefunction is a single Slater determinant of orthonormal orbitals. A detailed derivation of the Hartree-Fock procedure can be found in appendix \ref{app:HF_theory}. Those orbitals are determined self-consistently, meaning iteratively until convergence, so that each one “sees” the averaged Coulomb repulsion (direct term) and exchange interactions from all the other electrons. \textcolor{red}{TODO: Maybe re-write this part to clarify clearly that we are using Hartree instead of HF? Kinda wierd transition into the variational principle.}
 \\
 Central to any mean-field approach is the variational principle, which asserts that the expectation value of the energy
 \begin{equation}
     E[\Psi] = \frac{\braket{\Psi|H|\Psi}}{\braket{\Psi|\Psi}}\label{eq:variational_principle},
 \end{equation}
-is always greater than or equal to the true ground state energy $E_0$ (). By choosing a trial wavefunction $\Psi$ with adjustable parameters (here, the single-particle orbitals), we can minimize this expectation value until it converges to a local minimum\cite{helgaker2013molecular}\footnote{We refer the reader particularly to chapter 4.2 in \cite{helgaker2013molecular}}. 
+is always greater than or equal to the true ground state energy $E[\Psi]\geq E_0$. By choosing a trial wavefunction $\Psi$ with adjustable parameters (here, the single-particle orbitals), we can minimize this expectation value until it converges to a local minimum\cite{helgaker2013molecular}\footnote{We refer the reader particularly to chapter 4.2 in \cite{helgaker2013molecular}}. 
 
-In Hartee-Fock theory this trial wavefunction is a slater-determinant; in Hartree, it becomes a simple product of single-particle orbitals, often called a \emph{Hartree product}. These single-particle orbitals are the solution of the one-electron Schrödinger equati on, 
+In Hartee-Fock theory this trial wavefunction is a slater-determinant; in Hartree, it becomes a simple product of single-particle orbitals, often called a \emph{Hartree product}. These single-particle orbitals are the solution of the one-electron Schrödinger equation, 
 \begin{align*}
     \hat{h}\phi_i = \epsilon_i\phi_i
 \end{align*}
@@ -94,13 +95,13 @@ which has the solution eigenvector
 \begin{align}
     \Psi = \phi_1(\mathbf{r}_1)\phi_2(\mathbf{r}_2)...\phi_N(\mathbf{r}_N)\label{eq:hartree_product}
 \end{align}
-with corresponding eigenvalue $E = \epsilon_1 + \epsilon_2 + ... + \epsilon_N$, i.e. the sum of single-particle energies. Eq. \ref{eq:hartree_procut} is the Hartree product, and it is the simplest possible wavefunction for a many-body system. As is evident, this Hartree product is not anti-symmtric, nor indistinguishable, as the particles are designated a specific orbital to occupy and thus they are distinguishable. \\ \\
+with corresponding eigenvalue $E = \epsilon_1 + \epsilon_2 + ... + \epsilon_N$, i.e. the sum of single-particle energies. Equation \eqref{eq:hartree_product} is the Hartree product, and it is the simplest possible wavefunction for a many-body system. As is evident, this Hartree product is not anti-symmetric, nor indistinguishable, as the particles are designated a specific orbital to occupy and thus they are distinguishable, and the state is symmetric under particle exchange.
 
 \\
 In our double-well system, the two particles remain localized in separate wells and therefore behave like distinguishable subsystems rather than identical fermions. We still employ a mean-field strategy—now in the form of a Hartree approach—where the full two-particle wavefunction is approximated as a simple product of two single-particle orbitals (one in each well). Each orbital is chosen so that it minimizes the energy in the presence of the averaged Coulomb field generated by the other particle. This “bipartite Hartree” procedure allows us to incorporate the essential interaction effects while keeping the computational effort manageable.
 
 \\
-To implement this method, we select a finite basis set $\{\chi_\alpha\}$ for each subsystem $M$ (left or right well), and expand the single-particle Hartree orbitals in this basis. 
+To derive this method, we select a finite basis set $\{\chi_\alpha\}$ for each subsystem $M$ (left or right well), and expand the single-particle Hartree orbitals in this basis. 
 \begin{align*}
     \ket{\phi^M_i} = \sum_{\alpha=1}^{N^M} C^M_{\alpha i}\ket{\chi_\alpha}
 \end{align*}
@@ -122,9 +123,9 @@ where $\phi_0^M$ is the single-particle Hartree functions (orbitals) for subsyst
 \end{align*}
 where $\lambda^M$ are the Lagrange multipliers, and $E_H$ is the Hartree energy, which is the expectation value of the Hamiltonian in the Hartree product state
 \begin{align*}
-    E_H = \bra{\Psi}H\ket{\Psi} = \bra{\phi^A_0}h^A\ket{\phi^A_0} + \bra{\phi^B_0}h^B\ket{\phi^B_0} + \braket{\phi^A_0\phi^B_0|u|\phi^A_0\phi^B_0}
+    E_H = \bra{\Psi}H\ket{\Psi} = \bra{\phi^A_0}h^A\ket{\phi^A_0} + \bra{\phi^B_0}h^B\ket{\phi^B_0} + \braket{\phi^A_0\phi^B_0|u^{AB}|\phi^A_0\phi^B_0}
 \end{align*}
-here $h^M$ are the single-body Hamiltonian, for each subsystem and $V$ the mean-field Coulomb interaction between subsystems. The Hartree orbitals can be expaneded in our single-particle basis set, as linear combinations, 
+here $h^M$ are the single-body Hamiltonian, for each subsystem and $u^{AB}$ the mean-field Coulomb interaction between subsystems. The Hartree orbitals can be expanded in our single-particle basis set, as linear combinations, 
 \begin{align*}
     \ket{\phi^M_i} = \sum_{\alpha=1}^{N^M} C^M_{\alpha i}\ket{\chi_\alpha}
 \end{align*}
@@ -134,11 +135,20 @@ where $N^M$ is the number of single-particle basis functions in subsystem $M$. M
     &\frac{\partial L}{\partial C_{\alpha 0}^{B*}}  = \sum_{\beta=0}^{N_B}\big(h_{\alpha\beta}^B + \sum^{N_A}_{\delta\gamma=0}C^{A*}_{\delta0} u_{\delta\alpha,\gamma\beta}C^A_{\gamma0} \big)C^B_{\beta 0}  = \lambda^BC^B_{\alpha 0}.\label{eq:bipartite_hartree}
 \end{align}
 where $\h_{\alpha\beta} = \bra{\chi_\alpha^M}h^M\ket{\chi_\beta^M}$ are the one-body integrals, and $u_{\alpha\beta,\gamma\delta} = \bra{\chi_\alpha^M\chi_\beta^N}u^{MN}\ket{\chi_\gamma^M\chi_\delta^N}$ are the two-body interaction integrals.  \\\\
-These eigenvalue equations are for subsystem A and B respectivly, and we can identify the \emph{Hartree matrix} (similar to the Fock matrix in Hartree-Fock theory) as the LHS inside the big paranthesis. These two coupled equations are solved iteratively, by updating the coefficients $C_{\alpha 0}^M$ until convergence is reached (self-consistency). By diagonalization of these Hartree matrices we gain the $N_M$ lowest energy orbitals $C^M_{\alpha i}$ and energy levels $\lambda^M_i=\epsilon^M_i$\cite{leinonen2024coulomb}, which we will use as our single-particle basis for each subsystem. The equations to be solved are
+These eigenvalue equations are for subsystem A and B respectivly, and we can identify the \emph{Hartree matrix} (similar to the Fock matrix in Hartree-Fock theory, omitting the exchange term) as the LHS inside the big paranthesis. These two coupled equations are solved iteratively, by updating the coefficients $C_{\alpha 0}^M$ until convergence is reached (self-consistency). By diagonalization of these Hartree matrices we gain the $N_M$ lowest energy orbitals $C^M_{\alpha i}$ and energy levels $\lambda^M_i=\epsilon^M_i$\cite{leinonen2024coulomb}, which we will use as our single-particle basis for each subsystem. The equations to be solved are
 \begin{align}
     \sum_{\beta=0}^{N_M} f_{\alpha\beta}^M C^M_{\beta i} = \epsilon_i^M C^M_{\alpha i}\label{eq:hartree_eigenvalue}
 \end{align}
-with the Hartree matrices from eqs. \ref{eq:bipartite_hartree}. This method to solve the interacting many-body problem is called the Hartree method, and is a simplification of the Hartree-Fock method where Hartree product states are applied, instead of anti-symmtric Slater determinants. This method will natually introduce a mean-field coulomb interaction between our two subsystems into their respective basis sets, and will be the basis for our study of the two-particle system.
+with the Hartree matrices from eqs. \ref{eq:bipartite_hartree}. From this we identify the \emph{Hartree operator}
+\begin{equation}
+    f_{\alpha\beta}^M \;=\; h_{\alpha\beta}^M
+    \;+\;\sum_{\gamma,\delta=0}^{N_{\bar M}}
+      C_{\gamma0}^{\bar M\,*}\;u_{\alpha\gamma,\beta\delta}\;C_{\delta0}^{\bar M}.
+\label{eq:hartree_operator}
+\end{equation}
+
+This method to solve the interacting many-body problem is called the Hartree method, and is a simplification of the Hartree-Fock method where Hartree product states are applied, instead of anti-symmtric Slater determinants. This method will natually introduce a mean-field coulomb interaction between our two subsystems into their respective basis sets, and will be the basis for our study of the two-particle syste \cite{leinonen2024coulomb}.
+%%% CONFIGURATION INTERACTION
 \subsection{Configuration Interaction}\label{sec:CI}
 Configuration Interaction (CI) refines the mean-field Hartree solution by expanding on the Hartree product state to include all possible configurations of the particles. The exact two-body wavefunction is then expanded in a basis of \emph{correlated} product states, which are constructed from the single-particle Hartree orbitals. This allows us to account for all possible correlations between the particles, and thus obtain a more accurate description of the system. If we include all possible configurations (i.e infinite number of basis states) we obtain Full Configuation Interaction (FCI), which is the exact solution to the many-body problem, but is intractable for all but the smallest systems \cite{helgaker2013molecular, szabo1996modern}. \\
 
@@ -169,7 +179,7 @@ quantifies the correlation energy captured by the CI method within our truncated
 
 %%% MORSE  POTENTIAL
 \subsection{Morse potential}\label{sec:morse_potential}
-To build our qubit system, we need to define some form of potential trap that we can confine our particles within. In modern quantum computing many different potentials are used, tested and theorized. One of the most common potentials are the quantum harmonic oscillator potential (QHO), a very well known potential in quantum mechanics. This potential has been studied in great detail and has been used in many different quantum systems, and is very often used as a benchmark for more advanced symmetric potentials \cite{griffiths2018introduction, berera2021quantum}. The QHO basis sets are widely employed to study quantum dot systems\cite{Yuan_2017}, and are often used in quantum chemistry to describe molecular vibrations \cite{atkins2011molecular}. 
+To build our qubit system, we need to define some form of potential trap that we can confine our particles within. In modern quantum computing many different potentials are used, tested and theorized. One of the most common potentials are the Quantum Harmonic Oscillator potential (QHO), a very well known potential in quantum mechanics. This potential has been studied in great detail and has been used in many different quantum systems, and is very often used as a benchmark for more advanced symmetric potentials \cite{griffiths2018introduction, berera2021quantum}. The QHO basis sets are widely employed to study quantum dot systems\cite{Yuan_2017}, and are often used in quantum chemistry to describe molecular vibrations \cite{atkins2011molecular}. 
 \\ 
 
 One could think that using the QHO potential for our qubit would be a natural choice, but there are some nuances necessary to consider. The QHO double well potential is perfectly symmetric, meaning the energy levels are uniformly spaced, and equal across both wells. This is not ideal for qubit systems, as we need more control over eneregy levels in both wells - and the uniform energy spacing makes one-qubit operations unstable as we lack control over what energy levels we excite \cite{devoret2013superconducting}. 
@@ -229,5 +239,4 @@ where the subscripts L and R correspond to left and right well, respectively. Th
     \label{fig:double_well_morse_potential}
 \end{figure}
 Figure \ref{fig:double_well_morse_potential} shows the double Morse potential, with the two wells. This is an example visualization, and shows how the qubit system can be constructed by tuning the parameters of the potential and placing a single particle in each well minima. With a sufficiently high barrier between the two wells, we can ensure that the particles remain localized in their respective wells, and thus behave like distinguishable subsystems. The asymmetric shape of the potential is due to the difference in well depths, $D_L \neq D_R$, which will give us distinct single-particle energies in each well, and thus a non-degenerate energy level structure.  
-\newpage
 \end{document}

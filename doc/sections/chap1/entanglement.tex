@@ -52,7 +52,7 @@ Returning to our simple system of two distinguishable particles, we can express 
         \rho_{11, 00} & \rho_{11, 01} & \rho_{11, 10} & \rho_{11, 11}
     \end{pmatrix}
 \end{align*}
-where the diagonal elements of the density matrix are the probability populations of the system being in the corresponding states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$, while the off-diagonal elements are the coherences between said states - signatures of superposition states. Such superposition states differ from mixed states, as they are not statistical mixtures of pure states, but rather linear combinations of pure states. But how do we measure the entanglement in our system? To do so, we've mentioned the von Neumann entropy, which is a measure of the amount of information that is missing from the system. The von Neumann entropy is defined as
+where the diagonal elements of the density matrix are the probability populations of the system being in the corresponding states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$, while the off-diagonal elements are the coherences between said states - signatures of superposition states. Such superposition states differ from mixed states, as they are not statistical mixtures of pure states, but rather linear combinations of pure states. But how do we measure the entanglement in our system? To do so, we've mentioned the von Neumann entropy, which is a measure of the amount of information that is missing from the system. The von Neumann entropy is defined as \textcolor{red}{TODO: Add reference to von Neumann entropy}
 \begin{equation}
     S(\rho) = -\text{Tr}(\rho \ln \rho)
 \end{equation}
@@ -71,10 +71,10 @@ Another useful aspect of the density matrix formalism is that it naturally ties 
 \begin{align*}
     \braket{O} = \sum_i w_i\bra{\psi_i}O\ket{\psi_i} = \sum_i w_i\text{Tr}\big(\ket{\psi_i}\bra{\psi_i}O\big) = \text{Tr}\big(\sum_i w_i \ket{\psi_i}\bra{\psi_i}O\big) = \text{Tr}(\rho O)
 \end{align*}
-and we see how powerful this notation is, we can quickly calculate expectation values of operators (observables) by a simple trace operation. 
+and we see how powerful this notation is, we can quickly calculate expectation values of operators (observables) by a simple trace operation.\textcolor{red}{TODO: Add reference to density matrix formalism and expectation values, maybe add more steps in the proof?}
 
 \subsection{Avoided crossings}\label{sec:avoided_crossings}
-In our coupled, double well system \eqref{eq:double_well_morse_potential}, the emergence of entanglement is a direct consequence of the Coulomb coupling between the two subsystems. This coupling will give rise to a phenomenon known as \emph{avoided crossings}\cite{nazir2005anticrossings}, regions in the parameter space where the energy levels of the two subsystems come close to each other, but do not cross due to the coupling of the two subsystems. This coupling makes it so that the energy levels that may be degenerate in the uncoupled system, are no longer degenerate in the coupled system and they are no longer independent, and the system is no longer separable or expressable as a product state. This means our two subsystems will be entangled, and the energy levels will be shifted due to the coupling and this we can use to manipulate the system. \\ 
+In our coupled, double well system \eqref{eq:double_well_morse_potential}, entanglement arises directly from the Coulomb interaction between the two particles. This interaction (coupling) produces a phenomenon known as \emph{avoided crossings} \cite{nazir2005anticrossings}, regions in the parameters where energy levels approach one another but repel instead of crossing due to the coupling. In the uncoupled system, certain levels may be exactly degenerate, but the Coulomb coupling lifts these degeneracies and mixes the subsystem states. As a result, the full two-particle wavefunction can no longer be written as a simple product of single-particle states: the particles become entangled, and their energy levels shift in response to the interaction. We can then exploit these shifts to control and manipulate the joint quantum state.\textcolor{red}{TODO: Should we provide examples of this or source it? }\\ 
 
 To illustrate this, we can consider a simple example of a two level system, with two energy levels $E_1$ and $E_2$, which are degenerate in the uncoupled system, i.e $E_1 = E_2$. Introducing a coupling term $V$, the effective Hamiltonian of the system can be expressed as
 \begin{align*}
@@ -87,7 +87,7 @@ where $V$ is the coupling strength between the two levels. The eigenvalues of th
 \begin{align*}
     E_\pm = \frac{E_1 + E_2}{2} \pm \sqrt{\frac{(E_1 - E_2)^2}{4} + V^2}
 \end{align*}
-and we can see that the energy levels are shifted due to the coupling, and they will never cross for $V\neq0$. \\ \\
+and we can see that the energy levels are shifted due to the coupling, and they will never cross for $V\neq0$. \\ 
 
 Consider now a dynamical system, where there is some explicit time-dependence in the Hamiltonian, with a constant coupling strength $V$.
 \begin{align}
@@ -104,18 +104,18 @@ where $E(t)$ is the time-dependent energy level of the system, with $k$ the swee
 Simulating for a time starting from $t<0$, where the energy levels are degenerate we will highlight the avoided crossing at $t=0$, and we get what is called a \emph{Landau-Zener transition} \cite{landau1932theorie, zener1932non}. 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.8\textwidth]{figs/avoided_crossing.pdf}
-    \caption{The avoided crossings in a two-level system as a function time $t$. The energy levels are shifted due to the coupling, and the energy levels do not cross, but rather "avoid" each other.}
+    \includegraphics[width=1.0\textwidth]{figs/avoided_crossing.pdf}
+    \caption{The avoided crossings in a two-level system as a function time $t$. The energy levels are shifted due to the coupling, and the energy levels do not cross, but rather "avoid" each other. The un-coupled system crosses at $t=0$, as indicated by the dotted lines. The solid lines show the energy levels of the coupled system, which avoid crossing due to the coupling. Parameters for this novel visualization are $k=1.0$ and $V=2.0$.}
     \label{fig:avoided_crossings}
 \end{figure}
-As we can see, the Coulomb coupling between the two subsystems results in the energy levels 'avoiding' eachother, while the non-interacting system would have crossed at $t=0$ (as indicated by the dotted lines). But what happens with the wavefunctions prepared in th system? Initializing the system in the ground state $\psi_0 = \ket{0}$, we shall see that what happens at the avoided crossing depends heavily on both coupling strength $V$ and sweeping paramter $k$, through the Landau-Zener formula \cite{landau1932theorie, zener1932non}:
+As we can see, the Coulomb coupling between the two subsystems results in the energy levels repelling each other, while the non-interacting system would have crossed at $t=0$ (as indicated by the dotted lines). But what happens with the wavefunctions prepared in th system? Initializing the system in the ground state $\psi_0 = \ket{0}$, we shall see that what happens at the avoided crossing depends heavily on both coupling strength $V$ and sweeping paramter $k$, through the Landau-Zener formula \cite{landau1932theorie, zener1932non}:
 \begin{align}
-    P_{0\rightarrow1} = e^{-\frac{2\pi V^2}{\hbar k}}\label{eq:landau_zener_trans_prob}
+    P_D = e^{-\frac{2\pi V^2}{\hbar k}}\label{eq:landau_zener_trans_prob}
 \end{align}
-which governs the probability of the system to transitions between the two energy levels. As visualized in the following plot \eqref{fig:landau_zener}, we can see how the sweeping parameter $k$ governs how the avoided crossing affect the prepared wavefunction, in one case we achive some minor level of mixing between the two basis states, while in the other case we achieve a full transition between the two states.
+which governs the probability of the system to transitions dibatically (i.e remain in the same diabatic states). As visualized in the following plot \eqref{fig:landau_zener}, we can see how the sweeping parameter $k$ governs how the avoided crossing affect the prepared wavefunction, in one case we achive some minor level of mixing between the two basis states, while in the other case we achieve a full transition between the two states. In the case for a low $k=1.0$, we near the adiabatic limit $P_D \approx 0$, where the system has time to continually adjust to the changing Hamiltonian, and the energy eigenstates 'swap' places as they evolve. In the case for a high $k=10$, we are in the diabatic (non-adiabatic) limit $P_D \approx 1$, where the rapid change in the Hamiltonian does not allow the system to properly adjust, and the system eigenstates remain unchanged. As seen in the plot, we are not completely at the limits, but rather in a regime where the system ends up partially mixed.
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.8\textwidth]{figs/landau_zener.pdf}
+    \includegraphics[width=1.0\textwidth]{figs/landau_zener.pdf}
     \caption{The Landau-Zener transition probability for different combinations of the coupling strength $V$ and the sweeping parameter $k$. The probability of the system to transition between the two energy levels is given by the Landau-Zener formula \eqref{eq:landau_zener_trans_prob}. We can see how the states are mixed for large $k=10$ and transition fully for small $k=1.0$.}
     \label{fig:landau_zener}
 \end{figure} 
