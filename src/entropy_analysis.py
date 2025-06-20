@@ -16,13 +16,15 @@ from utils.visualization import find_figsize
 
 
 
-def entropy_analysis(params,
+def entropy_analysis(
+                    init_params,
+                    params,
                     l,
                     num_func,
                     grid_length,
                     num_grid_points,
                     alpha=1.0,
-                    a=0.25,
+                    a=0.1,
                     potential=None,
                     verbose=False,
                 ):
@@ -34,7 +36,32 @@ def entropy_analysis(params,
     returns:
         entropy (np.ndarray): The Von Neumann entropy of the system.
     """
-    
+    # Set Hartree base for both configurations
+    init_potential = MorsePotentialDW(
+        *init_params,
+    )
+    init_basis = ODMorse(
+        l=l,
+        grid_length=grid_length,
+        num_grid_points=num_grid_points,
+        alpha=alpha,
+        _a=a,
+        potential=init_potential,
+        dvr=True,
+    )
+    init_bhs = sinc_BHS(
+        h_l=init_basis.h_l,
+        h_r=init_basis.h_r,
+        u_lr=init_basis._ulr,
+        num_basis_l=num_func,
+        num_basis_r=num_func,
+    )
+    init_bhs.solve()
+    init_eps_l = init_bhs.eps_l
+    init_eps_r = init_bhs.eps_r
+    c_l = init_bhs.c_l
+    c_r = init_bhs.c_r
+
     # System parameters
     if potential is None:
         potential = MorsePotentialDW(
@@ -57,13 +84,10 @@ def entropy_analysis(params,
         num_basis_r=num_func,
     )
     bhs.solve()
-    eps_l = bhs.eps_l
-    eps_r = bhs.eps_r
-    c_l = bhs.c_l
-    c_r = bhs.c_r
     h_l = c_l.conj().T @ basis.h_l @ c_l
     h_r = c_r.conj().T @ basis.h_r @ c_r
-    u_lr = np.einsum('ai, bj, ab, ak, bl -> ijkl', c_l.conj(), c_r.conj(), basis._ulr, c_l, c_r)
+    M = np.einsum('ia, ij, ic -> acj', c_l.conj(), basis._ulr, c_l, optimize=True)
+    u_lr = np.einsum('acj, jb, jd -> abcd', M, c_r.conj(), c_r, optimize=True)
     # Compute energies
     h = np.kron(h_l, np.eye(*h_l.shape)) + np.kron(np.eye(*h_r.shape), h_r)
     u = u_lr.reshape(*h.shape)
@@ -96,13 +120,13 @@ def entropy_analysis(params,
             probs = np.abs(psi)**2
             print(f"State {i} populations:", probs)
             print(f"Entropy of state {i}: {S:.6f}")
-
+    # breakpoint()
     return eps, C, entropies
 
 def _visualize(C_, num_func, entropy, tol=1e-4):
     from matplotlib.colors import TwoSlopeNorm
     import seaborn as sns
-    matplotlib.style.use('seaborn-v0_8')
+    matplotlib.style.use('seaborn-v0_8-deep')
     colors = sns.color_palette()
     b = colors[0]
     g = colors[1]
@@ -145,7 +169,7 @@ def _visualize(C_, num_func, entropy, tol=1e-4):
 def visualize(C_, num_func, entropy, tol=1e-7):
     from matplotlib.colors import TwoSlopeNorm
     import seaborn as sns
-    matplotlib.style.use('seaborn-v0_8')
+    matplotlib.style.use('seaborn-v0_8-deep')
     colors = sns.color_palette()
     b = colors[0]
     g = colors[1]
@@ -157,7 +181,7 @@ def visualize(C_, num_func, entropy, tol=1e-7):
     # 2 rows × 3 cols, now showing states 0–5
     fig, axs = plt.subplots(
         2, 3,
-        figsize=find_figsize(1.2, 0.8),   # doubled height for 2 rows
+        figsize=find_figsize(1.2, 0.5),   # doubled height for 2 rows
         constrained_layout=True,
         sharex=True, sharey=True
     )
@@ -165,7 +189,7 @@ def visualize(C_, num_func, entropy, tol=1e-7):
 
     norm = TwoSlopeNorm(vmin=-1.0, vcenter=0.0, vmax=1.0)
     custom_cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
-        'custom_seaborn', [b, g, r], N=256
+        'blue_white_red', [b, (1,1,1), r], N=256
     )
 
     for i in range(6):
@@ -195,15 +219,16 @@ def visualize(C_, num_func, entropy, tol=1e-7):
     # axs[5].axis('off')  # now used by Ψ₅
 
     # shared labels
-    axs[3].set_ylabel(r"Left: $\phi_i$")
-    axs[4].set_xlabel(r"Right: $\phi_j$")  # bottom‐middle
+    axs[3].set_ylabel(r"Left-well basis state: $|i\rangle$")
+    axs[4].set_xlabel(r"Right-well basis state $|j\rangle$")  # bottom‐middle
 
-    fig.suptitle("Energyeigenstate population in configuration I")
+    fig.suptitle("Configuration II: Eigenstate occupancies")
+    # fig.subplots_adjust(bottom=0.05, right=0.95)
     fig.colorbar(
         im, ax=axs, orientation="horizontal",
         fraction=0.5, pad=0.03
     )
-    # plt.savefig('../doc/figs/state_populations_I.pdf')
+    plt.savefig('../doc/figs/state_populations_II.pdf')
     plt.show()
 if __name__ == "__main__":
     separations = [25, 50, 75, 100, 200]
@@ -213,11 +238,14 @@ if __name__ == "__main__":
     l = 25
     num_func = 4
     alpha = 1.0
-    a = 0.01
-    params_II = [73.44552758, 71.99208131, 29.16163181, 29.16725463, 42.80228627]
-    params_I = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, 42.47007681]
-    params = params_I
-    ep, C, ent = entropy_analysis(params, l, num_func, grid_length, num_grid_points, alpha, a, verbose=False)
+    a = 0.1
+    # params_II = [73.44552758, 71.99208131, 29.16163181, 29.16725463, 42.80228627]
+    # params_I = [73.40600785, 71.10039648 ,31.6125873,  26.57511632, 42.47007681]
+    params_I = [62.17088395, 60.73364357 ,19.89474221 ,21.81940414, 15.        ]
+    params_II = [62.97325982, 64.11742637 ,13.22714092 ,13.09781006 ,14.95744294]
+    params = params_II
+    init_params = params_I
+    ep, C, ent = entropy_analysis(init_params, params, l, num_func, grid_length, num_grid_points, alpha, a, verbose=False)
     visualize(C, num_func, entropy=ent)
     exit()
     
