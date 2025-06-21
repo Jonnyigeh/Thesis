@@ -1,7 +1,7 @@
 \documentclass{subfiles}
 \begin{document}
 %% TIME-EVOLUTION
-\section{Time-evolution}
+\section{Time-evolution}\label{sec:time_evolve_methods}
 In this section, we describe the numerical implementation of the time-dependent Schrödinger equation (TDSE) for evolving quantum states under a (possibly time-dependent) Hamiltonian. Our primary goal is to simulate the time evolution of a quantum wavefunction from a known initial state, using various numerical methods to approximate both the time-evolution operator and the propagation of the wavefunction itself.
 
 We begin by discussing how to discretize time for numerical propagation. We then introduce different strategies for approximating the time-evolution operator and solving the TDSE. Several integration schemes are examined, and we compare their accuracy, stability, and efficiency. We validate our implementation using the well-known Landau-Zener model before applying the methods to the more complex double-well Morse potential system.
