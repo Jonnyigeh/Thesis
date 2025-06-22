@@ -16,7 +16,7 @@ and it must satisfy the following critera:
 \end{itemize}
 All these critera can be satisfied by 
 \begin{align*}
-    U(t_0 + dt, t_0) = 1 - i\Omega(t_0) dt
+    U(t_0 + dt, t_0) = 1 - i\Omega(t_0) dt,
 \end{align*}
 where $\Omega$ is a Hermitian operator, and $dt$ is the infinitesimal time difference. The 3rd criteria is satisfied naturally as $dt$ goes to zero, while the 1st and 2nd criteria is satisfied to first order 
 \begin{align*}
@@ -25,27 +25,27 @@ where $\Omega$ is a Hermitian operator, and $dt$ is the infinitesimal time diffe
 and
 \begin{align*}
     &U(t_0 + 2dt, t_0) = 1 - i2\Omega(t_0)dt, \\
-    &U(t_0 + 2dt, t_0 +dt)U(t_0 + dt, t_0) = 1 - 2i\Omega(t_0)dt + \mathcal{O}(dt^2)
+    &U(t_0 + 2dt, t_0 +dt)U(t_0 + dt, t_0) = 1 - 2i\Omega(t_0)dt + \mathcal{O}(dt^2),
 \end{align*}
-if we have a small enough time-step $dt$, where we can safely ignore higher order terms. But how to identify the operator $\Omega$? We identify from classical mechanics that the Hamiltonian operator is the propagator of the system \cite{sakurai1986modern}, 
+if we have a small enough time-step $dt$, where we can safely ignore higher order terms. But how to identify the operator $\Omega$? We identify from classical mechanics that the Hamiltonian operator is the propagator of the system \cite{sakurai1986modern} 
 \begin{align*}
-    \Omega = \frac{H}{\hbar}
+    \Omega = \frac{H}{\hbar}.
 \end{align*}
-meaning, 
+Which means that the time-evolution operator can be expressed as 
 \begin{align*}
-    U = 1 - \frac{i}{\hbar}Hdt
+    U = 1 - \frac{i}{\hbar}Hdt,
 \end{align*}
 which we can see is the first order approximation of the exponential series
 \begin{align*}
-    e^{\frac{-i}{\hbar}Ht} = 1 - \frac{i}{\hbar}Ht + \frac{1}{2!}\bigg(\frac{-i}{\hbar}Ht\bigg)^2 + ...
+    e^{\frac{-i}{\hbar}Ht} = 1 - \frac{i}{\hbar}Ht + \frac{1}{2!}\bigg(\frac{-i}{\hbar}Ht\bigg)^2 + ... .
 \end{align*}
-which is the full form of the time-evolution operator, often coined time-propagator, and is given by
+This is the full form of the time-evolution operator, often coined time-propagator, and is given by
 \begin{equation}
-    U(t, t_0) = \mathcal{T}\text{exp}\bigg(\frac{-i}{\hbar}\int_{t_0}^t H(t')dt'\bigg)\label{eq:time_evolution_operator}
+    U(t, t_0) = \mathcal{T}\text{exp}\bigg(\frac{-i}{\hbar}\int_{t_0}^t H(t')dt'\bigg)\label{eq:time_evolution_operator},
 \end{equation}
 where the integral must be time-ordered, and swapped with the Dyson series expansion should the Hamiltonian be time-dependent, and non-commutative at different times (see chapter 2.1.2 in \cite{sakurai1986modern}). For a time-independent Hamiltonian $H$, the time-evolution operator simplifies to 
 \begin{align*}
-    U(t, t_0) = e^{-\frac{i}{\hbar}H(t-t_0)}
+    U(t, t_0) = e^{-\frac{i}{\hbar}H(t-t_0)},
 \end{align*}
 allowing for analytical propagation of the system. In contrast, the time-dependent case \eqref{eq:time_evolution_operator} requires numerical treatment to solve the integral, as the exponential cannot be solved analytically. 
 
@@ -57,25 +57,25 @@ To simulate time evolution of a quantum system numerically, we start by discreti
 
 The simplest approximative method is the \emph{Euler-Cromer} method, a first order method given by Taylor expansion of the time-evolution operator
 \begin{align}
-    U(t + dt, t) = 1 - \frac{i}{\hbar}H(t)dt\label{eq:euler_cromer}
+    U(t + dt, t) = 1 - \frac{i}{\hbar}H(t)dt\label{eq:euler_cromer},
 \end{align}
 which leads to an explicit update of the wavefunction as 
 \begin{align*}
-    \ket{\Psi(t + dt)} = \bigg(1 - \frac{i}{\hbar}H(t)dt\bigg)\ket{\Psi(t)}
+    \ket{\Psi(t + dt)} = \bigg(1 - \frac{i}{\hbar}H(t)dt\bigg)\ket{\Psi(t)}.
 \end{align*}
-which is a simple and fast, but inaccurate method. While this method is simple to implement and computationally inexpensive, it suffers from numerical instability and is not unitary nor norm-preserving. This means that the wavefunction will not be normalized after each time step, and the norm of the wavefunction will diverge over time, and we may obtain non-physical results should we want to evolve for longer timespans. \\ 
+This is a simple and fast, but inaccurate method. While this method is simple to implement and computationally inexpensive, it suffers from numerical instability and is not unitary nor norm-preserving. This means that the wavefunction will not be normalized after each time step, and the norm of the wavefunction will diverge over time, and we may obtain non-physical results should we want to evolve for longer timespans. \\ 
 % Matrix exponentiation
 To improve the accuracy and stability of time propagation, higher-order and norm-preserving methods are generally preferred. One straightforward approach is to compute the matrix exponential of the Hamiltonian over each time step. Since this operator is unitary by construction, it ensures that the wavefunction remains normalized and the dynamics remain physically consistent. This method is particularly appealing for low-dimensional systems, where the Hamiltonian can efficintly be diagonalized, and the matrix exponential can be computed. \\
 
 In practice, this matrix exponential is compututed on a discretized time interval by the expression
 \begin{equation}
-    U(t + dt, t) = e^{-\frac{i}{\hbar}H(t)\Delta t}\label{eq:numerical_time_evolution_operator}
+    U(t + dt, t) = e^{-\frac{i}{\hbar}H(t)\Delta t}\label{eq:numerical_time_evolution_operator},
 \end{equation}
 assuming that the Hamiltonian is approximatively constant over the time interval $\Delta t$. \\
 
 This naturally is an exact update rule for time-independent Hamiltonians, but the accurateness of this method depends on the size of the time step $\Delta t$ and how the Hamiltonian varies over the time intervals. This does however introduce a new alley for approximations, where we may introduce various methods to approximate the Hamiltonian over the time interval, such as the mid-way approximation, where we assume a better approximation is the average of the Hamiltonian at the start and end of the time interval, i.e
 \begin{align*}
-    U(t + dt, t) = e^{-\frac{i}{\hbar}\frac{H(t) + H(t + dt)}{2}\Delta t}
+    U(t + dt, t) = e^{-\frac{i}{\hbar}\frac{H(t) + H(t + dt)}{2}\Delta t}.
 \end{align*}
 Further on, we will explore more such ways to approximate the time-evolution operator, and in this work we shall investigate how these different approximations affect the time-evolution of our coupled double Morse potential system.\textcolor{red}{TODO: Will we? Or remove if we do not.} \\ 
 

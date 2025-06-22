@@ -15,13 +15,13 @@ One of the core features of our system - and the foundation of our qubit design 
 \\ However, we are assuming that the potential trap can be constructed in such a way that there are minimal correlations between the two particles, and that the wavefunction can be approximated as a product state. In this analysis we shall look at how "distinguishable" (or separable) our system actually is, and find a distance between wells where we can safely assume the particles to be distinguishable. \\ \\
 To make an assessment of the systems distinguishability we will firstly look at the eigen-energies of the system given that we either:
 \begin{itemize}
-    \item Assume the particles to be distinguishable: \\ We construct the wavefunction as a product state,
+    \item Assume the particles to be distinguishable: \\ We construct the wavefunction as a product state
     \begin{align*}
-        \Psi(\mathbf{r}_1, \mathbf{r}_2) = \phi_L(\mathbf{r}_1)\otimes\phi_R(\mathbf{r}_2)
+        \Psi(\mathbf{r}_1, \mathbf{r}_2) = \phi_L(\mathbf{r}_1)\otimes\phi_R(\mathbf{r}_2),
     \end{align*} 
     where $\phi_L$ and $\phi_R$ are the single-particle functions located in the left and right well respectivley. We then calculate the energy by diagonalizing the Hamiltonian matrix for this product state system. In such a product state system the Hamiltonian matrix becomes
     \begin{align*}
-        H = H_L \otimes I + I \otimes H_R + V
+        H = H_L \otimes I + I \otimes H_R + V,
     \end{align*}
     where $H_L$ and $H_R$ are the single-particle Hamiltonians for the left and right well, and $V$ is the interaction term between the two particles.
     \item Assume the particles to be indistinguishable, and construct a Slater determinant that we solve using Hartree-Fock theory.
@@ -52,19 +52,36 @@ As an initial search, we make a grid search over the potential parameters, mostl
     \end{tabular}
     \caption{The parameters we will search over in our grid search}
 \end{table}
-with the constraint that $2 * D / \sqrt{k} < l$ where $l$ are the number of basis functions allocated to each well, as we've discussed earlier. This is to ensure that the basis functions are well within the potential well, and that we do not have any basis functions that are cut off by the potential. This then becomes a \emph{constrained optimization problem}. To perform our optimization we will use the \texttt{scipy.optimize} package, and the \texttt{minimize} function. We will use the \texttt{COBYQA} method, which is a derivative-free optimization method that is well suited for constrained optimization problems. This method is built on the concept of \emph{sequential quadratic programming}, that solves constrained, non-linear problems. For more details on the method, see \cite{razh_cobyqa}. The optimization will be done as follows:
+with the constraint that $2D / \sqrt{k} < l$ where $l$ are the number of basis functions allocated to each well, as we've discussed earlier. This is to ensure that the basis functions are well within the potential well, and that we do not have any basis functions that are cut off by the potential. This then becomes a \emph{constrained optimization problem}. To perform our optimization we will use the \texttt{scipy.optimize} package, and the \texttt{minimize} function. We will use the \texttt{COBYQA} method, which is a derivative-free optimization method that is well suited for constrained optimization problems. This method is built on the concept of \emph{sequential quadratic programming}, that solves constrained, non-linear problems. For more details on the method, see \cite{razh_cobyqa}. The optimization will be done as follows:
+\begin{algorithm}[ht]
+\caption{Paramter optimization procedure: High-level overview}
+\textbf{Input:}{Parameter ranges \(\mathcal{R}\), \(\epsilon_{\text{coarse}}\), \(\epsilon_{\text{fine}}\)}
+\,\,\,\,\textbf{Output:}{Final refined parameter sets}
+
+\textbf{1. Initialization}\\
+Generate a collection of random parameter configurations within \(\mathcal{R}\).
+
+\textbf{2. Coarse Optimization}\\
+For each configuration in the collection:
 \begin{itemize}
-    \item Randomize an initial configuration of the parameters within the specified ranges.
-    \item Run the optimization algorithm, with a high tolerance for convergence.
-    \item Log 'good' regions where we achive the desired configurations.
-    \item Initialize new configurations using the 'good' parameters found from the grid search.
-    \item Run the optimization algorithm again, with a lower tolerance for convergenece.
+  \item Run the optimizer with convergence tolerance \(\epsilon_{\text{coarse}}\).
+  \item If the optimized result meets the desired criteria, retain it as a candidate.
 \end{itemize}
-\textcolor{red}{TODO: Change this into proper pseudo-code, and add more details about the optimization algorithm.}
+
+\textbf{3. Fine Optimization}\\
+For each candidate parameter set:
+\begin{itemize}
+  \item Re‐run the optimizer with tighter tolerance \(\epsilon_{\text{fine}}\).
+  \item Add the refined output to the final results.
+\end{itemize}
+
+\textbf{4. Return} the final set of optimized parameters.
+\end{algorithm}
+
 \subsubsection{Objective function}
 An objective function is constructed for the optimizer, which is the object to be minimized by our optimization algorithm. We will have two separate objective functions, one for each configuration we are looking for. Across both configurations, we want to minimize the $\zeta$-parameter, which directly controls the stability of time-evolution through the Hamiltonian matrix. The parameters is defined as 
 \begin{equation*}
-    \zeta = E_4 - E_1 - E_2 + E_0
+    \zeta = E_4 - E_1 - E_2 + E_0,
 \end{equation*}
 and we can identify this as the \emph{accumulated phase} of the rotated time-evolution operator $U = e^{-iHt}$, expressed in terms of the energy eigenstates, $U = \sum_i^4 e^{-iE_it}\ket{\phi_i}\bra{\phi_i}$. We see that written in matrix form in the logical state basis $\{|ij>\}$, this propagator is (where $\ket{11}$ is the 4th energy eigenstate)
 \begin{align*}
@@ -79,7 +96,7 @@ The energy eigenstates themselves are not unique, because we are free to apply a
 \begin{align*}
     E_{11} = E_{10} + E_{01} - E_00
 \end{align*}
-means that the excitation energy from the 0th state $\ket{00}\to\ket{11}$ equals the sum of excitations $\ket{00}\to\ket{10}$ and $\ket{00}\to\ket{01}$, which aids in ensuring phase stability in our iSwap-like two-qubit gate operation. 
+means that the excitation energy from the 0th state $\ket{00}\to\ket{11}$ equals the sum of excitations $\ket{00}\to\ket{10}$ and $\ket{00}\to\ket{01}$, which aids in ensuring phase stability in our iSwap-like two-qubit gate operation \cite{ku2020suppression}. 
 \\\\
 Configuration I, as we've mentioned, should have all energy levels distinct. This introduces penalties in our objective function corresponding to the overlap between energy eigenvalues and we want to Von Neumann entropies to be as close to zero as possible. In python we realise this in the following way
 \begin{lstlisting}[language=Python]
@@ -88,22 +105,19 @@ detuning_penalty = -min(0.5, np.abs(e_L - e_R))
 entropy_penalty = np.linalg.norm(entropy - target_entropy)
 ZZ_penalty = np.abs(E_4 - E_1 - E_2 + E_0)
 \end{lstlisting}
-where \texttt{e\_L} and \texttt{e\_R} are the energy levels of the left and right well, and \texttt{entropy} is the Von Neumann entropy of the subsystems. The \texttt{detuning\_penalty} is a penalty that is introduced to ensure that the energy levels are distinct, and the \texttt{entropy\_penalty} is a penalty that ensures that the entropy is as close to zero as possible. The objective function is then the sum of these two penalties. Furthermore, we would like the two configurations parameters to be close in parameter space, so that our evolution between the two configurations is smoooth. We introduce a penalty for this as well, similar to the \texttt{entropy\_penalty}.
-\\ In configuration II we have a similar detuning penalty, but in this configuration we do want degeneracy in the 1st Hartree energy level in each well, as well as having an entropy penalty, but with a different target vector. 
+where \texttt{e\_L} and \texttt{e\_R} are the energy levels of the left and right well, and \texttt{entropy} is the Von Neumann entropy of the subsystems. The \texttt{detuning\_penalty} is a penalty that is introduced to ensure that the energy levels are distinct, and the \texttt{entropy\_penalty} is a penalty that ensures that the entropy is as close to zero as possible. The objective function is then the sum of these two penalties. Furthermore, we would like the two configurations parameters to be close in parameter space, so that our evolution between the two configurations is smoooth. We introduce a penalty for this as well, similar to the \texttt{entropy\_penalty}. We also want to penalize off-diagonal coupling terms in the Hamiltonian matrix, as these will introduce unwanted couplings between the subsystems in our measurement configuration. This is done by introducing a \texttt{off\_diagonal\_penalty} that is the scaled sum of the absolute values of the off-diagonal elements in the Hamiltonian matrix.
+
+In configuration II we have a similar detuning penalty, but in this configuration we do want degeneracy in the 1st Hartree energy level in each well, as well as having an entropy penalty, but with a different target vector. We also here want to penalize certain off-diagonal coupling terms in the Hamiltonian matrix that induces unwanted transitions during evolution, and reward the correct coupling between the subsystems that induce entanglement between the first two excited energy eigenstates. This coupling is closely related to the energy difference between said energy states, so we want to minimize $\Delta E_{12} / J_{12}$, where $J_{12}$ is the coupling strength between the first two energy eigenstates through the \texttt{J\_deltaE\_penalty}. 
+The objective function is then again the sum of these penalties.
 \begin{lstlisting}[language=Python]
 target_entropy = np.array([0, 1, 1, 0])
 detuning_penalty = np.abs(e_L - e_R)
 entropy_penalty = np.linalg.norm(entropy - target_entropy)
 ZZ_penalty = np.abs(E_4 - E_1 - E_2 + E_0)
+J_12 = np.abs(H[1, 2])  
+deltaE_12 = np.abs(E_2 - E_1)  
+J_deltaE_penalty = - np.abs(J_12 / deltaE_12 + 1e-12)  
 \end{lstlisting}
-The objective function is then again the sum of these penalties. \\ 
-The overall structure of the objective function is as follows:
-\begin{itemize}
-    \item Solve for the Hartree energy eigenstates of the system given the current parameters $\theta$.
-    \item Calculate the reduced density matrices, and the Von Neumann entropies of the subsystems.
-    \item Calculate the penalties for the current configuration, and return the sum of these penalties.
-\end{itemize}
-\textcolor{red}{TODO: Change this into proper pseudo-code, and add more details. REDO the objective function to match the actual objective used. Might want to remove the ZZ parameter? fuck it we can leave it sounds cool and have a nice reference to litterature (zhao article)}
 
 
 %%% DVR basis
@@ -111,7 +125,6 @@ The overall structure of the objective function is as follows:
 In this section, we show how to implement the Sinc Discrete Variable Representation (Sinc-DVR) basis used throughout this thesis, and the framework used to validate, and motivate, its usage by comparing the results of the DVR basis against more traditional basis sets, such as the (exact) energy eigenbasis. We do so in a simplified system, where we have a single particle in a Morse potential. This will allow us to compare the results to known analytical solutions. 
 
 As a grid-based basis, Sinc-DVR offers practical computational advantages, particularly when dealing with operators that are diagonally representable and/or localized states. Its effectiveness depends however, on the ability to accurately represent the relevant physical states of the system at hand. To test this, we examine how the DVR basis functions overlap with the exact energy eigenstates of the system, and we use the DVR basis to compute the ground state energy of the system, which we then compare to the result obtained from the exact energy eigenstates by diagonalizaton of the Hamiltonian. 
-\\
 
 To validate the Sinc-DVR basis, we compare its performance to the exact energy eigenstates of the system, obtained by directly diagonalizing the Hamiltonian of the system. This mirrors the procedure used to solve the time-independent Schrödinger equation \eqref{eq:tise}, where the eigenvalues and eigenfunctions define the stationary states of the system.
 
@@ -160,24 +173,24 @@ for i in range(N):
             T_dvr[i, j] = np.pi**2 / (6 * dx**2)
         else:
             T_dvr[i, j] = ((-1)**(i - j)) / (dx**2 * (i - j)**2)
-T_true = np.zeros((N, N))
+T_exact = np.zeros((N, N))
 T_diag = 1 / dx**2 
 T_off_diag = -1 / (2 * dx**2)
 for i in range(N):
     for j in range(N):
         if i == j:
-            T_true[i, j] = T_diag
+            T_exact[i, j] = T_diag
         elif abs(i - j) == 1:
-            T_true[i, j] = T_off_diag
+            T_exact[i, j] = T_off_diag
         else:
-            T_true[i, j] = 0
+            T_exact[i, j] = 0
 
 
-H_true = T_true + V_matrix
+H_exact = T_exact + V_matrix
 H_dvr = T_dvr + V_matrix
 # Diagonalize the Hamiltonian
 E_dvr, psi_dvr = np.linalg.eigh(H_dvr)
-E_true, psi_true = np.linalg.eigh(H_true)
+E_exact, psi_exact = np.linalg.eigh(H_exact)
 \end{lstlisting}
 
 \subsubsection*{Energy eigenstates}
@@ -192,12 +205,12 @@ where $\phi_n(x)$ is the Sinc-DVR basis function and $\psi_m(x)$ is the exact en
 as shown in the following code snippet, building on the previous code snippet \ref{lst:dvr_validation}:
 \begin{lstlisting}[language=Python]
 E_dvr, psi_dvr = np.linalg.eigh(H_dvr)
-E_true, psi_true = np.linalg.eigh(H_true)
+E_exact, psi_exact = np.linalg.eigh(H_exact)
 S = np.zeros((n_levels, n_levels))
 for i in range(n_levels):
     for j in range(n_levels):
         # Calculate the overlap integral
-        overlap = np.sum(psi_dvr[:, i].conj() * psi_true[:, j])
+        overlap = np.sum(psi_dvr[:, i].conj() * psi_exact[:, j])
         S[i, j] = np.abs(overlap)
 \end{lstlisting}
 where \texttt{n\_levels} is the number of energy levels we are interested in. The reader might notice the lack of $\Delta x$ in the overlap integral, this is due to how \texttt{numpy} produces normalized basis sets from diagonalization in the \texttt{eigh} function, so their (discrete) normalization is already accounted for. The overlap matrix $S$ is then a $n_{\text{levels}} \times n_{\text{levels}}$ matrix, where each element $S_{nm}$ represents the overlap between the $n$th Sinc-DVR basis function and the $m$th exact energy eigenstate of the system.

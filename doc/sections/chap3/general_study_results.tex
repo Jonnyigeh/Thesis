@@ -6,11 +6,11 @@
 \subsubsection*{Energy eigenstates}
 A natural validation of the Sinc-DVR basis is to check that the Sinc-DVR basis functions closely match the exact energy eigenstates of the system. We require that the functions that the Sinc-DVR basis is constructed to have a high degree of overlap with the exact energy eigenstates of the system. Otherwise, we risk losing important information about dynamics of the system, dynamics that may have a significant impact on the quantum control protocols we wish to implement.\\ 
 
-We begin by computing the overlap matrix $S$ between the Sinc-DVR basis functions and the exact energy eigenstates of the Morse potential. Recall from Section \ref{sec:sinc_dvr_validation}, the overlap matrix is defined as:
+We begin by computing the overlap matrix $S$ between the Sinc-DVR basis functions and the exact energy eigenstates of the Morse potential. Recall, the overlap matrix is defined as:
 \begin{align*}
-    S_{ij} = \int \psi_i(x) \psi_j(x) dx
+    S_{ij} = \int \psi_i(x) \psi_j(x) dx,
 \end{align*}
-where $\psi_i(x)$ and $\psi_j(x)$ are the Sinc-DVR basis and exact energy eigenstates, respectively. 
+where $\psi_i(x)$ and $\psi_j(x)$ are the Sinc-DVR basis and exact energy eigenstates, respectively.\textcolor{red}{TODO: Should ref this better to prior sections. SHould we add the assessment section that could bind this?} 
 
 The overlap matrix $S$ is then a measure of how well the Sinc-DVR basis functions represent the exact energy eigenstates of the system. The results are shown in figure \ref{fig:dvr_validation_overlap}, where we see that the overlap between the Sinc-DVR basis functions and the exact energy eigenstates is quite high, especially for the lowest lying states. We see that the overlap matrix is close to the identity matrix, indicating a near perfect overlap between the two basis sets.
 \begin{figure}[h!]
@@ -42,7 +42,7 @@ Recall, the Hamiltonian for the Landau-Zener model is given by:
     H(t) = \begin{pmatrix}
         vt & V \\
         V & -vt
-\end{pmatrix}
+\end{pmatrix},
 \end{align*}
 where $v$ is the sweeping velocity, $V$ is the coupling strength, and $t$ is the time. At $t=0$, the uncoupled system would have a degeneracy, but the coupling $V$ opens a gap (lifts the degeneracy), resulting in an avoided crossing as we saw in section \ref{sec:avoided_crossings}. Thus, this minimal system captures one of the simplest non-trivial dynamics of a quantum system which also leads to a well known analytical solution for the transition probability \eqref{eq:landau_zener_trans_prob}. 
 
