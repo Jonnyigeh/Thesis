@@ -21,20 +21,71 @@
 
 
 \newcommand{\qedsymbol}{\rule{0.7em}{0.7em}}
-\lstset{ %
-inputpath=,
-backgroundcolor=\color{white!88!black},
-basicstyle={\ttfamily\scriptsize},
-commentstyle=\color{magenta},
-language=Python,
-morekeywords={True,False},
-tabsize=4,
-stringstyle=\color{green!55!black},
-frame=single,
-keywordstyle=\color{blue},
-showstringspaces=false,
-columns=fullflexible,
-keepspaces=true}
+\definecolor{sns_bg}{RGB}{250,250,250}         % near-white
+\definecolor{sns_fg}{RGB}{ 33, 33, 33}         % dark grey text
+\definecolor{sns_comment}{RGB}{127,127,127}    % medium-grey comments
+\definecolor{sns_keyword}{HTML}{4C72B0}        % deep blue
+\definecolor{sns_string}{HTML}{55A868}         % deep green
+\definecolor{sns_number}{HTML}{C44E52}         % deep red
+\definecolor{sns_builtins}{HTML}{C44E52}       % same deep red for built-ins
+\lstset{
+  language=Python,
+  alsoletter={_.,},            % treat _ and . as part of words
+  backgroundcolor=\color{sns_bg},
+  basicstyle=\ttfamily\small\color{sns_fg},
+  commentstyle=\color{sns_comment}\itshape,
+  stringstyle=\color{sns_string},
+  numberstyle=\color{sns_number},
+  frame=single,
+  rulecolor=\color{sns_bg},
+  xleftmargin=1em,
+  xrightmargin=1em,
+  tabsize=4,
+  showstringspaces=false,
+  columns=flexible,
+  keepspaces=true,
+  captionpos=b,
+  literate=
+    % Library calls → Seaborn-blue
+    {np}                      {{\color{sns_keyword}np}}1
+    {scipy}                   {{\color{sns_keyword}scipy}}1
+    {einsum}                  {{\color{sns_keyword}einsum}}1
+    {sum}                     {{\color{sns_keyword}sum}}1
+    {abs}                     {{\color{sns_keyword}abs}}1
+    {zeros}                   {{\color{sns_keyword}zeros}}1
+    {linalg}                  {{\color{sns_keyword}linalg}}1
+    {eigh}                    {{\color{sns_keyword}eigh}}1
+    {fft}                     {{\color{sns_keyword}fft}}1
+    {optimize}                {{\color{sns_keyword}optimize}}1
+    {linspace}                {{\color{sns_keyword}linspace}}1
+    {arange}                  {{\color{sns_keyword}arange}}1
+    {array}                   {{\color{sns_keyword}array}}1
+    {asarray}                 {{\color{sns_keyword}asarray}}1
+    {diag}                    {{\color{sns_keyword}diag}}1
+    {exp}                     {{\color{sns_keyword}exp}}1
+    {expm}                    {{\color{sns_keyword}expm}}1
+    {norm}                    {{\color{sns_keyword}norm}}1
+    {kron}                    {{\color{sns_keyword}kron}}1
+    {eye}                     {{\color{sns_keyword}eye}}1
+    {sqrt}                    {{\color{sns_keyword}sqrt}}1
+    {dot}                     {{\color{sns_keyword}dot}}1
+    {range}                     {{\color{sns_keyword}range}}1
+    {for}                     {{\color{sns_keyword}for}}1
+    {in}                     {{\color{sns_keyword}in}}1
+    {inv}                     {{\color{sns_keyword}inv}}1
+    {if}                     {{\color{sns_keyword}if}}1
+    {else}                     {{\color{sns_keyword}else}}1
+    {elif}                     {{\color{sns_keyword}elif}}1
+    {return}                     {{\color{sns_keyword}return}}1
+    {def}                     {{\color{sns_keyword}def}}1
+    {morse_potential}         {{\color{sns_builtins}morse\_potential}}1
+    {construct_fock_matrices} {{\color{sns_builtins}construct\_fock\_matrices}}1
+    {diagonalize_fock_matrices}{{\color{sns_builtins}diagonalize\_fock\_matrices}}1
+    {time_evolution_operator} {{\color{sns_builtins}time\_evolution\_operator}}1
+    {crank_nicolson}          {{\color{sns_builtins}crank\_nicolson}}1
+    {H_t}                     {{\color{sns_builtins}H\_t}}1
+    {runge_kutta_4}           {{\color{sns_builtins}runge\_kutta\_4}}1
+}
 
 \title{Parametric quantum control of two-particle entanglement in a Morse double-well potential}
 \subtitle{Engineering degeneracy and entanglement for time-dependent two-qubit control protocols}
@@ -60,8 +111,8 @@ keepspaces=true}
 
 \mainmatter{}
 \subfile{chapters/chap1.tex}
-\subfile{chapters/chap3.tex}
 \subfile{chapters/chap2.tex}
+\subfile{chapters/chap3.tex}
 
 
 

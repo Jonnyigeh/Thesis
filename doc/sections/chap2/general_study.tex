@@ -106,7 +106,7 @@ The overall structure of the objective function is as follows:
 \textcolor{red}{TODO: Change this into proper pseudo-code, and add more details. REDO the objective function to match the actual objective used. Might want to remove the ZZ parameter? fuck it we can leave it sounds cool and have a nice reference to litterature (zhao article)}
 
 
-%%% DVR basis
+% %%% DVR basis
 \subsection{Validation of Sinc-Discrete Variable Representation basis}\label{sec:sinc_dvr_validation}
 In this section, we show how to implement the Sinc Discrete Variable Representation (Sinc-DVR) basis used throughout this thesis, and the framework used to validate, and motivate, its usage by comparing the results of the DVR basis against more traditional basis sets, such as the (exact) energy eigenbasis. We do so in a simplified system, where we have a single particle in a Morse potential. This will allow us to compare the results to known analytical solutions. 
 
@@ -141,7 +141,7 @@ where $V(x)$ is the Morse potential. For the exact energy eigenstates, we can co
 where $\Delta x$ is the grid spacing. As is evident, this approximation converges to the true second derivative as $\Delta x \to 0$. The Sinc-DVR kinetic elements are given analytically as in \eqref{eq:sinc_dvr_kinetic}. With these definitions, we have the full one-body Hamiltonian matrix elements for our single particl trapped in a Morse potential.
 \\ 
 In the following code snippet, we highlight some of the key steps in the construction of the quantum mechanical system and the diagonalization of the Hamiltonian matrix, which is used to obtain the energy eigenstates and eigenvalues of the system. 
-\begin{lstlisting}[language=Python]\label{lst:dvr_validation}
+\begin{lstlisting}[language=Python, label=lst:dvr_validation]
 N = 200
 x = np.linspace(-1, 2, N)
 dx = x[1] - x[0]
@@ -209,7 +209,7 @@ for i in range(n_levels):
         overlap = np.sum(psi_dvr[:, i].conj() * psi_true[:, j])
         S[i, j] = np.abs(overlap)
 \end{lstlisting}
-where \texttt{n\_levels} is the number of energy levels we are interested in. The reader might notice the lack of $\Delta x$ in the overlap integral, this is due to how \texttt{numpy} produces normalized basis sets from diagonalization in the \texttt{eigh} function, so their (discrete) normalization is already accounted for. The overlap matrix $S$ is then a $n_{\text{levels}} \times n_{\text{levels}}$ matrix, where each element $S_{nm}$ represents the overlap between the $n$th Sinc-DVR basis function and the $m$th exact energy eigenstate of the system. \\ 
+where \texttt{n\_levels} is the number of energy levels we are interested in. The reader might notice the lack of $\Delta x$ in the overlap integral, this is due to how \texttt{numpy} produces normalized basis sets from diagonalization in the \texttt{eigh} function, so their (discrete) normalization is already accounted for. The overlap matrix $S$ is then a $n_{\text{levels}} \times n_{\text{levels}}$ matrix, where each element $S_{nm}$ represents the overlap between the $n$th Sinc-DVR basis function and the $m$th exact energy eigenstate of the system. 
 
 % The overlap matrix $S$ is then a measure of how well the Sinc-DVR basis functions represent the exact energy eigenstates of the system. The results are shown in figure \ref{fig:dvr_validation_overlap}, where we see that the overlap between the Sinc-DVR basis functions and the exact energy eigenstates is quite high, especially for the lowest lying states. We see that the overlap matrix is close to the identity matrix, indicating a near perfect overlap between the two basis sets.
 % \begin{figure}[h!]
