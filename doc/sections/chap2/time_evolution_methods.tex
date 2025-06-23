@@ -122,7 +122,7 @@ def H_t(t):
     # This is a placeholder function and should be replaced with the actual Hamiltonian
     return np.array([[1, 0], [0, 1]])  # Example: Identity matrix
 
-def crank_nicolson(H, psi, t, dt):
+def crank_nicolson(H_t, psi, t, dt):
     # Define the Hamiltonian matrix at the current time step
     H_current = H_t(t)
     H_next = H_t(t + dt)
@@ -138,7 +138,7 @@ def crank_nicolson(H, psi, t, dt):
 # Time evolution loop
 psi_t = np.zeros((N, len(psi)), dtype=complex)  # Store wavefunction at each time step
 for t in time:
-    psi_new = crank_nicolson(H, psi, t, dt)
+    psi_new = crank_nicolson(H_t, psi, t, dt)
     psi_t.append(psi_new)
     psi = psi_new  # Update the wavefunction for the next iteration
 \end{lstlisting}
@@ -188,7 +188,7 @@ def H_t(t):
     # This is a placeholder function and should be replaced with the actual Hamiltonian
     return np.array([[1, 0], [0, 1]])  # Example: Identity matrix
 
-def runge_kutta_4(H, psi, t, dt):
+def runge_kutta_4(H_t, psi, t, dt):
     # Define the Hamiltonian matrix at the current time step
     H_current = H_t(t)
     H_dt2 = H_t(t + dt / 2)
@@ -207,10 +207,10 @@ def runge_kutta_4(H, psi, t, dt):
 # Time evolution loop
 psi_t = np.zeros((N, len(psi)), dtype=complex)  # Store wavefunction at each time step
 for t in time:
-    psi_new = runge_kutta_4(H, psi, t, dt)  
+    psi_new = runge_kutta_4(H_t, psi, t, dt)  
     # Optionally, apply norm corrections to maintain unitarity
-    norm_correction = np.linalg.norm(psi_new)
-    psi_new /= norm_correction  # Normalize the wavefunction
+    correction = np.linalg.norm(psi_new)
+    psi_new /= correction  # Normalize the wavefunction
     psi_t.append(psi_new)
     psi = psi_new  # Update the wavefunction for the next iteration
 \end{lstlisting}
