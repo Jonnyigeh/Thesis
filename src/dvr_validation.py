@@ -52,12 +52,15 @@ E_dvr, psi_dvr = np.linalg.eigh(H_dvr)
 E_true, psi_true = np.linalg.eigh(H_true)
 olap = False
 if olap:
-    matplotlib.style.use('seaborn-v0_8')
+    matplotlib.style.use('seaborn-v0_8-deep')
     colors = sns.color_palette()
     b = colors[0]
     g = colors[1]
     r = colors[2]
-    custom_cmap = matplotlib.colors.LinearSegmentedColormap.from_list('custom_seaborn', [b, g, r], N=256,)
+    # custom_cmap = matplotlib.colors.LinearSegmentedColormap.from_list('custom_seaborn', [b, g, r], N=256,)
+    custom_cmap = matplotlib.colors.LinearSegmentedColormap.from_list(
+        'blue_white_red', [b, (1,1,1), r], N=256
+    )
     # blue_cmap = matplotlib.colors.LinearSegmentedColormap.from_list("blue_map", ['white', colors[0]], N=256)
     # Calculate the overlap between the DVR and true eigenstates
     n_levels = 7 # Number of states to compare
@@ -118,7 +121,7 @@ if spectrum:
         E_true_n = E_true[n]
         dev[n] = np.abs(E_dvr_n - E_true_n)
     levels = np.arange(n_levels)
-
+    breakpoint()
     fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.4, 0.4))
     # Plot the deviance
     ax[1].semilogy(np.arange(n_levels), dev, label='Deviance', marker='x', )

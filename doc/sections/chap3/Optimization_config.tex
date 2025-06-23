@@ -4,33 +4,34 @@
 Applying the optimization procedure outlined in Section \ref{sec:optimization_procedure}, we identify two sets of optimal parameters for the Morse doubl well potential that meet the desired energy and entanglement criteria. Configuration $C_I$ is tailored to yield distinct, well-separated single-particle energy spectrums and vanishing two-body entanglement, while configuration $C_{II}$ is designed to produce a significant two-body entanglement and enforce a degeneracy of the first excited single-particle energy levels in each well to enable coherent mixing of the $\ket{10}$ and $\ket{01}$ logical states.
 \\ 
 
-Table \ref{tab:optimized_params} summarizes the five optimized parameters - depths of the left and right wells $D_L$ and $D_R$, widths $k_L$ and $k_R$, and inter-well separation $d$ -  for each configuation, all in atomic units (a.u.). In $C_I$ a deeper left well ($D_L = 73.4060$ a.u.) alongside a shallower right well ($D_R = 71.1004$ a.u.) ensures disctint eigenenergies and a von Neumann entanglement entropy of $S_{VN} = 0.0000$\textcolor{red}{TODO: Calculate, and insert} between the two first excited logical states $\ket{10}$ and $\ket{01}$, confirming a product state regime. Configuation $C_{II}$, on the other hand, slightly increases the right-well depth ($D_R = 71.9918$ a.u.) and adjust a more balanced width for both wells ($k_L = 29.1615$ a.u., $k_R = 29.1677$ a.u.) so that the first excited single-particle energies coincid within numerical tolerance, and we have degeneracy in our two-particle system.
+Table \ref{tab:optimized_params} summarizes the five optimized parameters - depths of the left and right wells $D_L$ and $D_R$, widths $k_L$ and $k_R$, and inter-well separation $d$ -  for each configuation, all in atomic units (a.u.). In $C_I$ a deeper left well ($D_L = 62.1709$ a.u.) alongside a shallower right well ($D_R = 60.7336$ a.u.) ensures disctint eigenenergies and a von Neumann entanglement entropy of $S_{VN} = 0.0000$ across the first 6 energy eigenstates, indicating a product state regime. Configuation $C_{II}$, on the other hand, slightly increases the right-well depth ($D_R = 64.1174$ a.u.) and adjust a more balanced width for both wells ($k_L = 13.2271$ a.u., $k_R = 13.0978$ a.u.) so that the first excited single-particle energies coincid within numerical tolerance, and we have degeneracy in our two-particle system.
 
-This engineered degeneracy creates a sharp 'entanglement peak' in the potential parameter space, allowing our ramp protocol to traverse from $C_I$ to $C_{II}$ to induce mixing of the logical states $\ket{10}$ and $\ket{01}$, and thus, generate a significant two-body entanglement. The two configuations are similar within a few atomic units, so quantum control protocols can perturb our system without having to significantly alter the systme architecture, with minimal control overhead. \\
+This engineered degeneracy creates a sharp 'entanglement peak' in the potential parameter space, allowing our ramp protocol to traverse from $C_I$ to $C_{II}$ to induce mixing of the logical states $\ket{10}$ and $\ket{01}$, and thus, generate a significant two-body entanglement. The two configuations are similar within a few atomic units, so quantum control protocols can perturb our system without having to significantly alter the system architecture, with minimal control overhead. \\
 
-These two parameter configuations form the foundation for all subsequent static analyses and dynamical simulations in the thesis work. \textcolor{red}{TODO: Change to the proper parameters, remember to also change the plots showcasing the populations of th states in either configuration. ALSO: Remove remark that this is the only paramters used, in the 2 level system we have separate parameters. Should we add these also here? Or make separate sections? Could give smoe useful insights how the parameters must chang when higher order terms are included. ALSO: Add a discussion on the implications of these parameters for the physical realization of the system, and how they relate to experimental setups. What does this mean for the distance between the particles, and how does this affect the entanglement generation? Are we within working ranges of experimental setups? Other physical properties and constraints that might be relevant at this distance?}
+These two parameter configuations form the foundation for all subsequent static analyses and dynamical simulations in the thesis work when working in the $l=4$ regime. \textcolor{red}{TODO: in the 2 level system we have separate parameters. Should we add these also here? Or make separate sections? Could give smoe useful insights how the parameters must chang when higher order terms are included. ALSO: Add a discussion on the implications of these parameters for the physical realization of the system, and how they relate to experimental setups. What does this mean for the distance between the particles, and how does this affect the entanglement generation? Are we within working ranges of experimental setups? Other physical properties and constraints that might be relevant at this distance?}
 \begin{table}[h!]
   \centering
   \caption{Optimized Morse potential parameters for configurations \(C_1\) (separable) and \(C_2\) (degenerate).}
   \label{tab:optimized_params}
   \begin{tabular}{lcc}
     \toprule
-    Parameter & \(C_1\) & \(C_2\) \\
+    Parameter & $C_{I}$ & $C_{II}$ \\
     \midrule
-    \(D_L\) (depth of left well)       [a.u.] & 73.4060 & 73.4469 \\
-    \(D_R\) (depth of right well)      [a.u.] & 71.1004 & 71.9918 \\
-    \(k_L\) (width of left well)       [a.u.] & 31.6126 & 29.1615 \\
-    \(k_R\) (width of right well)      [a.u.] & 26.5751 & 29.1677 \\
-    \(d\)   (inter-well separation)     [a.u.] & 42.4701 & 42.7983 \\
+    \(D_L\) (depth of left well)       [a.u.] & 62.1709 & 62.9733 \\
+    \(D_R\) (depth of right well)      [a.u.] & 60.7336 & 64.1174 \\
+    \(k_L\) (width of left well)       [a.u.] & 19.8947 & 13.2271 \\
+    \(k_R\) (width of right well)      [a.u.] & 21.8194 & 13.0978 \\
+    \(d\)   (inter-well separation)     [a.u.] & 15.0000 & 14.9574 \\
     \bottomrule
   \end{tabular}
 \end{table}
 \\
-Figure \ref{fig:state_populations_I} show the decomposition of the six lowest two-particle energy eigenstates in the Sinc-DVR product basis for configuration $C_I$, where we observe that the states are indeed pure product states within a numerical tolerance of $10^{-7}$. Each eigenstate has exactly one dominant block, and is zero elsewhere - meaning the there is vanishing two-body entanglement between the particles, as seen from the listed entropy $S$ for each state - just what we aimed to achieve for the separable configuration. 
+Figure \ref{fig:state_populations_I} show the computational basis state (Hartree states) occupancy of the six lowest two-particle energy eigenstates in the Sinc-DVR product basis for configuration $C_I$, where we observe that the states are indeed pure product states within a numerical tolerance of $10^{-7}$. Each eigenstate has exactly one dominant block, and is zero elsewhere - meaning the there is vanishing two-body entanglement between the particles, as seen from the listed entropy $S$ for each state - just what we aimed to achieve for the separable configuration. 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1.0\textwidth]{figs/state_populations_I.pdf}
     \label{fig:state_populations_I}
+    \caption{State populations of the six lowest two-particle energy eigenstates in configuration $C_I$. Each energy eigenstate is occupied by a single computational basis state (Hartree state), and are pure product states. The entropy $S$ for each state is zero, indicating no entanglement.}
 \end{figure}
 \textcolor{red}{TODO: Add discussion on these results. Calculate the tranformation from atomic units to real SI units to quantify what the distance mean. What does this distance impose on the physical realisation of our system? Are we within working ranges of experimental setups? Other physical properties and constraints that might be relevant at this distance?}
 \\
@@ -41,6 +42,7 @@ By contrast, Figure \ref{fig:state_populations_II} illustrates the same six two-
     \centering
     \includegraphics[width=1.0\textwidth]{figs/state_populations_II.pdf}
     \label{fig:state_populations_II}
+    \caption{State populations of the six lowest two-particle energy eigenstates in configuration $C_{II}$. The first excited states $\ket{10}$ and $\ket{01}$ are now mixed, with significant contributions from the first excited state in each well. The entropy $S$ for these states is equal to 1 (within a tolerance of $10^-6$), indicating (near) maximal entanglement. We note that maximal entanglement is not equivalent to being in a Bell state, but rather, maximally entangled with \emph{multiple} states beyond $\ket{01}, \ket{10}$. In this mixed configuration however, we see traces of other basis states leaking into our previously pure product states, especially prevalent in the higher energy states.This is seen as transparent red/blue tint in the heatmap, indicating minor contributions from other basis states.}
 \end{figure}
 \\
 
