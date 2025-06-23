@@ -121,7 +121,7 @@ J_deltaE_penalty = - np.abs(J_12 / deltaE_12 + 1e-12)
 
 
 %%% DVR basis
-\subsection{Validation of Sinc-Discrete Variable Representation basis}\label{sec:sinc_dvr_validation}
+\subsection{Sinc-Discrete Variable Representation}\label{sec:sinc_dvr_validation}
 In this section, we show how to implement the Sinc Discrete Variable Representation (Sinc-DVR) basis used throughout this thesis, and the framework used to validate, and motivate, its usage by comparing the results of the DVR basis against more traditional basis sets, such as the (exact) energy eigenbasis. We do so in a simplified system, where we have a single particle in a Morse potential. This will allow us to compare the results to known analytical solutions. 
 
 As a grid-based basis, Sinc-DVR offers practical computational advantages, particularly when dealing with operators that are diagonally representable and/or localized states. Its effectiveness depends however, on the ability to accurately represent the relevant physical states of the system at hand. To test this, we examine how the DVR basis functions overlap with the exact energy eigenstates of the system, and we use the DVR basis to compute the ground state energy of the system, which we then compare to the result obtained from the exact energy eigenstates by diagonalizaton of the Hamiltonian. 
