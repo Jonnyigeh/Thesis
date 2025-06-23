@@ -212,17 +212,6 @@ for i in range(n_levels):
         overlap = np.sum(psi_dvr[:, i].conj() * psi_exact[:, j])
         S[i, j] = np.abs(overlap)
 \end{lstlisting}
-where \texttt{n\_levels} is the number of energy levels we are interested in. The reader might notice the lack of $\Delta x$ in the overlap integral, this is due to how \texttt{numpy} produces normalized basis sets from diagonalization in the \texttt{eigh} function, so their (discrete) normalization is already accounted for. The overlap matrix $S$ is then a $n_{\text{levels}} \times n_{\text{levels}}$ matrix, where each element $S_{nm}$ represents the overlap between the $n$th Sinc-DVR basis function and the $m$th exact energy eigenstate of the system. 
-
-The overlap matrix $S$ is then a measure of how well the Sinc-DVR basis functions represent the exact energy eigenstates of the system. The results are shown in figure \ref{fig:dvr_validation_overlap}, where we see that the overlap between the Sinc-DVR basis functions and the exact energy eigenstates is quite high, especially for the lowest lying states. We see that the overlap matrix is close to the identity matrix, indicating a near perfect overlap between the two basis sets.
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=\textwidth]{figs/dvr_validation_overlap.pdf}
-    \caption{Overlap between the Sinc-DVR basis functions and the exact energy eigenstates of the Morse potential. The parameters used for the Morse potential are $D = 10.0$, $a = 1.0$, and $x_0 = 0.0$. The grid spacing is $\Delta x = 0.025$, and the number of grid points is $N = 200$.}
-    \label{fig:dvr_validation_overlap}
-\end{figure}
-\\
-
-In summary, we have shown that the Sinc-DVR basis is a valid choice for representing quantum mechanical systems, and that it can be used to accurately compute the energy spectrum and energy eigenstates of the system. We have also shown that the Sinc-DVR basis functions closely match the exact energy eigenstates of the system, especially for the lowest lying states. This gives us confidence in our choice of basis set, and we can safely proceed with our analysis of the double-well potential.
+where \texttt{n\_levels} is the number of energy levels we are interested in. The reader might notice the lack of $\Delta x$ in the overlap integral, this is due to how \texttt{numpy} produces normalized basis sets from diagonalization in the \texttt{eigh} function, so their (discrete) normalization is already accounted for. The overlap matrix $S$ is then a $n_{\text{levels}} \times n_{\text{levels}}$ matrix, where each element $S_{nm}$ represents the overlap between the $n$th Sinc-DVR basis function and the $m$th exact energy eigenstate of the system. \textcolor{red}{TODO: Check that this section is meaningful without the plot. Result is in result section}
 
 \end{document}

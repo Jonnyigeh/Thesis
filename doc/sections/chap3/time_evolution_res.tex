@@ -2,7 +2,7 @@
 
 \begin{document}
 \section{Time-evolution of quantum gate protocols}\label{sec:time_evolution}
-We simulate the time-dependent Schrödinger equation for two distinguishable particles in our double-well Morse potential, in accordance with the procedural framework outlined in Section \ref{sec:summary_workflow}. The system is built in the Sinc-DVR basis using, and mapped into the reduced Hartree basis as described in Section \ref{sec:Hartree_method}. We choose eigenvectors of Hamiltonian in the optimal parameters for configuation $C_I$ as our measurement (computational) basis, as the eigenvectors of this configuration have complete overlap with the logical basis states $\ket{ij}$, i.e the product states of the two particles. Our ramping protocol (Section \ref{sec:ramping_protocol}) smoothly ramps from configuration $C_I$ (non-degenerate qubit levels, zero entanglement) to configuration $C_{II}$ (close-to degeneracy in first excitations, high entanglement), and back. In what follows, we present the results of our time-evolution simulations, focusing on the state populations throughout. First we shall present a minimal "two-level" model of the system ($l=2$ basis functions per well) to demonstrate the idealized gate action and entanglement generation, and then we will present the full simulation ($l=4$ basis functions per well) to investigate the effects of higher-order excitations, assess higher-order leakage and its impact on gate fidelity. The discussions that follow will focus on the implications of these results for quantum control protocols and the feasibility of implementing a two-qubit gate operation in a real-world experimental setup. Time-scales in the simulations are given in atomic units (a.u.), where $1$ a.u. corresponds to approximately $2.42 \times 10^{-17}$ seconds (Hartree time), or about $58.7$ attoseconds. The total simulation times will be converted as needed to SI units, and the time steps are set to $\Delta t = 0.1$ a.u. for all simulations, ensuring a sufficiently fine resolution for capturing the dynamics of the system.
+We simulate the time-dependent Schrödinger equation for two distinguishable particles in our double-well Morse potential, in accordance with the procedural framework outlined in Section \ref{sec:summary_workflow}. The system is built in the Sinc-DVR basis using, and mapped into the reduced Hartree basis as described in Section \ref{sec:Hartree_method}. We choose eigenvectors of Hamiltonian in the optimal parameters for configuation $C_I$ as our measurement (computational) basis, as the eigenvectors of this configuration have complete overlap with the logical basis states $\ket{ij}$, i.e the product states of the two particles. Our ramping protocol (Section \ref{sec:ramping_protocols}) smoothly ramps from configuration $C_I$ (non-degenerate qubit levels, zero entanglement) to configuration $C_{II}$ (close-to degeneracy in first excitations, high entanglement), and back. In what follows, we present the results of our time-evolution simulations, focusing on the state populations throughout. First we shall present a minimal "two-level" model of the system ($l=2$ basis functions per well) to demonstrate the idealized gate action and entanglement generation, and then we will present the full simulation ($l=4$ basis functions per well) to investigate the effects of higher-order excitations, assess higher-order leakage and its impact on gate fidelity. The discussions that follow will focus on the implications of these results for quantum control protocols and the feasibility of implementing a two-qubit gate operation in a real-world experimental setup. Time-scales in the simulations are given in atomic units (a.u.), where $1$ a.u. corresponds to approximately $2.42 \times 10^{-17}$ seconds (Hartree time), or about $58.7$ attoseconds. The total simulation times will be converted as needed to SI units, and the time steps are set to $\Delta t = 0.1$ a.u. for all simulations, ensuring a sufficiently fine resolution for capturing the dynamics of the system.
 
 \subsection{Two-level model: Idealized gate action and entanglement generation}
 In the reduced four-dimensional Hilbert space spanned by the product states $\{\ket{00}, \ket{01}, \ket{10}, \ket{11}\}$, we simulate the time evolution using the unitary time-evolution operator (Section \ref{sec:time_evolution_operator}) for the two-particle system. Because only the first four states are active, there is no possibility for population leakage to higher order states outside the qubit subspace, and we can expect the system to behave as a perfect two-qubit gate. Figure \ref{fig:time_evolution_2_basefunctions} shows the time evolution of the state populations for the two-level model, where we've plotted the populations 
@@ -43,10 +43,10 @@ operation. \textcolor{red}{TODO: ADd more on this discuttion, and maybe move to 
 \end{figure}
 In figure \ref{fig:time_evolution_4_basefunctions} we show the time evolution of the state populations for the four-level model, where we observe similar behaviour as in the idealised two-level model, but with some leakage to higher-order states. The populations of the eigenstates $\ket{\psi_0(t)}$ and $\ket{\psi_1(t)}$ oscillate in a coherent manner, indicating a successful SWAP-like operation. The final state population of the two energy eigenstates are
 \begin{align*}
-    \ket{\psi_1(t_{\text{end}})} &\approx 0.9863 \ket{01} + 0.0072 \ket{10}  \\
-    \ket{\psi_2(t_{\text{end}})} &\approx 0.0072 \ket{01} + 0.9993 \ket{10},
+    \ket{\psi_1(t_{\text{end}})} &\approx 0.9970 \ket{01} + 0.0030 \ket{10}  \\
+    \ket{\psi_2(t_{\text{end}})} &\approx 0.0030 \ket{01} + 0.9970 \ket{10},
 \end{align*}
-and we note that there is some minor leakage to higher order states - which is why they are approximations. 
+and we see that we have a pure mixture of the logical states $\ket{01}$ and $\ket{10}$, and the SWAP was successful within an error of $10^{-2}$.
 \\
 Figure \ref{fig:time_evolution_4_basefunctions} shows the protocol with hold time to approximately match the Rabi oscillation for a successful swap of the logical states. I.e since the Rabi oscillation frequency is given by the coupling term $J = H[\psi_1, \psi_2]$, through $P_{01\to10} = \sin^2(J t)$, we can optimize the hold time to be a multiple of the Rabi oscillation period $T_R = \pi/(4J)$. With a coupling term of $J = 7.9674 \times 10^{-5}$ a.u., we find the Rabi oscillation period to be $T_R 19715 $ a.u., and we set the hold time accordingly. We note that the oscillations are elongated compared to the two-level model, indicating that the coupling term is lower than in the idealized case. This is expected, as we have higher-order excitations that can lead to leakage and de-phasing effects. \textcolor{red}{TODO: Add more discussion and move onto physical realisation of this evolution}
 
@@ -54,10 +54,10 @@ Figure \ref{fig:time_evolution_4_basefunctions} shows the protocol with hold tim
 To assess how this evolution aligns with our desired SWAP gate operation, we can compute the logical propagator $U_{\text{logical}}$\textcolor{red}{TODO: Should add a small note in theory/method section for this?},
 \begin{align*}
     U_{\text{logical}} = \Psi_0^\dagger\Psi(t_f) = \begin{pmatrix}
-        \braket{00|\psi_00(t_f)} & \braket{00|\psi_01(t_f)} & \braket{00|\psi_10(t_f)} & \braket{00|\psi_11(t_f)} \\
-        \braket{01|\psi_00(t_f)} & \braket{01|\psi_01(t_f)} & \braket{01|\psi_10(t_f)} & \braket{01|\psi_11(t_f)} \\
-        \braket{10|\psi_00(t_f)} & \braket{10|\psi_01(t_f)} & \braket{10|\psi_10(t_f)} & \braket{10|\psi_11(t_f)} \\
-        \braket{11|\psi_00(t_f)} & \braket{11|\psi_01(t_f)} & \braket{11|\psi_10(t_f)} & \braket{11|\psi_11(t_f)}
+        \braket{00|\psi_{00}(t_f)} & \braket{00|\psi_{01}(t_f)} & \braket{00|\psi_{10}(t_f)} & \braket{00|\psi_{11}(t_f)} \\
+        \braket{01|\psi_{00}(t_f)} & \braket{01|\psi_{01}(t_f)} & \braket{01|\psi_{10}(t_f)} & \braket{01|\psi_{11}(t_f)} \\
+        \braket{10|\psi_{00}(t_f)} & \braket{10|\psi_{01}(t_f)} & \braket{10|\psi_{10}(t_f)} & \braket{10|\psi_{11}(t_f)} \\
+        \braket{11|\psi_{00}(t_f)} & \braket{11|\psi_{01}(t_f)} & \braket{11|\psi_{10}(t_f)} & \braket{11|\psi_{11}(t_f)}
     \end{pmatrix},
 \end{align*}
 where $\Psi(t_f)$ is the time-evolved wavefunction at the end of the simulation, and $\Psi_0$ is the initial wavefunction in the logical basis. The ideal SWAP gate operation would yield a propagator of the form \eqref{eq:swap_gate}, i.e
@@ -72,31 +72,34 @@ where $\Psi(t_f)$ is the time-evolved wavefunction at the end of the simulation,
 The result of our simulation yields the following logical propagator,
 \begin{align*}
 U_{\text{logical}}
-&=
+=
 \begin{pmatrix}
--0.8490 + 0.5284i &  0.0000 + 0.0000i &  0.0000 - 0.0000i &  0.0000 + 0.0000i \\
--0.0000 - 0.0000i &  0.0613 - 0.0593i &  0.0028 - 0.9931i & -0.0000 - 0.0000i \\
- 0.0000 - 0.0000i & -0.6230 + 0.7817i & -0.0107 - 0.0846i &  0.0000 - 0.0000i \\
- 0.0000 + 0.0000i & -0.0000 + 0.0000i &  0.0000 + 0.0000i & -0.9768 - 0.2140i
-\end{pmatrix},\\[1ex]
+ 0.7157 - 0.6984i & 0.0000 + 0.0000i & 0.0000 + 0.0000i & 0.0000 + 0.0000i \\
+ 0.0000 + 0.0000i & 0.0191 - 0.0518i & -0.3709 - 0.9270i & 0.0000 + 0.0000i \\
+ 0.0000 + 0.0000i & -0.2850 + 0.9569i & -0.0238 - 0.0498i & 0.0000 + 0.0000i \\
+ 0.0000 + 0.0000i & 0.0000 + 0.0000i & 0.0000 + 0.0000i & 0.9769 + 0.2135i
+\end{pmatrix}
+\end{align*}
+and the populations of the states are given by
+\begin{align*}
 \lvert U_{\text{logical}}\rvert^2
-&=
+=
 \begin{pmatrix}
 1.0000 & 0.0000 & 0.0000 & 0.0000 \\
-0.0000 & 0.0073 & 0.9863 & 0.0000 \\
-0.0000 & 0.9992 & 0.0073 & 0.0000 \\
-0.0000 & 0.0000 & 0.0000 & 0.9999
+0.0000 & 0.0030 & 0.9970 & 0.0000 \\
+0.0000 & 0.9970 & 0.0030 & 0.0000 \\
+0.0000 & 0.0000 & 0.0000 & 0.9998
 \end{pmatrix}.
 \end{align*}
-We can see that the propagator is close to the ideal SWAP gate operation, with the populations of the states $\ket{00}$ and $\ket{11}$ remaining constant, while swapping the populations of the states $\ket{\psi_1}$  (initially $\ket{01}$) and $\ket{\psi_2}$ (initially $\ket{10}$) almost perfectly, to an accuracy of $99.92\%$ and $98.63\%$ respectively. The small deviations can be improved upon by further optimizing the ramping protocol. We can further assess the fidelity by computing the average and classical fidelity of the gate operation \textcolor{red}{TODO: Should add this also, an equation, in theory/method}, recalling its definition as
+We can see that the propagator is close to the ideal SWAP gate operation, with the populations of the states $\ket{00}$ and $\ket{11}$ remaining constant, while swapping the populations of the states $\ket{\psi_1}$  (initially $\ket{01}$) and $\ket{\psi_2}$ (initially $\ket{10}$) almost perfectly, to an accuracy of $99.70\%$. The small deviation can be improved upon by further optimizing the ramping protocol. We can assess the fidelity by computing the average and classical fidelity of the gate operation \textcolor{red}{TODO: Should add this also, an equation, in theory/method}, recalling its definition as
 \begin{align*}
     F = \frac{|\text{Tr}(U_{\text{ideal}}^\dagger U_{\text{logical}})|^2 + d}{d(d+1)},
 \end{align*}
-where $d$ is the dimension of the logical sub-space, which in our case is $d=4$. The average fidelity of our gate operation is computed to be $F = 49.97\%$. This indicates that while the gate operation is not perfect, it is still a significant improvement over random operations, which would yield an average fidelity of $F = 25\%$. The deviation from the ideal SWAP gate operation arises from the fact that we do not optimize with regards to the phase evolution of the states, and instead only focus on the population transfer between the states. A better measurement of the gate performance as we have optimized for, would be the classical fidelity\textcolor{red}{TODO: Add this to theory/method section?}, defined as
+where $d$ is the dimension of the logical sub-space, which in our case is $d=4$. The average fidelity of our gate operation is computed to be $F = 26.41\%$. This indicates that while the gate operation (near) perfectly swaps the populations, it is still a no significant improvement over random operations, which would yield an average fidelity of $F = 25\%$\textcolor{red}{TODO: Proof or cite. Maybe nielsen2010quantum?}. The deviation from the ideal SWAP gate operation arises from the fact that we do not optimize with regards to the phase evolution of the states, and instead only focus on the population transfer between the states. A better measurement of the gate performance as we have optimized for, would be the classical fidelity\textcolor{red}{TODO: Add this to theory/method section?}, defined as
 \begin{align*}
     F_c = \frac{1}{d} \sum_{i=0}^{d-1} |\braket{\psi_i | \psi_i(t_f)}|^2.
 \end{align*}
-Computed for our simulation, we find the classical fidelity to be $F_c = 99.64\%$, indicating that the gate operation is indeed successful in transferring the populations of the states $\ket{01}$ and $\ket{10}$, even without much optimization of the ramping protocol, and only an approximation of the Rabi oscillation is used. 
+\textcolor{red}{TODO: Which is the Bhattacharyya fidelity for a deterministic gate operation (ref til theory)}Computed for our simulation, we find the classical fidelity to be $F_c = 99.84\%$, indicating that the gate operation is indeed successful in transferring the populations of the states $\ket{01}$ and $\ket{10}$, even without much optimization of the ramping protocol, and only an approximation of the Rabi oscillation is used. By that we mean, that while we target the Rabi oscillation period exactly (to 4 decimal places), we do not account for what happens \emph{during} the parameter ramp (i.e the linear sweep between configurations), which will alter the perfect Rabi oscillation period. More studies would be needed to properly investigate the effects of the linear sweep and ramping duration on the 'perfect' Rabi oscillation period, and how this affects the gate fidelity.\textcolor{red}{TODO: Add this into scope of future work unless already done}
 
 \subsubsection*{$\sqrt{\text{SWAP}}$-gate operation}
 In addition to the SWAP gate operation, we can also investigate the $\sqrt{\text{SWAP}}$ gate operation, which is a half-SWAP operation that transfers only half of the population from one state to another, inducing maximally entangled Bell-states\eqref{eq:bell_states} at the end of the operation. 
@@ -108,13 +111,13 @@ In addition to the SWAP gate operation, we can also investigate the $\sqrt{\text
 \end{figure}
 Figure \ref{fig:time_evolution_4_basefunctions_sqrtSWAP} shows the time-evolution of the same system as in figure \ref{fig:time_evolution_4_basefunctions}, but with a hold time of $T_{\text{hold}} = T_{\text{SWAP}}/2 = 9857$ a.u., which is half the Rabi oscillation period. To this end, we aim to achieve a $\sqrt{\text{SWAP}}$ gate operation, which would yield a maximally entangled Bell-state at the end of the operation. Qualitatively, we see that the population of the states $\ket{01}$ and $\ket{10}$ are highly mixed, indicating that we've been successful to some degree. At the end of simulation, the populations of the two energy eigenstates are
 \begin{align*}
-    \ket{\psi_1(t_{\text{end}})} &\approx 0.4765 \ket{01} + 0.5203 \ket{10}, \\
-    \ket{\psi_2(t_{\text{end}})} &\approx 0.5203 \ket{01} + 0.4828 \ket{10},
+    \ket{\psi_1(t_{\text{end}})} &\approx 0.4797 \ket{01} + 0.5203 \ket{10}, \\
+    \ket{\psi_2(t_{\text{end}})} &\approx 0.5203 \ket{01} + 0.4797 \ket{10},
 \end{align*}
-which means we have achieved a good mixing of the two states, but not a perfect $\sqrt{\text{SWAP}}$ gate, altough the states $\psi_0(t)$ and $\psi_3(t)$ remain constant (to an accuracy of $10^{-5}$). We can note that we've succesfully implemented a $\sqrt{\text{SWAP}}$ gate-like operation, where the populations of the states $\ket{01}$ and $\ket{10}$ are mixed, but not to the extent that we achieve a perfect Bell-state. 
+which means we have achieved a good mixing of the two states, but not a perfect $\sqrt{\text{SWAP}}$ gate, altough the states $\psi_0(t)$ and $\psi_3(t)$ remain constant (to an accuracy of $10^{-5}$). We can note that we've succesfully implemented a $\sqrt{\text{SWAP}}$ gate-like operation, where the populations of the states $\ket{01}$ and $\ket{10}$ are mixed, but not to the extent that we achieve a perfect Bell-state. It is still a pure mixture (to numerical accuracy) of the two logical states $\ket{01}$ and $\ket{10}$, with no contribution from higher order states, but it is not the maximally entangled Bell-state. 
 To quantitatively assess the success of the $\sqrt{\text{SWAP}}$ gate operation, we can compute the logical propagator $U_{\text{logical}}$ as before, and compare it to the ideal $\sqrt{\text{SWAP}}$ gate operation. Recall, the ideal $\sqrt{\text{SWAP}}$ \ref{eq:sqrt_swap_gate} is given by 
 \begin{align*}
-    U_{\sqrt{\text{SWAP}}} = \frac{1}{{2}}\begin{pmatrix}
+    U_{\sqrt{\text{SWAP}}} = \begin{pmatrix}
         1 & 0 & 0 & 0 \\
         0 & \frac{1 + i}{2} & \frac{1 - i}{2} & 0 \\
         0 & \frac{1 - i}{2} & \frac{1 + i}{2} & 0 \\
@@ -124,11 +127,12 @@ To quantitatively assess the success of the $\sqrt{\text{SWAP}}$ gate operation,
 The result of our simulation yields
 \begin{equation}
 U_{\mathrm{logical}}
-=\begin{pmatrix}
- 0.9635 + 0.2677i & -0.0000 + 0.0000i & -0.0000 - 0.0000i &  0.0000 - 0.0000i\\
- 0.0000 - 0.0000i &  0.1459 - 0.7066i & -0.4457 - 0.5269i & -0.0000 + 0.0000i\\
--0.0000 - 0.0000i &  0.0217 + 0.6943i & -0.5814 - 0.4273i &  0.0000 - 0.0000i\\
- 0.0000 - 0.0000i & -0.0000 + 0.0000i &  0.0000 - 0.0000i & -0.8709 + 0.4914i
+=
+\begin{pmatrix}
+ 0.9635 + 0.2677i & 0.0000 + 0.0000i & 0.0000 + 0.0000i & 0.0000 + 0.0000i\\
+ 0.0000 + 0.0000i & 0.1459 - 0.7066i & -0.4472 - 0.5286i & 0.0000 + 0.0000i\\
+ 0.0000 + 0.0000i & 0.0216 + 0.6921i & -0.5814 - 0.4273i & 0.0000 + 0.0000i\\
+ 0.0000 + 0.0000i & 0.0000 + 0.0000i & 0.0000 + 0.0000i & -0.8709 + 0.4914i
 \end{pmatrix}.
 \end{equation}
 Of which, if we take the element-wise modulus, we gain the population transfer matrix
@@ -136,12 +140,12 @@ Of which, if we take the element-wise modulus, we gain the population transfer m
 \sqrt{\lvert U_{\mathrm{logical}}\rvert^2}
 =\begin{pmatrix}
 1.0000 & 0.0000 & 0.0000 & 0.0000\\
-0.0000 & 0.7215 & 0.6901 & 0.0000\\
-0.0000 & 0.6947 & 0.7215 & 0.0000\\
+0.0000 & 0.7215 & 0.6924 & 0.0000\\
+0.0000 & 0.6924 & 0.7215 & 0.0000\\
 0.0000 & 0.0000 & 0.0000 & 1.0000
 \end{pmatrix}.
 \end{equation}
-Calculating the gate fidelity, we find the classical fidelity to be $F_c = 73.97\%$, indicating that the gate works but is not perfect. As before, the lack of phase control throughout evolution hurts the gate fidelity, and we can improve upon this by optimizing the ramping protocol to ensure that the relative phases of the states are preserved throughout the evolution. As we are more interested in the realisation of correct population transfer, we can instead assess the fidelity of the population transfer matrix, which is given by $|U_{\sqrt{\text{SWAP}}}|$, which yields a classical fidelity of $F_c = 75.51\%$. \textcolor{red}{TODO: We omit the average fidelity here, as it is $\approx 25\%$ - which is not particularly impressive. Should we add it anyway for consistency?}
+Calculating the gate fidelity, we find the classical fidelity to be $F_c = 73.97\%$, indicating that the gate works but is not perfect. As before, the lack of phase control throughout evolution hurts the gate fidelity, and we can improve upon this by optimizing the ramping protocol to ensure that the relative phases of the states are preserved throughout the evolution. As we are more interested in the realisation of correct population transfer, we can instead assess the fidelity of the population transfer, which is given by $ P_log = |U_{\sqrt{\text{SWAP}}}|^2$, which yields a classical fidelity of $F_c = 99.99\%$. \textcolor{red}{TODO: We omit the average fidelity here, as it is $\approx 25\%$ - which is not particularly impressive. Should we add it anyway for consistency? REmmber the Bhattacharyya fidelity!! This is the classical fidelity for deterministic gates, recall sqrtswap is not deterministic!}
 
 
 

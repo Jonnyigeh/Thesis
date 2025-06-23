@@ -117,9 +117,7 @@ class time_evolution:
         # self.psi01 = self.C0[:, self.idx_01] # |01> at index 0*nr + 1
         # self.psi10 = self.C0[:, self.idx_10] # |10> at index 1*nr + 0
         # self.psi11 = self.C0[:, self.idx_11] # |11> at index 1*nr + 1
-        
         # self.C = self.C0.copy() # Copy the initial state
-        breakpoint()
         # self.S0 = np.zeros(len(self.E0))
         # for i in range(len(self.E0)):
         #     self._make_density_matrix(self.C0[:,i]) # Each column is the energy eigenstates
@@ -299,7 +297,11 @@ class time_evolution:
     def crank_nicolson_step(self, t=0):
         """Integrate the system using the Crank-Nicolson method."""
         I = np.eye(self.H.shape[0])
-        A = np.linalg.inv(I + 1j * self.dt / 2 * self.H) @ (I - 1j * self.dt / 2 * self.H)
+        H_current = self.H_prev
+        H_next = self.H
+        H_mid = 0.5 * (H_current + H_next)
+        # A = np.linalg.inv(I + 1j * self.dt / 2 * H_next) @ (I - 1j * self.dt / 2 * H_current)
+        A = np.linalg.inv(I + 1j * self.dt / 2 * H_mid) @ (I - 1j * self.dt / 2 * H_mid)
         self.C = A @ self.C
         self.psi00 = A @ self.psi00
         self.psi01 = A @ self.psi01
@@ -430,27 +432,10 @@ class time_evolution:
                 self.params = params
                 self.c_l = self.c_l1
                 self.c_r = self.c_r1
+                self.H_prev = self.H.copy() # Save the previous Hamiltonian
                 self.update_system(params)
-                # if lmbda[i] != 0.0 and lmbda[i] != 1.0:
-                #     self.update_system(self.params, bhs=True)
-                # elif lmbda[i] == 0.0:
-                #     self.c_l = self.c_l1
-                #     self.c_r = self.c_r1
-                #     self.update_system(self.params)
-                # elif lmbda[i] == 1.0:
-                #     self.c_l = self.c_l2
-                #     self.c_r = self.c_r2
-                #     self.update_system(self.params)
-                # else:
-                #     raise ValueError(f"Invalid lambda value: {lmbda[i]}")
                 
-                # self.C = self._C.conj().T @ self.C # 
-                # self.psi00 = self._C.conj().T @ self.psi00 # |00>
-                # self.psi01 = self._C.conj().T @ self.psi01 # |01>
-                # self.psi10 = self._C.conj().T @ self.psi10 # |10>
-                # self.psi11 = self._C.conj().T @ self.psi11 # |11>
                 step()
-
                 self.overlap[i] =   self.C0.conj().T @ self.C #
                 self.population[i] = np.abs(self.C)**2
                 # Calculate all overlaps with the logical states
@@ -485,7 +470,7 @@ class time_evolution:
                 self.energies[i] = self.E
                 pbar.set_description(
                     # rf'[Commutator = {np.linalg.norm(self.commutator):.3e}]'
-                    rf'[Entropy: {np.array([self.S[0], self.S[1], self.S[2], self.S[3]])}, Coupling: {self.H[self.idx_01, self.idx_10]:.3e}]'
+                    rf'[Entropy: {np.array([self.S[0], self.S[1], self.S[2], self.S[3]])}]'
                 )
                 pbar.update(1)
         overlaps = {
@@ -540,7 +525,7 @@ class time_evolution:
         return params
 
     
-    def _plot_overlap(self, overlap=None):
+    def _plot_overlap(self, overlap=None, save=False):
         """Plot the overlap between the initial and current state."""
         matplotlib.style.use('seaborn-v0_8-deep')
         colors = sns.color_palette()
@@ -646,59 +631,18 @@ class time_evolution:
                 'psi11_11_overlap': self.psi11_11_overlap
             }
             if file is None:
-                file = 'data/time_evolution_data_for_2_basefunction_1806.pkl'
+                file = 'data/time_evolution_data_for_4_basefunction_2306_SWAP_CN.pkl'
             try:
                 with open(file, 'wb') as f:
                     pickle.dump(data, f)
             except:
                 breakpoint()
-        # save_data()
         plt.tight_layout(rect=[0,0,0.95,1])
         # fig.subplots_adjust()
-        # plt.savefig('../doc/figs/time_evolution_2_basefunctions_1806.pdf')
+        if save:
+            save_data() 
+            plt.savefig('../doc/figs/time_evolution_4_basefunctions_2306_SWAP.pdf')
         plt.show()
-
-        breakpoint()
-        exit()
-        # fig, ax = plt.subplots(4, 1, figsize=(8,8))
-        # ax[0].plot(self.t, np.abs(self.overlap[:,:, 0])**2)
-        
-        # ax[1].plot(self.t, np.abs(self.overlap[:,:, 1])**2)
-        # ax[2].plot(self.t, np.abs(self.overlap[:,:, 2])**2)
-        # ax[3].plot(self.t, np.abs(self.overlap[:,:, 3])**2 )
-        # # ax[2].plot(self.t, np.abs(self.overlap[:,:, self.idx_01])**2 )
-        # # pop_01_to_10 = abs(self.overlap[:, self.idx_01, self.eig_idx_10])**2
-        # # pop_10_to_01 = abs(self.overlap[:, self.idx_10, self.eig_idx_01])**2
-        # pop_01_to_10 = self.pop01to10
-        # pop_10_to_01 = self.pop10to01   
-        # # ax[3].plot(self.t, pop_01_to_10, color=b, label='|01⟩ to |10⟩')
-        # # ax[3].plot(self.t, pop_10_to_01, color=g, label='|10⟩ to |01⟩')
-        # ax[0].set_ylim(0, 1.1)
-        # ax[1].set_ylim(0, 1.1)
-        # ax[2].set_ylim(0, 1.1)
-        # ax[0].set_xlabel('Time')
-        # ax[0].set_ylabel('Population')
-        # ax[0].legend(['|00⟩', '|01⟩', '|10⟩', '|11⟩'], ncol=2, loc='upper right', fontsize='small')
-        # ax[0].legend(['|00⟩', '|01⟩', '|02⟩', '|03⟩', '|10>', '|11>'], ncol=3, loc='upper right', fontsize='small')
-        # fig, ax = plt.subplots(10, 1)
-        # ax[0].plot(self.t, np.abs(self.overlap[:, :, 0])**2)
-        # ax[1].plot(self.t, np.abs(self.overlap[:, :, 1])**2)
-        # ax[2].plot(self.t, np.abs(self.overlap[:, :, 2])**2)
-        # ax[3].plot(self.t, np.abs(self.overlap[:, :, 3])**2)
-        # ax[0].legend(['|00⟩', '|01⟩', '|10⟩', '|11⟩'], ncol=2, loc='upper right', fontsize='small')
-        # # ax[4].plot(self.t, np.abs(self.overlap[:, :, 4])**2)
-        # # ax[5].plot(self.t, np.abs(self.overlap[:, :, 5])**2)
-        # # ax[6].plot(self.t, np.abs(self.overlap[:, :, 6])**2)
-        # # ax[7].plot(self.t, np.abs(self.overlap[:, :, 7])**2)
-        # # ax[8].plot(self.t, np.abs(self.overlap[:, :, 8])**2)
-        # # ax[9].plot(self.t, np.abs(self.overlap[:, :, 9])**2)
-        # # ax[9].legend(['|00⟩', '|01⟩', '|02⟩', '|03>⟩', '|10>', '|11⟩', '|12⟩', '|13>', '|20⟩', '|21⟩',], ncol=2, loc='upper right', fontsize='small', bbox_to_anchor=(1.05, 1.0))
-        # ax[0].set_ylim(0, 1.1)
-        # ax[0].set_xlabel('Time')
-        # ax[0].set_ylabel('Population')
-        # fig.tight_layout()
-        # plt.show()
-        # breakpoint()
 
 
 if __name__ == '__main__':
@@ -765,8 +709,8 @@ if __name__ == '__main__':
     # params_II = [22.57803111, 28.42655626 , 3.     ,     3.1781328 ,  5.42763218]
 
     # 18.06 l=2
-    params_I = [39.94917866, 40.08475402  ,9.44196147 , 8.48598234 ,10.30854679]
-    params_II = [40.02035412, 41.97386199 , 6.99384561  ,7.01237375 , 9.96140797]
+    # params_I = [39.94917866, 40.08475402  ,9.44196147 , 8.48598234 ,10.30854679]
+    # params_II = [40.02035412, 41.97386199 , 6.99384561  ,7.01237375 , 9.96140797]
 
     # 18.06 l = 4
     # params_I = [50.61022309, 49.97873181, 15.15957671 ,14.7814281 , 25.        ]
@@ -781,19 +725,19 @@ if __name__ == '__main__':
 
 
 
-    # # 18.06 second run l = 4
-    # params_I = [62.17088395, 60.73364357 ,19.89474221 ,21.81940414, 15.        ]
-    # params_II = [62.97325982, 64.11742637 ,13.22714092 ,13.09781006 ,14.95744294]
+    # 18.06 second run l = 4
+    params_I = [62.17088395, 60.73364357 ,19.89474221 ,21.81940414, 15.        ]
+    params_II = [62.97325982, 64.11742637 ,13.22714092 ,13.09781006 ,14.95744294]
 
 
-    ins = time_evolution(params1=params_I, params2=params_II, integrator='U', 
+    ins = time_evolution(params1=params_I, params2=params_II, integrator='CN', 
                          alpha=1.0,
                          t_max=10.0, dt=0.1,  ramp='cosine',
-                         num_lr=2,
-                         plateau=2250*5,
-                         ramp_up=50,
-                         ramp_down=50,
-                         chill_after=500,
+                         num_lr=4,
+                         plateau=19715,
+                         ramp_up=500,
+                         ramp_down=500,
+                         chill_after=1500,
                          chill_before=10,)
     # import pickle
     # with open('data/time_evolution_data_for_4_basefunction_1806.pkl', 'rb') as f:
@@ -803,7 +747,47 @@ if __name__ == '__main__':
     # exit()
 
     ins._evolve()
-    ins._plot_overlap()
+    ins._plot_overlap(save=False)
+    # fidelity
+    psi0 = np.column_stack([ ins.C0[:,0], ins.C0[:,1], ins.C0[:,4], ins.C0[:,5]])
+    psit = np.column_stack([ins.psi00, ins.psi01, ins.psi10, ins.psi11])
+    U_log = psi0.conj().T @ psit
+    gate_data = {
+        'C0': ins.C0,
+        'psi00': ins.psi00,
+        'psi01': ins.psi01,
+        'psi10': ins.psi10,
+        'psi11': ins.psi11,
+        'U_log': U_log,
+    }
+    def classical_fidelity(U_log, U_ideal):
+        P_log = np.abs(U_log)**2
+        P_targt = np.abs(U_ideal)**2
+
+        F_j = np.sum(np.sqrt(P_log * P_targt), axis=0)
+        F_classical = np.mean(F_j)
+        return F_classical
+
+    import pickle
+    with open('data/SWAP_gate_2306.pkl', 'wb') as f:
+        pickle.dump(gate_data, f)
+    try:
+        psi0 = np.column_stack([ ins.C0[:,0], ins.C0[:,1], ins.C0[:,4], ins.C0[:,5]])
+        psit = np.column_stack([ins.psi00, ins.psi01, ins.psi10, ins.psi11])
+        U_ideal = np.array([ [1,0,0,0], [0,0,1,0], [0,1,0,0],[0,0,0,1]]) # SWAP
+        # U_ideal = np.array([ [1,0,0,0], [0,(1+1j)/2,(1-1j)/2,0], [0,(1-1j)/2,(1+1j)/2,0],[0,0,0,1]]) # sqrt(SWAP)
+        sq2U = np.sqrt(np.abs(U_ideal)**2)
+        U_log = psi0.conj().T @ psit
+        target = [0, 2, 1, 3]  # target permutation for |00⟩, |01⟩, |10⟩, |11⟩
+        olap = np.trace(U_ideal.conj().T @ U_log)
+        F_op = 0.25 * np.abs(olap)**2
+        F_avg = (np.abs(olap)**2 + 4) / 20
+        probs = abs(U_log[target, np.arange(4)])**2
+        F_classical = probs.mean()
+        print(f"Operator fidelity: {F_op:.4f}, Classical fidelity: {F_classical:.4f}, Average fidelity: {F_avg:.4f}")
+        print(f"Eigenstate populatation, psi_1: {abs(ins.C[:,1])**2}, psi_2: {abs(ins.C[:,2])**2}, psi_3: {abs(ins.C[:,3])**2}, psi_0: {abs(ins.C[:,0])**2}")
+    except: 
+        breakpoint()
     breakpoint()
     exit()
     # # C, e, n = ins.run_parameter_change()

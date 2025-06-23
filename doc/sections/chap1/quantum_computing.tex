@@ -35,10 +35,10 @@ where the Swap gate is similarly defined, without introducing the phase factor, 
 \end{equation}
 and we have the square root of the Swap gate, $\sqrt{\text{Swap}}$, which maximally entangles the affected qubits, defined as:
 \begin{equation}
-    \sqrt{\text{Swap}} = \frac{1}{2}\begin{pmatrix}
+    \sqrt{\text{Swap}} = \begin{pmatrix}
     1 & 0 & 0 & 0 \\
-    0 & 1+i & 1-i & 0 \\
-    0 & 1-i & 1+i & 0 \\
+    0 & \frac{1+i}{2} & \frac{1-i}{2} & 0 \\
+    0 & \frac{1-i}{2} & \frac{1+i}{2} & 0 \\
     0 & 0 & 0 & 1
     \end{pmatrix} \label{eq:sqrt_swap_gate}.
 \end{equation}

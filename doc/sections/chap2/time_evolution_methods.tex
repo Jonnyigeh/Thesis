@@ -15,7 +15,7 @@ The foundation of any numerical time-evolution scheme lies in the discretization
 In this work we will be primarily employing fixed time steps, as the system we are studying is not expected to exhibit rapidly changing dynamics, due to us being in control of how we vary the potential parameters and thus perturb the system. 
 
 
-\subsection{Approximating the Time-evolution operator}
+\subsection{Approximating the Time-evolution operator}\label{sec:time_evolution_operator}
 In principle, the exact propagator for a quantum system is given by the time-ordered exponential of the Hamiltonian \eqref{eq:time_evolution}
 \begin{align*}
     U(t, t_0) = \mathcal{T}\text{exp}\bigg(\frac{-i}{\hbar}\int_{t_0}^t H(t')dt'\bigg),
@@ -103,6 +103,7 @@ This expression is a \textbf{Padé approximation} to the exponential function\te
 \begin{align*}
     U = e^{-iH\Delta t/\hbar} \approx \frac{\mathbb{I} - \frac{i\Delta t}{2\hbar}H}{\mathbb{I} + \frac{i\Delta t}{2\hbar}H}.
 \end{align*}
+For a time-dependant Hamiltonian, the Crank-Nicolson method can be viewed as a midpoint evaluation of the Hamiltonian, where the midpoint of the Hamiltonian $H = 1/2(H(t+\Delta t) + H(t))$ is used to compute the time-evolution operator to enforce unitarity, and is especially important for rapidly varying Hamiltonians. 
 Viewed as such, the Crank-Nicolson method situates itself somewhere in between numerical integration methods and approximate exponentiaion schemes, providing a physical, flexible and efficient framework for quantum state time-evolution. Some of the key advantages of the Crank-Nicolson method include:
 \begin{itemize}
     \item \textbf{Unitarity:} The method preserves the norm of the wavefunction, ensuring that the total probability remains constant over time. This is crucial for maintaining physical consistency in quantum simulations.
@@ -126,10 +127,11 @@ def crank_nicolson(H_t, psi, t, dt):
     # Define the Hamiltonian matrix at the current time step
     H_current = H_t(t)
     H_next = H_t(t + dt)
+    H_mid = (H_current + H_next) / 2  # Midpoint evaluation for unitarity
     
     # Construct the Crank-Nicolson update operator
-    U_CN = np.linalg.inv(np.eye(len(psi)) + 1j * dt / (2 * hbar) * H_next) @ \
-           (np.eye(len(psi)) - 1j * dt / (2 * hbar) * H_current)
+    U_CN = np.linalg.inv(np.eye(len(psi)) + 1j * dt / (2 * hbar) * H_mid) @ \
+           (np.eye(len(psi)) - 1j * dt / (2 * hbar) * H_mid)
     
     # Solve the linear system to obtain the wavefunction at the next time step
     psi_new = np.dot(U_CN, psi)
@@ -142,6 +144,7 @@ for t in time:
     psi_t.append(psi_new)
     psi = psi_new  # Update the wavefunction for the next iteration
 \end{lstlisting}
+\textcolor{red}{TODO: Comment on hwo to regain unitarity with the operator given that $H(t + \Delta t) \neq H(t)$. Use midpoint evaluation? I.e $H_mid = \frac{H(t) + H(t + \Delta t)}{2}$ solves the issue, and would make the operator unitary. But is it wrong? Should discuss with Oskar and find some sources}
 
 \subsubsection{Runge-Kutta method}
 In contrast to the Crank-Nicolson method, the Runge-Kutta method trades off unitarity and exact norm preservation for simplicity, flexibility and short-term accuracy. As such, it provides a versatile and widely used tool for initial value problems, and is particularly useful for systems with smooth dynamics. The RK4 method, in particular, is a fourth-order explicit integration scheme that offers high accuracy and ease of implementation.
@@ -209,7 +212,7 @@ for t in time:
 This code snippet outlines a suggested procedure, however - in our work, we shall instead use the \texttt{scipy.integrate} packages \texttt{RK45}\footnote{See \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.RK45.html}} method, which is a built-in implementation of the RK4 method. This package provides a convenient and efficient way to perform numerical integration of ODEs, and is well-suited for our purposes.  \\\\
 In Section \ref{sec:numerical_validation_landau_zener}, we compare the performance and qualitative behaviour of the Crank-Nicolson and RK4 methods when applied to the Landau-Zener system \eqref{eq:landau_zener}, providing insight into their respective advantages and limitations in a controlled testbed scenario.
 
-\subsection{Ramping protocols}
+\subsection{Ramping protocols}\label{sec:ramping_protocols}
 In the context of time-evolution methods, ramping protocols refer to the controlled variation of system parameters over time, allowing for smooth transitions between different potential configurations. In our double-well Morse potential system, we will employ ramping protocols to gradually change the potential parameters during the simulation, to encur mixing of the states between the two wells. \\\\
 In order to steer our system from the separable configuration $C_I$ into the degenerate, entanglging configuration $C_{II}$ (and back again), we implement a time-dependent ramping protocol for the Morse potential parameters. This protocol is crucial to avoid diabatic transitions and to maintain a level of quantum control over the induced entanglement.
 \\
