@@ -173,14 +173,14 @@ for i in range(N):
         else:
             T_dvr[i, j] = ((-1)**(i - j)) / (dx**2 * (i - j)**2)
 T_exact = np.zeros((N, N))
-T_diag = 1 / dx**2 
-T_off_diag = -1 / (2 * dx**2)
+T_d = 1 / dx**2 
+T_off_d = -1 / (2 * dx**2)
 for i in range(N):
     for j in range(N):
         if i == j:
-            T_exact[i, j] = T_diag
+            T_exact[i, j] = T_d
         elif abs(i - j) == 1:
-            T_exact[i, j] = T_off_diag
+            T_exact[i, j] = T_off_d
         else:
             T_exact[i, j] = 0
 
@@ -212,6 +212,6 @@ for i in range(n_levels):
         overlap = np.sum(psi_dvr[:, i].conj() * psi_exact[:, j])
         S[i, j] = np.abs(overlap)
 \end{lstlisting}
-where \texttt{n\_levels} is the number of energy levels we are interested in. The reader might notice the lack of $\Delta x$ in the overlap integral, this is due to how \texttt{numpy} produces normalized basis sets from diagonalization in the \texttt{eigh} function, so their (discrete) normalization is already accounted for. The overlap matrix $S$ is then a $n_{\text{levels}} \times n_{\text{levels}}$ matrix, where each element $S_{nm}$ represents the overlap between the $n$th Sinc-DVR basis function and the $m$th exact energy eigenstate of the system. \textcolor{red}{TODO: Check that this section is meaningful without the plot. Result is in result section}
+where \texttt{n\_levels} is the number of energy levels we are interested in. The reader might notice the lack of $\Delta x$ in the overlap integral, this is due to how \texttt{numpy} produces normalized basis sets from diagonalization in the \texttt{eigh} function, so their (discrete) normalization is already accounted for. The overlap matrix $S$ is then a $n_{\text{levels}} \times n_{\text{levels}}$ matrix, where each element $S_{nm}$ represents the overlap between the $n$th Sinc-DVR basis function and the $m$th exact energy eigenstate of the system.
 
 \end{document}

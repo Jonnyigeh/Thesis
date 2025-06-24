@@ -15,7 +15,8 @@ Achieving reliable single-qubit operations in our system requires energy levels 
 The second configuration, \emph{configuration II}, aims to induce a transition between the two lowest lying single particle states. This configuration make the first excited states of both subsystems degenerate, while maintaining separation among higher levels. In this configuration, we expect the respective energy eigenstates to mix, and this will entangle our two qubits - which in turn, allows for two-qubit operations such as the iSwap gate, or the CNOT gate to mention a few\cite{leinonen2024coulomb, nichol2017high}.
 %% QUANTUM LOGIC
 \subsection{Quantum Logic}
-In our model, we aim to emulate the Swap and iSwap gate approximatively through Swap-like behaviour by dynamically tuning the system into configuration II as previously described. The iSwap gate is a two-qubit gate that swaps the states of two qubits while introducing a phase factor. It is defined as:
+\subsubsection*{Two-qubit operations}
+In our model, we aim to emulate the Swap and iSwap gate approximatively through Swap-like behaviour by dynamically tuning the system into configuration II as previously described. The iSwap gate is a two-qubit gate that swaps the states of two qubits while introducing a phase factor \cite{nielsen2010quantum}. It is defined as:
 \begin{equation}
     \text{iSwap} = \begin{pmatrix}
     1 & 0 & 0 & 0 \\
@@ -48,4 +49,49 @@ In our work, configuration $C_{II}$ is designed to bring the first excited state
 By controlling the duration for which the system remains in the various configurations, and the time spent ramping between them, we can identify time windows where the system approximates the desired state-swapping behavior. This is analogous to how iSwap or $\sqrt{\text{iSwap}}$ gates are implemented in superconducting or trapped-ion systems through Hamiltonian engineering and pulse timing \cite{picard2025entanglement}. \\
 
 Thus, our model represents a novel first step towards demonstrating quantum logic operations using Morse-type double well potentials. The anharmonicity of the Morse potential enables isolation of low-lying states and avoids (unwanted) higher-level leakage, which is essential for the construction of robust, tunable qubit architectures\cite{nielsen2010quantum}.
+
+\subsubsection*{Single-qubit operations}\ref{sec:single_qubit_operations}
+In addition to our two-qubit operations, high-fidelity quantum logic also requires precise single-qubit operations.  In experimental practice, single-qubit gates are implemented by applying tailored external fields or voltage pulses that transiently shift one dot's energy levels \cite{mcdermott2014accurate}. In our Morse double-well model, configuation $C_I$ is engineered to have well-separated single-particle energies in the two subsystems. By driving at the resonance of one qubit, we can induce rotations in the state of that qubit without affecting the other. 
+
+In our study we focus mainly on \emph{Z-rotations}, which are rotations around the $Z$-axis of the Bloch sphere, which crucially can correct unwanted dynamical phases that may accumulate during a two-qubit operation. A Z-rotation is defined as:
+\begin{equation}
+    R_Z(\theta) = \begin{pmatrix}
+    e^{-i\theta/2} & 0 \\
+    0 & e^{i\theta/2}
+    \end{pmatrix} \label{eq:z_rotation_gate},
+\end{equation}
+where $\theta$ is the rotation angle. Written more compactly using the Pauli $Z$ operator\textcolor{red}{TODO: We can assume reader knows it, or atleast can deduce it from here right?}, this can be expressed as $R_z(\theta) = \text{exp}(-i\theta Z/2)$ \cite{nielsen2010quantum}. The ultimate goal of these single-qubit operations is to increase the fidelity of our two-qubit operations, such as the iSwap gate, by correcting for any unwanted relative phases that misaligns the evolved statse with the target states. We note that $X$ and $Y$ rotations similarly can be performed, but our present work is limited to Z-rotations for phase correction.
+\subsection{Fidelity measures}\ref{sec:fidelity_measures}
+To quantify, and assess the performance of our quantum control protocols we will measure the \emph{fidelity} of the numerically generated two-qubit operation $U = \Psi_0^\dagger\Psi(t_f)$ against the ideal target operation $U_{target}$, where the target operation are the two-qubit gate matrices e.g \eqref{eq:swap_gate}. 
+We introduce the following fidelity measures:
+\begin{itemize}
+    \item \textbf{Average fidelity:} This is the standard measure of fidelity in quantum gate operations, sensitive to both population errors and incorrect phases. Following the derivations in Pedersen et al. \cite{pedersen2007fidelity}, in a $d-$dimensional Hilbert space the average fidelity is defined as:
+    \begin{equation*}
+    F_{avg}(U, U_{target}) = \frac{1}{d(d+1)}\bigg[\text{Tr}(MM^\dagger) + |\text{Tr}(M)|^2\bigg],
+    \end{equation*}
+    where $M = U_{target}^\dagger U$. Assuming that $U$ is unitary, $M$ is therefore unitary, and $\text{Tr}(MM^\dagger) = d$, meaning the average fidelity is given by:
+    \begin{equation}
+        F_{avg}(U, U_{target}) = \frac{1}{d(d+1)}\bigg[d + |\text{Tr}(U_{target}^\dagger U)|^2\bigg]\label{eq:avg_fidelity}.
+    \end{equation}
+    \item \textbf{Classical fidelity:} If we are only interested in the population transfer, and not the relative phases, then we may compare the two classical transition matrices $P$ and $P_{target}$, whose entries are $P_{ij} = |U_{ij}|^2$, through the Bhattacharyya overlap \cite{bhattacharyya1943measure}:
+    \begin{equation*}
+        F_j(P, P_{target}) = \sum_{i,j} \sqrt{P_{ij} P_{target,ij}},
+    \end{equation*}
+    and then average over all inputs $j$,
+    \begin{equation}
+        F_{classical}(U, U_{target}) = \frac{1}{d}\sum_j F_j(P, P_{target})\label{eq:classical_fidelity}. 
+    \end{equation} 
+    Classical fidelity measures how well the gate operation reproduces the target population transfer, disregarding any phase information \cite{nielsen2010quantum}. For deterministic gates - where each input state $\ket{j}$ is mapped to a unique output $\ket{g(j)}$ - the target transition matrix probabilities satisfy $P_{target,ij} = \delta_{g(j),i}$, where $\delta_{ij}$ is the Kronecker delta. The Bhattacharyya overlap then simplifies to
+    \begin{equation*}
+        F_j(P, P_{target}) = \sum_i \sqrt{P_{ij} \delta_{g(j),i}} = |U_{g(j), j}|.
+    \end{equation*}
+    and the classical fidelity reduces to the average of the absolute values of the transition amplitudes:
+    \begin{equation}
+        F_{classical}(U, U_{target}) = \frac{1}{d}\sum_j |U_{g(j), j}|^2 = \frac{1}{d}\sum_j P_{g(j), j}\label{eq:classical_fidelity_deterministic}.
+    \end{equation}
+    This is the average probability of correctly transferring the population from input state $\ket{j}$ to the target state $\ket{g(j)}$. 
+\end{itemize}
+To summarize, the two fidelity measures introduced above play complementary roles in assessing the performance of our quantum control protocols. The average fidelity (Equation \eqref{eq:avg_fidelity}) captures the full coherent performance of theg gate, including both population transfer and phase alignment, while the classical fidelity (Equation \eqref{eq:classical_fidelity}) isolates purely population transfer, disregarding any phase information. Initially, we will primarily focus on the classical fidelity to asseess if our two-qubit operations achieve the desired population transfer. Once the population transfer is satisfactory, we will calculate the average fidelity to assess the overall performance of our two-qubit operations, including any phase errors. This will then be usde to find suitable single-qubit operations that can correct for any unwanted phases that may have accumulated during the two-qubit operation, resulting in a better average fidelity measure, and a more successful two-qubit operation. In the method section, we will outline how we compute these fidelity measures numerically from the time-evolved system, and how this guides the construction of our single-qubit $R_Z$ corrections to yield a high-fidelity two-qubit gate.
+
+
 \end{document}

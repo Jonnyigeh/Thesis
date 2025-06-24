@@ -155,8 +155,13 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     eps_asym, C_asym = np.linalg.eigh(H_antisym)
     disting_eps, disting_C = np.linalg.eigh(H)
     exch_energy = abs(eps_asym[0] - 0.5*(disting_eps[1] + disting_eps[2]))
+    direct_energy = 0.5 * (disting_eps[1] + disting_eps[2])
+    # direct_energy = np.einsum(
+    #     'i, j, ijkl, k, l ->',
+    #     c_l[:,0].conj(), c_r[:,0].conj(), basis._ulr, c_l[:,0], c_r[:,0], optimize=True
+    # )
+    # exch_energy = eps_asym[0] - direct_energy
     print(f"Exchange:{abs(eps_asym[0] - 0.5*(disting_eps[1] + disting_eps[2])):.5f}")
-
 
     # # Anti-symmetric WF 
     # indisting_basis = ODMorse(
@@ -186,7 +191,7 @@ def make_comparison(potential, alpha, a, num_grid_points, grid_length, num_func,
     # E_HF = sum(eps_hf[i] for i in occ) \
     #     - 0.5 * sum(J[i, j] - K[i, j] for i in occ for j in occ)
     # print(f"HF energy: {E_HF:.5f}")
-    return exch_energy, eps_asym, disting_eps, 
+    return exch_energy, eps_asym, disting_eps, direct_energy
     # rho = np.zeros((indisting_basis.l,indisting_basis.l), dtype=np.complex128)
     # for i in range(n_particles):
     #     rho += np.outer(indisting_C[:,i], np.conj(indisting_C[:,i]).T)
@@ -282,8 +287,9 @@ if __name__ == "__main__":
                 # k_b=25,
                 # d=d
             )
-        exchange_en, eps_asym, eps, = make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
+        exchange_en, eps_asym, eps, direct_en = make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
         exchange_term.append(exchange_en)
+        direct_term.append(direct_en)
         asym_en.append(eps_asym[0])
         E_n.append(0.5 * (eps[2] + eps[1] ))
         # eps_asym, E, prod_en, S_, exch, direct = make_comparison(potential=potential, alpha=alpha, a=a, num_grid_points=num_grid_points, grid_length=grid_length, num_func=num_func, l=l, n_particles=n)
@@ -294,40 +300,42 @@ if __name__ == "__main__":
         # prod_e.append(prod_en[0])
         # overlaps.append(S_)
         # print("\n")
+    delta_E = np.array(E_n) - np.array(asym_en)
     matplotlib.style.use('seaborn-v0_8-deep')
     colors = sns.color_palette()
     b = colors[0]
     g = colors[1]
     r = colors[2]
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.45))
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4))
     ax[0].plot(separations, E_n, 'x-', color=b, label='Hartree energy')
-    ax[0].plot(separations, asym_en, 'x-', color=r, label='CI energy')
-    ax[0].set_xlabel('Separation (a.u.)')
-    ax[0].set_ylabel('Energy (a.u.)')
+    ax[0].plot(separations, asym_en, 'x-', color=g, label='CI energy')
+    ax[0].set_xlabel('Separation [a.u.]')
+    ax[0].set_ylabel('Energy [a.u.]')
     ax[0].set_title('Ground state energies')
-    ax[1].plot(separations, np.asarray(exchange_term) *  27.211, 'x-', color=g, label='Exchange energy')
-    ax[1].set_xlabel('Separation (a.u.)')
-    ax[1].set_ylabel('Energy (eV)')
-    ax[1].set_title('Exchange energy')
+    ax[1].plot(separations, np.asarray(delta_E), 'x-', color=r, label=r'$\Delta E$')
+    ax[1].set_xlabel('Separation [a.u.]')
+    ax[1].set_ylabel(r'$\Delta E$ [a.u.]')
+    ax[1].set_title('Ground state deviation')
     ax[0].legend()
     ax[1].legend()
-    plt.tight_layout()
-    fig.subplots_adjust(left=0.1,
-                    right=0.9,  # increased margin on the right
-                    top=0.9,
-                    bottom=0.15,
-                    wspace=0.3)
+    plt.tight_layout(rect=[0, 0, 0.95, 1])
+    # fig.subplots_adjust(left=0.1,
+    #                 right=0.9,  # increased margin on the right
+    #                 top=0.9,
+    #                 bottom=0.15,
+    #                 wspace=0.3)
     plt.savefig("../doc/figs/exchange_shift.pdf")
     plt.show()
-    exit()
-    data = {
-        "separations": separations,
-        "asym_energies": asym_en,
-        "prod_energies": prod_e,
-        "E_n": E_n,
-        "overlaps": overlaps,
-        "exchange_terms": exchange_term,
-    }
+    # exit()
+    # data = {
+    #     "separations": separations,
+    #     "asym_energies": asym_en,
+    #     "prod_energies": prod_e,
+    #     "E_n": E_n,
+    #     "overlaps": overlaps,
+    #     "exchange_terms": exchange_term,
+    #     "direct_terms": direct_term,
+    # }
     # import pickle
     # with open("data/distinguishable_particle_breakdown0306.pkl", "wb") as f:
     #     pickle.dump(data, f)
@@ -340,41 +348,41 @@ if __name__ == "__main__":
     # with open("data/distinguishable_particle_breakdown.pkl", "rb") as f:
     #     data = pickle.load(f)
 
-    E_n = data['E_n']
-    separations = data['separations']
-    asym_en = data['asym_energies']
-    breakpoint()
+    # E_n = data['E_n']
+    # separations = data['separations']
+    # asym_en = data['asym_energies']
+    # breakpoint()
     # separations = data['separations']
     # asym_en = data['asym_energies']
     # prod_e = data['prod_energies']
     # E_n = data['E_n']
-    matplotlib.style.use('seaborn-v0_8')
-    colors = sns.color_palette()
-    b = colors[0]
-    g = colors[1]
-    r = colors[2]
-    delta_E = np.array(E_n) - np.array(asym_en)
+    # matplotlib.style.use('seaborn-v0_8')
+    # colors = sns.color_palette()
+    # b = colors[0]
+    # g = colors[1]
+    # r = colors[2]
+    # delta_E = np.array(E_n) - np.array(asym_en)
 
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.45))
-    ax[0].plot(separations, [np.abs(E) for E in E_n], 'o-', color=r, label='HF energy')
-    # ax[0].plot(separations, [E.real for E in prod_e], 'o-', color=g, label='Distinguishable product energy')
-    ax[0].plot(separations, [np.abs(E) for E in asym_en], 'o-', color=b, label='Hartree energy')
-    ax[0].set_xlabel('Separation (a.u.)')
-    ax[0].set_ylabel('Energy (a.u.)')
-    ax[0].set_title('Ground state energies')
-    ax[1].plot(separations, delta_E, 'o-', color=r, label=r'$\Delta E$')
-    ax[1].set_xlabel('Separation (a.u.)')
-    ax[1].set_ylabel(r'$\Delta E$ (a.u.)')
-    ax[1].set_title('Deviation in ground state estimate')
-    ax[0].legend()
-    ax[1].legend()
-    plt.tight_layout()
-    fig.subplots_adjust(left=0.1,
-                    right=0.9,  # increased margin on the right
-                    top=0.9,
-                    bottom=0.15,
-                    wspace=0.3)
+    # fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.45))
+    # ax[0].plot(separations, [np.abs(E) for E in E_n], 'o-', color=r, label='HF energy')
+    # # ax[0].plot(separations, [E.real for E in prod_e], 'o-', color=g, label='Distinguishable product energy')
+    # ax[0].plot(separations, [np.abs(E) for E in asym_en], 'o-', color=b, label='Hartree energy')
+    # ax[0].set_xlabel('Separation [a.u.]')
+    # ax[0].set_ylabel('Energy [a.u.]')
+    # ax[0].set_title('Ground state energies')
+    # ax[1].plot(separations, delta_E, 'o-', color=r, label=r'$\Delta E$')
+    # ax[1].set_xlabel('Separation [a.u.]')
+    # ax[1].set_ylabel(r'$\Delta E$ [a.u.]')
+    # ax[1].set_title('Deviation in ground state estimate')
+    # ax[0].legend()
+    # ax[1].legend()
+    # plt.tight_layout()
+    # fig.subplots_adjust(left=0.1,
+    #                 right=0.9,  # increased margin on the right
+    #                 top=0.9,
+    #                 bottom=0.15,
+    #                 wspace=0.3)
     # plt.savefig("../doc/figs/exchange_shift.pdf")
-    plt.show()
-    breakpoint()
+    # plt.show()
+    # breakpoint()
 

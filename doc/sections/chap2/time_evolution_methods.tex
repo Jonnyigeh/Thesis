@@ -4,7 +4,7 @@
 \section{Time-evolution}\label{sec:time_evolve_methods}
 In this section, we describe the numerical implementation of the time-dependent Schrödinger equation (TDSE) for evolving quantum states under a (possibly time-dependent) Hamiltonian. Our primary goal is to simulate the time evolution of a quantum wavefunction from a known initial state, using various numerical methods to approximate both the time-evolution operator and the propagation of the wavefunction itself.
 
-We begin by discussing how to discretize time for numerical propagation. We then introduce different strategies for approximating the time-evolution operator and solving the TDSE. Several integration schemes are examined, and we compare their accuracy, stability, and efficiency. We validate our implementation using the well-known Landau-Zener model before applying the methods to the more complex double-well Morse potential system.
+We begin by discussing how to discretize time for numerical propagation, and our choice made regarding time-discretization in the work. We then introduce different strategies for approximating the time-evolution operator and solving the TDSE. Several integration schemes are examined, and we compare their accuracy, stability, and efficiency. We validate our implementation using the well-known Landau-Zener model before applying the methods to the more complex double-well Morse potential system, before motivating our choice methods backed by these simple tests.
 
 \subsection{Time discretization}
 The foundation of any numerical time-evolution scheme lies in the discretization of the time variable. Typically, this is done by introducing a time step $\Delta t$, and defining a grid of time points $t_n = n \Delta t$ where $n$ is an integer. In general, there are two ways to do this:
@@ -12,8 +12,9 @@ The foundation of any numerical time-evolution scheme lies in the discretization
     \item \textbf{Fixed time step:} This is the most common approach, where we define a fixed time step $\Delta t$ and evolve the system in small steps. 
     \item \textbf{Adaptive time step:} This approach allows for a variable time step, where the time step is adjusted based on the dynamics of the system. This can be useful for systems with rapidly changing dynamics, where a fixed time step may not be sufficient to capture the dynamics accurately.
 \end{itemize}
-In this work we will be primarily employing fixed time steps, as the system we are studying is not expected to exhibit rapidly changing dynamics, due to us being in control of how we vary the potential parameters and thus perturb the system. 
+In this work we will be primarily employing fixed time steps, as the system we are studying is not expected to exhibit rapidly changing dynamics, due to us being in control of how we vary the potential parameters and thus perturb the system. The choice of time step is crucial for the accuracy and stability of most numerical schemes, and a poorly chosen time step can lead to divergence - as most methods error scales with $\Delta t$. In practice, we choose a time step that is small enough to ensure convergence of the results, but large enough to keep the computational cost manageable. 
 
+All of our time-evolution simulations on the Morse double-well potential use a fixed time-step of $\Delta t = 0.1$ a.u. This choice represents a compromise between accuracy (error scales as $\mathcal{O}(\Delta t^3)$ for our mid-point Crank-Nicolson scheme) and computational cost, and is sufficient to capture the dynamics of the system without introducing significant numerical errors. In physical terms, $0.1$ a.u. corresponds to only about $2.4$ attoseconds, so ven this coarse time-step is extremely fine relative to experimental timescales. Thus, the choice for the time-step is purely to ensure convergence with the numerical integrator. For the simple Landau-Zener model benchmark simulations, a smaller time-step of $\Delta t = 0.01$ a.u. is used, ensuring that all integration schemes are well within their convergence regimes, and that time-step related errors remain negligible. This approach allows us to compare the performance of different numerical methods on a common footing, minimizing any bias introduced by the choice of time step.
 
 \subsection{Approximating the Time-evolution operator}\label{sec:time_evolution_operator}
 In principle, the exact propagator for a quantum system is given by the time-ordered exponential of the Hamiltonian \eqref{eq:time_evolution}
@@ -24,7 +25,7 @@ or by the simpler matrix exponential $U(t) = e^{-iHt}$ for a time-independent sy
 
 For our simulations in the double-well Morse potential, we rely exclusively on two unitary-preserving, stable schemes:
 \begin{itemize}
-    \item \textbf{Matrix exponentiation via Padé:} This is the most straightforward approach, where we compute a direct evaluation of the matrix exponential $U=\text{exp}\big(-\frac{i}{\hbar}H\Delta t)$, typically using a Padé approximation combined with scaling and squaring, as implemented in \texttt{scipy.linalg.expm}. This method is efficient and works well for small to medium-sized matrices. Its cost scales as $\mathcal{O}(N^3)$, where $N$ is the number of basis states.\textcolor{red}{TODO: Should maybe cite the algorithm used in scipy.linalg.expm?}
+    \item \textbf{Matrix exponentiation via Padé:} This is the most straightforward approach, where we compute a direct evaluation of the matrix exponential $U=\text{exp}\big(-\frac{i}{\hbar}H\Delta t)$, typically using a Padé approximation combined with scaling and squaring, as implemented in \texttt{scipy.linalg.expm}. This method is efficient and works well for small to medium-sized matrices. Cost scales as $\mathcal{O}(N^3)$, where $N$ is the number of basis states \cite{Al-Mohy_Higham_2010}.
     \item \textbf{Crank-Nicolson method:} An implicit midpoint method that approximates the evolution operator as a weighted average of states at the current and next time step,
     \begin{align*}
         \psi(t + \Delta t) = \bigg(\mathbb{I} + i\frac{\Delta t H}{2}\bigg)^{-1} \bigg(\mathbb{I} - i\frac{\Delta t H}{2}\bigg) \psi(t).
@@ -43,7 +44,7 @@ Following the material presented in section \ref{sec:time_evolution_theory}, we 
 \begin{align*}
     U(t) \approx e^{-iH(t)\Delta t} 
 \end{align*}
-which is easily implemented direcly in python using the \texttt{scipy.linalg.expm} function. The approximation is only valid given a small enough\footnote{Small enough is system specific} $\Delta t$, and/or slowly varying Hamiltonian. This function uses the \texttt{scipy.linalg} package to compute the matrix exponential using the algorithm introduced in \cite{Al-Mohy_Higham_2010}, which in essence in a Padé approxmation to the exponential function, using a scaling and squaring method. The \texttt{scipy.linalg.expm} function is efficient and reliable, making it well-suited for systems of moderate size. 
+which is easily implemented direcly in python using the \texttt{scipy.linalg.expm} function. The approximation is only valid given a sufficiently fine\footnote{Sufficiently is in general system specific, but it must atleast be $<1$.} $\Delta t$, and/or slowly varying Hamiltonian. This function uses the \texttt{scipy.linalg} package to compute the matrix exponential using the algorithm introduced in \cite{Al-Mohy_Higham_2010}, which in essence in a Padé approxmation to the exponential function, using a scaling and squaring method. The \texttt{scipy.linalg.expm} function is efficient and reliable, making it well-suited for systems of moderate size. 
 
 The function is implemented as follows:
 \begin{lstlisting}[language=Python]
@@ -66,7 +67,7 @@ While matrix exponentiation provides a robust method for computing the time-evol
     \item \textbf{Midpoint evaluation (second order):} $U(t + \Delta t, t) = \text{exp}(-iH(t + \Delta t/2)\Delta t)$. This method is more accurate than the left-endpoint method, but still suffers from stability issues for large time steps.
     \item \textbf{Trapezoidal evaluation (second order, symmetric):} $U(t + \Delta t, t) = \text{exp}(-i(H(t) + H(t + \Delta t))/2 \Delta t)$. This method is more accurate than the midpoint method, and naturally leads into implicits methods like Crank-Nicolson. 
 \end{itemize}
-The choice of evaluation method depends on the specific system, and in this work, we primarily use the Euler method for simplicity and speed. \textcolor{red}{TODO: Add more details, possibly validate against the other two evaluation methods.} \\ In the next section we will discuss the different approach of using numerical integration methods to solve the time-evolution operator, namely the Crank-Nicolson method and the Runge-Kutta method. These methods are more general and can be used for time-dependent Hamiltonians, but are also more complex and computationally expensive.
+The choice of evaluation method depends on the specific system, and in this work, we primarily use the Euler method for simplicity and speed. In the next section we will discuss the different approach of using numerical integration methods to solve the time-evolution operator, namely the Crank-Nicolson method and the Runge-Kutta method. These methods are more general and can be used for time-dependent Hamiltonians, but are also more complex and computationally expensive.
 
 \subsection{Numerical integrators}
 As we have seen, direct matrix exponentiation provides a robust and unitary method for approximating the time-evolution operator. However, it becomes increasingly inefficient and impractical for high-dimensional systems, due to the computational complexity of evaluating the matrix exponential of the Hamiltonian in each time step. To address this, we resort to \emph{numerical integratorion methods}, which offer more scalable alternatives for evolving the quantum system, and propagating the wavefunction through time.  \\
@@ -99,11 +100,12 @@ This equation represents a \textbf{linear system} of equations for the wavefunct
 \begin{align*}
     U_{CN} (\Delta t) = \bigg[\mathbb{I} + \frac{i\Delta t}{2\hbar}H(t + \Delta t)\bigg]^{-1}\bigg[\mathbb{I} - \frac{i\Delta t}{2\hbar}H(t)\bigg].
 \end{align*}
-This expression is a \textbf{Padé approximation} to the exponential function\textcolor{red}{TODO: Add reference}, and it provides a second-order accurate approximation to the time-evolution operator that is norm-preserving. In the time-independent case, it acts as a rational approximation\textcolor{red}{TODO: Add more details, and references to this} to the exponential time-evolution operator
+This expression is a \textbf{Padé approximation} to the exponential function, and it provides a second-order accurate approximation to the time-evolution operator that is norm-preserving. It acts as (1,1) Padé rational to the exponential time-evolution operator \cite{moler2003nineteen, higham2008functions}, and takes the following form in the time-independent case:\textcolor{red}{TODO: Add maybe a section in the appendix with derivation? }
 \begin{align*}
     U = e^{-iH\Delta t/\hbar} \approx \frac{\mathbb{I} - \frac{i\Delta t}{2\hbar}H}{\mathbb{I} + \frac{i\Delta t}{2\hbar}H}.
 \end{align*}
-For a time-dependant Hamiltonian, the Crank-Nicolson method can be viewed as a midpoint evaluation of the Hamiltonian, where the midpoint of the Hamiltonian $H = 1/2(H(t+\Delta t) + H(t))$ is used to compute the time-evolution operator to enforce unitarity, and is especially important for rapidly varying Hamiltonians. 
+For a time-dependant Hamiltonian, the Crank-Nicolson method can be viewed as a midpoint evaluation of the Hamiltonian, where the midpoint of the Hamiltonian $H = 1/2(H(t+\Delta t) + H(t))$ is used to compute the time-evolution operator to enforce unitarity, which is especially important for rapidly varying Hamiltonians, and is the procedue we shall use in our study. For a proof of unitarity, see appendix \ref{sec:crank_nicolson_proof}\textcolor{red}{TODO: Do proof.}.
+
 Viewed as such, the Crank-Nicolson method situates itself somewhere in between numerical integration methods and approximate exponentiaion schemes, providing a physical, flexible and efficient framework for quantum state time-evolution. Some of the key advantages of the Crank-Nicolson method include:
 \begin{itemize}
     \item \textbf{Unitarity:} The method preserves the norm of the wavefunction, ensuring that the total probability remains constant over time. This is crucial for maintaining physical consistency in quantum simulations.
@@ -111,23 +113,23 @@ Viewed as such, the Crank-Nicolson method situates itself somewhere in between n
     \item \textbf{Accuracy:} The second-order accuracy of the method supports the use of larger time steps compared to first-order methods, while still maintaining a high level of precision, as the local error scales as $\mathcal{O}(\Delta t^3)$, and global error as $\mathcal{O}(\Delta t^2)$.
     \item \textbf{Sparsity:} The method can be efficiently implemented for sparse Hamiltonians, as solving the linear system is generally more efficient than computing the full matrix exponential.
 \end{itemize}
-In the following, we shall outline a suggested implementation of the Crank-Nicolson method in Python, with a code snippet to illustrate its usage.\textcolor{red}{TODO: Do we want to add somee pseudo-code?} 
+In the following, we shall outline a suggested implementation of the Crank-Nicolson method in Python, with a code snippet to illustrate its usage.
 \begin{lstlisting}[language=Python]
 N = ... # Number of time steps
-hbar = 1.0  # Reduced Planck's constant (in a.u)
+hbar = 1.0  # Reduced Planck's constant (a.u)
 psi = np.zeros([...])  # Initial wavefunction
 time = np.linspace(0, 10, N)  # Time grid
 dt = time[1] - time[0]  # Time step
 def H_t(t):
-    # Define the Hamiltonian matrix at time t
-    # This is a placeholder function and should be replaced with the actual Hamiltonian
+    # Set the Hamiltonian matrix at time t
+    # Placeholder function, replace with actual Hamiltonian
     return np.array([[1, 0], [0, 1]])  # Example: Identity matrix
 
 def crank_nicolson(H_t, psi, t, dt):
-    # Define the Hamiltonian matrix at the current time step
+    # Get the Hamiltonian matrix at the current time step
     H_current = H_t(t)
     H_next = H_t(t + dt)
-    H_mid = (H_current + H_next) / 2  # Midpoint evaluation for unitarity
+    H_mid = (H_current + H_next) / 2  # Midpoint evaluation
     
     # Construct the Crank-Nicolson update operator
     U_CN = np.linalg.inv(np.eye(len(psi)) + 1j * dt / (2 * hbar) * H_mid) @ \
@@ -142,9 +144,8 @@ psi_t = np.zeros((N, len(psi)), dtype=complex)  # Store wavefunction at each tim
 for t in time:
     psi_new = crank_nicolson(H_t, psi, t, dt)
     psi_t.append(psi_new)
-    psi = psi_new  # Update the wavefunction for the next iteration
+    psi = psi_new  # Update the wavefunction
 \end{lstlisting}
-\textcolor{red}{TODO: Comment on hwo to regain unitarity with the operator given that $H(t + \Delta t) \neq H(t)$. Use midpoint evaluation? I.e $H_mid = \frac{H(t) + H(t + \Delta t)}{2}$ solves the issue, and would make the operator unitary. But is it wrong? Should discuss with Oskar and find some sources}
 
 \subsubsection{Runge-Kutta method}
 In contrast to the Crank-Nicolson method, the Runge-Kutta method trades off unitarity and exact norm preservation for simplicity, flexibility and short-term accuracy. As such, it provides a versatile and widely used tool for initial value problems, and is particularly useful for systems with smooth dynamics. The RK4 method, in particular, is a fourth-order explicit integration scheme that offers high accuracy and ease of implementation.
@@ -171,7 +172,7 @@ This method achieves a local error of $\mathcal{O}(\Delta t^5)$ and a global err
     \item \textbf{Explicitness:} The RK4 method is explicit, meaning that it does not require the solution of a linear system at each time step, making it computationally efficient for a wide range of systems.
     \item \textbf{Accuracy:} The fourth-order accuracy enables the use of relatively large time steps while maintaining a high level of accuracy.
 \end{itemize}
-The following code snippet illustrates a suggested implementation of the RK4 method for time-evolution in Python, with illustration its usage in a time-loop: \textcolor{red}{TODO: Do we want pseudo-code?}
+The following code snippet illustrates a suggested implementation of the RK4 method for time-evolution in Python, with illustration its usage in a time-loop:
 \begin{lstlisting}[language=Python]
 psi = np.zeros([...])  # Initial wavefunction
 N = ... # Number of time steps
@@ -207,16 +208,16 @@ for t in time:
     correction = np.linalg.norm(psi_new)
     psi_new /= correction  # Normalize the wavefunction
     psi_t.append(psi_new)
-    psi = psi_new  # Update the wavefunction for the next iteration
+    psi = psi_new  # Update the wavefunction
 \end{lstlisting}
 This code snippet outlines a suggested procedure, however - in our work, we shall instead use the \texttt{scipy.integrate} packages \texttt{RK45}\footnote{See \url{https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.RK45.html}} method, which is a built-in implementation of the RK4 method. This package provides a convenient and efficient way to perform numerical integration of ODEs, and is well-suited for our purposes.  \\\\
 In Section \ref{sec:numerical_validation_landau_zener}, we compare the performance and qualitative behaviour of the Crank-Nicolson and RK4 methods when applied to the Landau-Zener system \eqref{eq:landau_zener}, providing insight into their respective advantages and limitations in a controlled testbed scenario.
 
 \subsection{Ramping protocols}\label{sec:ramping_protocols}
 In the context of time-evolution methods, ramping protocols refer to the controlled variation of system parameters over time, allowing for smooth transitions between different potential configurations. In our double-well Morse potential system, we will employ ramping protocols to gradually change the potential parameters during the simulation, to encur mixing of the states between the two wells. \\\\
-In order to steer our system from the separable configuration $C_I$ into the degenerate, entanglging configuration $C_{II}$ (and back again), we implement a time-dependent ramping protocol for the Morse potential parameters. This protocol is crucial to avoid diabatic transitions and to maintain a level of quantum control over the induced entanglement.
+In order to steer our system from the separable configuration $C_I$ into the degenerate, entangling configuration $C_{II}$ (and back again), we implement a time-dependent ramping protocol for the Morse potential parameters. This protocol is crucial to avoid diabatic transitions and to maintain a level of quantum control over the induced entanglement.
 \\
-We begin by choosing a total evolution time $T_\text{total}$ and a fixed time step $\Delta t$. We also define an interpolation function that smoothly varies the potential parameters from their initial values in configuration $C_I$ to their final values in configuration $C_{II}$. The function of choice is a linear interpolation, which is simple and effective for our purposes. The potential parameters are defined as functions of time:
+We begin by choosing a total evolution time $T_\text{total}$ and a fixed time step $\Delta t$. We also define an interpolation function that linearly varies the potential parameters from their initial values in configuration $C_I$ to their final values in configuration $C_{II}$. The function of choice is a linear interpolation, which is simple and effective for our purposes. The parameters are defined as functions of time:
 \begin{equation}
     C(t) = (1 - \lambda(t))C_I + \lambda(t)C_{II}\label{eq:interpolation_function},
 \end{equation}

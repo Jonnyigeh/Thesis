@@ -96,7 +96,7 @@ def visualize_ramp_protocol():
     # Axis labels and limits
     ax.set_xlim(0, t_max)
     ax.set_ylim(-0.05, 1.05)
-    ax.set_xlabel('Time (a.u.)')
+    ax.set_xlabel('Time [a.u.]')
     ax.set_ylabel(r'$\lambda(t)$')
     ax.set_title('Ramping Protocol')
 
@@ -242,7 +242,7 @@ def show_double_well_pot():
     plt.show()
 
 if __name__ == "__main__":
+    visualize_ramp_protocol()
     exit()
     show_potential_with_spf()
     show_double_well_pot()
-    visualize_ramp_protocol()

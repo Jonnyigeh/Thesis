@@ -56,6 +56,13 @@ def set_system(params, c_l=None, c_r=None, initial=True):
     # E, C = np.linalg.eigh(H)
     h_l = basis._h_l
     h_r = basis._h_r
+    e_l, _ = np.linalg.eigh(h_l)
+    e_r, _ = np.linalg.eigh(h_r)
+    e00 = e_l[0] + e_r[0]
+    e11 = e_l[1] + e_r[1]
+    e01 = e_l[0] + e_r[1]
+    e10 = e_l[1] + e_r[0]
+    eps_nonint = np.array([e00, e01, e10, e11])
     u_lr = basis._ulr
     u_lr4 = basis._ulr4d
     if initial:
@@ -74,6 +81,7 @@ def set_system(params, c_l=None, c_r=None, initial=True):
     U = u_lr.reshape(*H_.shape)
     H = H_ + U
     eps, C = np.linalg.eigh(H)
+    eps_nonint_, _ = np.linalg.eigh(H_)
 
     S = np.zeros(len(eps))
     for i in range(len(eps)):
@@ -83,7 +91,9 @@ def set_system(params, c_l=None, c_r=None, initial=True):
         S[i] = _find_VN_entropies(rho)
     if initial:
         return c_l, c_r
-    return eps, C, S
+    return eps, C, S, eps_nonint
+
+
 def update_params(lmbda):
     config_I = [62.17088395, 60.73364357 ,19.89474221 ,21.81940414, 15.        ]
     config_II = [62.97325982, 64.11742637 ,13.22714092 ,13.09781006 ,14.95744294]
@@ -105,10 +115,10 @@ def plot_entanglement_peak(lmbda, S_mat):
     ax.plot(lmbda, S_mat[:, 1], label=r'S$[\psi_2]$', color=g, lw=2)
     ax.plot(lmbda, S_mat[:, 2], label=r'S$[\psi_3]$', color=r, lw=2, linestyle='--')
     ax.plot(lmbda, S_mat[:, 3], label=r'S$[\psi_4]$', color=l, lw=2, linestyle='--')
-    ax.set_xlabel(r'$\lambda$'), 
-    ax.set_ylabel(r'Entanglement entropy $S$ ')
+    ax.set_xlabel(r'$\lambda(t)$'), 
+    ax.set_ylabel('Entanglement entropy')
     ax.set_title(r'Entanglement as function of $\lambda$')
-    ax.vlines(x=1.0, ymin=-0.5, ymax=1.0, color='k', linestyle='--', lw=1.0)
+    ax.vlines(x=1.0, ymin=-0.5, ymax=1.4, color='k', linestyle='--', lw=1.0)
     ax.set_ylim(-0.05, 1.05)
     ax.set_xlim(0, 2.0)
     axins = inset_axes(ax,
@@ -117,11 +127,11 @@ def plot_entanglement_peak(lmbda, S_mat):
                        loc='upper right',
                        borderpad=1)
     # plot same curves on inset
-    axins.plot(lmbda, S_mat[:, 0], color=b, lw=2)
-    axins.plot(lmbda, S_mat[:, 2], color=r, lw=2)
-    axins.plot(lmbda, S_mat[:, 1], color=g, lw=2, ls='--')
-    axins.plot(lmbda, S_mat[:, 3], color=l, lw=2, ls='--')
-    axins.vlines(1.0, 0, 1, color='k', ls='--', lw=0.5)
+    axins.plot(lmbda, S_mat[:, 0], color=b, lw=1.5)
+    axins.plot(lmbda, S_mat[:, 1], color=g, lw=1.5)
+    axins.plot(lmbda, S_mat[:, 2], color=r, lw=1.5, ls='--')
+    axins.plot(lmbda, S_mat[:, 3], color=l, lw=1.5, ls='--')
+    axins.vlines(1.0, 0, 1.2, color='k', ls='--', lw=0.5)
 
     # restrict the view to the peak region
     axins.set_xlim(0.98, 1.02)
@@ -136,7 +146,7 @@ def plot_entanglement_peak(lmbda, S_mat):
     plt.savefig('../doc/figs/entanglement_peak.pdf')
     plt.show()
 
-def plot_energy_curves(lmbda, eps_mat):
+def plot_energy_curves(lmbda, eps_mat, eps_nonint_mat):
     matplotlib.style.use('seaborn-v0_8-deep')
     colors = sns.color_palette()
     b = colors[0]
@@ -148,7 +158,7 @@ def plot_energy_curves(lmbda, eps_mat):
     ax.plot(lmbda, eps_mat[:, 1], label=r'$E[\psi_1]$', color=g, lw=2)
     ax.plot(lmbda, eps_mat[:, 2], label=r'$E[\psi_2]$', color=r, lw=2)
     ax.plot(lmbda, eps_mat[:, 3], label=r'$E[\psi_3]$', color=l, lw=2)
-    ax.set_xlabel(r'$\lambda$')
+    ax.set_xlabel(r'$\lambda(t)$')
     ax.set_ylabel(r'Energy [a.u]')
     ax.set_title(r'Energy as function of $\lambda$')
     ax.vlines(x=1.0, ymin=-0.5, ymax=20.0, color='k', linestyle='--', lw=1.0)
@@ -163,6 +173,13 @@ def plot_energy_curves(lmbda, eps_mat):
                  eps_mat[(lmbda>0.995)&(lmbda<1.005),1:].min(),
                  eps_mat[(lmbda>0.995)&(lmbda<1.005),1:].max(),
                  color='k', linestyle='--', linewidth=0.8)
+
+    # # Plot non-interacting energies around lambda = 1.0
+    # idx1 = np.argmin(np.abs(lmbda - 1.0))
+    # nonint_vals = eps_nonint_mat[idx1]  # array of length 4
+    # x0, x1 = 0.99975, 1.00025
+    # for y in nonint_vals:
+    #     axins.hlines(y, x0, x1, color='k', lw=1)
 
     # Zoom limits
     axins.set_xlim(0.99975, 1.00025)
@@ -190,23 +207,30 @@ if __name__ == "__main__":
         lmbda = linear_lamba_t(np.linspace(0, 1, 1001))
         S_mat = np.zeros((len(lmbda), 4))  # Assuming 4 energy levels for the system
         eps_mat = np.zeros((len(lmbda), 4))  # Assuming 4
+        eps_nonint_mat = np.zeros((len(lmbda), 4))
         for i, l in tqdm(enumerate(lmbda)):
             params = update_params(l)
-            eps, C, S = set_system(params, c_l, c_r, initial=False)
+            eps, C, S, eps_nonint = set_system(params, c_l, c_r, initial=False)
             S_mat[i] = S[:4]  # Store the first 4 entropies
             eps_mat[i] = eps[:4]  # Store the first 4 energies
+            eps_nonint_mat[i] = eps_nonint[:4]
 
         data = {
             "lmbda": lmbda,
             "S_mat": S_mat,
             "eps_mat": eps_mat,
+            "eps_nonint_mat": eps_nonint_mat
         }
     import pickle
-    with open('data/entanglement_peak_data.pkl', 'rb') as f:
+    # with open('data/entanglement_peak_data_withnonint.pkl', 'wb') as f:
+    #     pickle.dump(data, f)
+    with open('data/entanglement_peak_data_withnonint.pkl', 'rb') as f:
         data = pickle.load(f)
     lmbda = data["lmbda"]
     S_mat = data["S_mat"]
     eps_mat = data["eps_mat"]
-    # plot_entanglement_peak(lmbda, S_mat)
-    plot_energy_curves(lmbda, eps_mat)
+    eps_nonint_mat = data["eps_nonint_mat"]
+    exit()
+    plot_energy_curves(lmbda, eps_mat, eps_nonint_mat)
+    plot_entanglement_peak(lmbda, S_mat)
     

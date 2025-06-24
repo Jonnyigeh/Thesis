@@ -149,12 +149,48 @@ Calculating the gate fidelity, we find the classical fidelity to be $F_c = 73.97
 
 
 
+\subsubsection*{Phase correction for coherent gate fidelity}
+Applying the phase correction procedure (Section \ref{sec:phase_correction}) to our raw time-evolved two-qubit unitary matrices $U_{\text{SWAP}}$ and $U_{\sqrt{\text{SWAP}}}$ dramatically improves their coherent gate fidelities. We summarize below the key numbers for both gate operations, before and after phase correction, to illustrate the impact of this procedure.
+\paragraph{SWAP gate}
+\begin{itemize}
+    \item \textbf{Raw gate fidelity:} $F_c = 99.84\%$ (classical fidelity), $F = 26.41\%$ (average fidelity)
+    \item \textbf{Optimized phase angles:} $(\theta_2, \theta_3) = (3.8832, 1.4117)$ (radians)
+    \item \textbf{Phase-corrected gate fidelity:} $F_c = 99.92\%$ (classical fidelity), $F = 98.79\%$ (average fidelity)
+\end{itemize}
+The optimized phase angles $(\theta_2, \theta_3)$ are applied to the time-evolved unitary matrix $U_{\text{SWAP}}$, resulting in a significant increase in both classical and average fidelities. 
+The optimized gate operation after phase correction is given by
+\begin{equation}
+G_{\mathrm{SWAP}}
+=
+\begin{pmatrix}
+ 1.0000 + 0.0000\,i & 0.0000 + 0.0000\,i & 0.0000 + 0.0000\,i & 0.0000 + 0.0000\,i\\
+ 0.0000 + 0.0000\,i & 0.0313 + 0.0455\,i & 0.9714 + 0.2309\,i & 0.0000 + 0.0000\,i\\
+ 0.0000 + 0.0000\,i & 0.9714 + 0.2309\,i & -0.0484 + 0.0265\,i & 0.0000 + 0.0000\,i\\
+ 0.0000 + 0.0000\,i & 0.0000 + 0.0000\,i & 0.0000 + 0.0000\,i & 1.0000 + 0.0000\,i
+\end{pmatrix}.
+\end{equation}
+Qualitatively, this is a much better result than the raw gate operation, as the populations of the states $\ket{01}$ and $\ket{10}$ are now pure to a tolerance of $10^{-3}$, and the populations of the states $\ket{00}$ and $\ket{11}$ are now constant with no relative phase. 
 
+\paragraph{$\sqrt{\text{SWAP}}$ gate}
+\begin{itemize}
+    \item \textbf{Raw gate fidelity:} $F_c = 73.97\%$ (classical fidelity), $F = 26.41\%$ (average fidelity)
+    \item \textbf{Optimized phase angles:} $(\theta_2, \theta_3) = (2.8589, 1.0674)$ (radians)
+    \item \textbf{Phase-corrected gate fidelity:} $F_c = 99.99\%$ (classical fidelity), $F = 77.30\%$ (average fidelity)
+\end{itemize}
+The optimized phase angles $(\theta_2, \theta_3)$ are applied to the time-evolved unitary matrix $U_{\sqrt{\text{SWAP}}}$, resulting in once again a significant increase in both classical and average fidelities. We are not as successful in improving the average fidelity as we were for the SWAP gate, but we still see a
+The optimized gate matrix is given by
+\begin{equation}
+G_{\sqrt{\mathrm{SWAP}}}
+=
+\begin{pmatrix}
+ 1.0000 + 0.0000i & 0.0000 + 0.0000i & 0.0000 + 0.0000i & 0.0000 + 0.0000i\\
+ 0.0000 + 0.0000i & 0.6072 - 0.3898i & 0.0652 - 0.6893i & 0.0000 + 0.0000i\\
+ 0.0000 + 0.0000i & -0.3823 - 0.5773i & 0.7192 + 0.0577i & 0.0000 + 0.0000i\\
+ 0.0000 + 0.0000i & 0.0000 + 0.0000i & 0.0000 + 0.0000i & 1.0000 + 0.0000i
+\end{pmatrix}.
+\end{equation}
+Qualitatively, we see that the phase correction has improved the gate operation immensively, as the populations of the states $\ket{01}$ and $\ket{10}$ are now mixed cleanly to a much higher degree, and the population of states $\ket{00}$ and $\ket{11}$ are now constant with no relative phase. There is still room for improvement, and we again would need to optimize further the ramping protocol to ensure that the relative phases of are more easily optimized by our correction procedure.
 
-
-
-
-
-
-
+These results demonstrate the effectiveness of the phase correction procedure in improving the coherent gate fidelities of our two-qubit gate operations. Initially, our average fidelities were no better than random operations ($\approx 25\%$), but after a single phase correction step, we achieved average fidelities of $98.79\%$ for the SWAP gate and $77.30\%$ for the $\sqrt{\text{SWAP}}$ gate, with classical fidelities of $99.92\%$ and $99.99\%$, respectively. This highlights the importance of phase control in quantum gate operations, and how it can significantly enhance two-qubit operations. In exprimental setups, such single-qubit phase corrections are usually integrated into the two-qubit gate protocols.
+\textcolor{red}{TODO: Add more discussion on the phase correction procedure? Cit somehting}
 \end{document}

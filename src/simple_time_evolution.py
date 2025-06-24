@@ -319,8 +319,8 @@ if benchmark:
 
 
 ### PLOT IN THEORY: LANDAU ZENER COMPARISON OF EXPONENTIAL VS TAYLOR EXPENSAION
-# t, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, _,_,_, pop_sym, norm_sym = landau_zener_benchmark(v=1.0, Delta=1.0)
-method_comparison = False
+t, pop_exp, pop_euler, pop_rk4, pop_cn, norm_exp, norm_euler, norm_rk4, norm_cn, _,_,_, pop_sym, norm_sym = landau_zener_benchmark(v=1.0, Delta=1.0)
+method_comparison = True
 if method_comparison:
     fig, ax = plt.subplots(nrows=1, ncols=2, figsize=find_figsize(1.2, 0.4))
 
@@ -331,8 +331,8 @@ if method_comparison:
     ax[0].plot(t, pop_sym, ':', label='Second order', alpha=0.8)
     ax[0].plot(t, pop_cn, '-.', label='Crank-Nicholson', alpha=0.8)
 
-    ax[0].set_xlabel('Time')
-    ax[0].set_ylabel('Population')
+    ax[0].set_xlabel('Time [s]')
+    ax[0].set_ylabel(r'Population $|\psi_0(t)|^2$')
     ax[0].set_title('Population transfer')
     ax[0].legend(loc='upper left', )
 
@@ -341,14 +341,14 @@ if method_comparison:
     ax[1].plot(t, norm_euler, '--', label='Euler-Cromer', alpha=0.8)
     ax[1].plot(t, norm_sym, ':', label='Second order', alpha=0.8)
     ax[1].plot(t, norm_cn, '-.', label='Crank-Nicholson', alpha=0.8)
-    ax[1].set_xlabel('Time')
+    ax[1].set_xlabel('Time [s]')
     ax[1].set_ylabel(r'Norm of $\Psi$')
     ax[1].set_title('Norm preservation')
     ax[1].legend(loc='upper left', )
 
-    plt.tight_layout()
-    fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.15, wspace=0.3)
-    # plt.savefig('../doc/figs/landau_zener_numerical_methods.pdf')
+    plt.tight_layout(rect=[0, 0, 0.95, 1])
+    # fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.15, wspace=0.3)
+    plt.savefig('../doc/figs/landau_zener_numerical_methods.pdf')
     plt.show()
     exit()
 
@@ -381,7 +381,7 @@ if crossing:
     plt.show()
     exit()
 pop_transfer=False
-if pop_transfer
+if pop_transfer:
     t1, psi1, e1, nonint_e1 = landau_zener(10.0, 1.0)
     t2, psi2, e2, nonint_e2 = landau_zener(1.0, 1.0)
     p11 = np.abs(psi1[:, 0])**2

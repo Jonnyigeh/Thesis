@@ -1,0 +1,148 @@
+\documentclass{subfiles}
+\begin{document}
+\section{Postprocessing}\label{sec:postprocessing}
+
+\subsection{Measurement of gate fidelity}
+Our numerical two-qubit gate is represented by the $4\times 4$ unitary matrix $U$ that we extract from the time-evolved system. Each column of $U$ is found by initializing the system in the four logical computational basis states $\{\ket{00}, \ket{01}, \ket{10}, \ket{11} \}$, and propagating through our time-evolutoin scheme that realises the SWAP-like operation by linearly ramping the system from configuration $C_I$ to $C_{II}$ and back, and projecting back onto the logical subspace to properly track evolution. $U$ is then constructed as
+\begin{lstlisting}[language=Python]
+U = np.zeros((4, 4), dtype=complex)
+psi_00 = \dots
+psi_01 = \dots
+psi_10 = \dots
+psi_11 = \dots
+psi_00t = evolve(psi_00, ramp_protocol)
+psi_01t = evolve(psi_01, ramp_protocol)
+psi_10t = evolve(psi_10, ramp_protocol)
+psi_11t = evolve(psi_11, ramp_protocol)
+psi0 = np.column_stack([psi_00, psi_01, psi_10, psi_11])
+psit = np.column_stack([psi_00t, psi_01t, psi_10t, psi_11t])
+U = psi0.conj().T @ psit
+\end{lstlisting}
+where $\psi_0$ is the initial state vector, and $\psi_t$ is the time-evolved state vector. $U_{target}$ is then the ideal unitary operation that we want to achive, i.e the ideal two-qubit gates. With these two unitary matrics in hand, we can compute the fidelity measures as shown in the following code snippet 
+\begin{lstlisting}[language=Python]
+def classical_fidelity(U, U_target):
+    d = U.shape[0]
+    P = np.abs(U)**2
+    P_targt = np.abs(U_target)**2
+    F_j = np.sum(np.sqrt(P * P_targt), axis=0)
+    F_classical = np.mean(F_j)
+
+    return F_classical
+
+def average_fidelity(U, U_target):
+    d = U.shape[0]
+    trace = np.trace(U_target.conj().T @ U)
+    F = (np.abs(trace)**2 + d) / (d * (d + 1))
+
+    return F
+\end{lstlisting}
+Before extracting the fidelity measures, we make certain that the time-evolution matrix $U$ is indeed unitary within numerical tolerance, i.e. $\|U U^\dagger - \mathbb{I} < 10^-{10}\|$, and we monitor leakage outside the logical subspace. Once these tests are passed we can compute the gate fidelity measures.
+
+\subsection{One-qubit phase correction}\label{sec:phase_correction}
+To recover the highest possible coherent gate fidelity, we can apply phase correction rotations to the unitary matrix $U$ after time evolution. To do so, we apply local $Z$-rotations on each qubit to cancel any misaligned phases that may have accumulated during the time evolution. This phase-correction step sits at the very end of our pipeline, immediately after we have extracted the unitary matrix $U$ from the time-evolved state. Its purpose is to remove all trivial single-qubit $Z$-phase rotations - leftover dynamical phases that have no impact on population transfer but degrade coherent fidelity - so that our final gate is as close to the ideal unitary operation as possible.
+
+In essence, form the overlap matrix 
+\begin{equation*}
+  M = U_0^\dagger U,
+\end{equation*}
+where $U_0$ is the ideal unitary operation that we want to achieve, and $U$ is the time-evolved unitary matrix. The overlap matrix $M$ should ideally be the identity matrix, but in practice it will have some non-trivial phases, both a harmless global phase and two relative phases - one phase for each qubits logical subspace. We extract these phases, and build the phase-correction matrix $P(\theta_2, \theta_3)$ (ignoring the global phase) as follows:
+\begin{equation*}
+    P(\theta_2, \theta_3) = \text{diag}\bigg(e^{-i(\theta_2 + \theta_3)/2}, e^{-i(\theta_2 - \theta_3)},\dots\bigg)
+\end{equation*}
+which we can now apply to the time-evolved unitary matrix $U$ to correct for the misaligned phases, and recalculat the gate fidelity. This is the optimization, to find the optimal phase-correction angles $\{\theta_2, \theta_3\}$ that maximizes the average fidelity between the time-evolved unitary matrix $U$ and the target unitary matrix $U_0$.
+The structure of the phase-correction procedure is as follows:
+\begin{algorithm}[H]
+\caption{Phase Correction Procedure}
+\label{alg:phase_correction}
+\begin{algorithmic}[1]
+  \State \textbf{Input:} Time‐evolved gate $U$, target gate $U_0$
+  \State Compute initial fidelity 
+    \[
+      F = \mathrm{average\_fidelity}(U,\,U_0)
+    \]
+  \State Compute overlap matrix 
+    \[
+      M = U_{0}^{\dagger}\,U
+    \]
+  \State Extract phase‐correction angles 
+    \[
+      (a_1,a_2,a_3) = \texttt{phase\_corr\_angles}(M)
+    \]
+  \State Initialize $(\theta_1,\theta_2) \leftarrow (a_2,a_3)$
+  \State Define objective
+    \[
+      f(\theta_1,\theta_2)
+      = -\,\mathrm{average\_fidelity}\bigl(P(\theta_1,\theta_2)\,U,\;U_0\bigr)
+    \]
+  \State Optimize 
+    \[
+      (\theta_1^*,\theta_2^*)
+      = \arg\min_{\theta_1,\theta_2} f(\theta_1,\theta_2)
+    \]
+    using SciPy’s \texttt{minimize}
+  \State Construct corrected gate 
+    \[
+      U' = P(\theta_1^*,\theta_2^*) \, U
+    \]
+  \State Remove residual global phase:
+    \[
+      U' \leftarrow e^{-i\,\arg(U'_{00})}\,U'
+    \]
+  \State Compute optimized fidelity 
+    \[
+      F_{\mathrm{opt}} = \mathrm{average\_fidelity}(U',\,U_0)
+    \]
+  \State \Return $U'$, $F_{\mathrm{opt}}$, and $(\theta_1^*,\theta_2^*)$
+\end{algorithmic}
+\end{algorithm}
+
+The follow code snippet implement exactly this procedure, again using the optimization algorithm \texttt{scipy.optimize.minimize} with the default 'BFGS' method. This optimization finds the optimal phase correction angles $\{\theta_1, \theta_2\}$ that maximizes the average fidelity \eqref{eq:avg_fidelity} between the time-evolved unitary matrix $U$ and the target unitary matrix $U_0$ (the ideal gate): 
+\begin{lstlisting}[language=Python]
+def average_fidelity(U_0, U_target):
+    """Calculate aveage fidelity between two unitary matrices U_0, U_target."""
+    d = U_0.shape[0]
+    tr = np.trace(U_target.conj().T @ U_0)
+    F = (np.abs(tr)**2 + d) / (d * (d + 1))
+
+    return F.real
+ 
+def phase_rotation(alphas, U):
+    a2, a3 = alphas
+    P = np.diag(
+        [
+            np.exp(-0.5j * (a2 + a3)),
+            np.exp(-0.5j * (a2 - a3)),
+            np.exp(0.5j * (a2 - a3)),
+            np.exp(0.5j * (a2 + a3)),
+        ]
+    )
+
+    return P @ U
+
+def phase_corr_angles(overlaps):
+    P = np.angle(overlaps)
+    a1 = 0.5 * (P[1, 1] + P[2, 2])
+    a2 = P[2, 2] - P[0, 0]
+    a3 = P[1, 1] - P[0, 0]
+
+    return -a1, -a2, -a3
+
+def fidelity_opt_correction(alphas, U, fidelity):
+    """Objective function"""
+    return fidelity(phase_rotation(alphas, U))
+
+def opt_fidelity(U_0, U):
+    """Optimize the average fidelity between a unitary matrix U_0 and a unitary matrix U"""
+    a1, a2, a3 = phase_corr_angles(U)
+    opt_res = minimize(
+        lambda x: -fidelity_opt_correction(x, U, partial(average_fidelity, U_0)),
+        [(a2) % (2 * np.pi), (a3) % (2 * np.pi)],
+    )
+
+    G = phase_rotation(opt_res.x, U)
+    G = np.exp(-1j * np.angle(G[0, 0])) * G
+
+    return -opt_res.fun, opt_res.x, G
+\end{lstlisting}
+
+\end{document}

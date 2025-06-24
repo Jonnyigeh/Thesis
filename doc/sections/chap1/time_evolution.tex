@@ -77,7 +77,7 @@ This naturally is an exact update rule for time-independent Hamiltonians, but th
 \begin{align*}
     U(t + dt, t) = e^{-\frac{i}{\hbar}\frac{H(t) + H(t + dt)}{2}\Delta t}.
 \end{align*}
-Further on, we will explore more such ways to approximate the time-evolution operator, and in this work we shall investigate how these different approximations affect the time-evolution of our coupled double Morse potential system.\textcolor{red}{TODO: Will we? Or remove if we do not.} \\ 
+In this work, however, we shall mainly use \eqref{eq:numerical_time_evolution_operator} in its simplest form, as the Hamiltonian vary smoothly as we traverse  through parameters space between our desired configurations.\\ 
 
 % Numerical integrations
 Direct matrix exponentiation, however, quickly becomes intractable for most computers, as the system increases, due to the computational burden of diagonalizing, or exponentiating, large matrices - commonly referred to as \emph{the curse of dimensionality}, for the exponential increase in computational cost as we increase the dimension of our system. For this reason, it is often more efficient to apply numerical integration methods. A range of numerical integration methods can be applied to evolve the quantum wavefunction, each with its own advantages and disadvantages. These methods generally involve discretizing time and updating the wavefunction iteratively by approximating the time-evolution operator over small time intervals. While these methods are generally more computationally efficient than direct matrix exponentiation, they may not preserve unitarity exactly - however, many such methods can be made to do so approximatively. Most of these methods build upon Taylor expansions, as in the simple case of the Euler-Cromer method shown in \eqref{eq:euler_cromer}, and more complex methods can be seen as higher-order approximations of the time-evolution operator. 
@@ -90,6 +90,6 @@ Returning to our simple system \eqref{eq:landau_zener}, the time-evolution of a 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1.0\textwidth]{figs/landau_zener_numerical_methods.pdf}
-    \caption{Time evolution of a two-level system under a time-varying Hamiltonian. Population transfer between $\ket{0}$ and $\ket{1}$ and wavefunction norm are shown, demonstrating how the simpler Euler-Cromer and second-order symmetric methods deviate from the exact solution, while Crank-Nicolson remains both norm-preserving and more accurate, and overlaps well with the exact direct matrix exponentiation.}\label{fig:landau_zener}
+    \caption{Time evolution of an initial state $\psi_0 = [1,0]^T = \ket{0}$ in a two-level system under a time-varying Hamiltonian. Population transfer between $\ket{0}$ and $\ket{1}$ and wavefunction norm are shown, demonstrating how the simpler Euler-Cromer and second-order symmetric methods deviate from the exact solution, while Crank-Nicolson remains both norm-preserving and more accurate, and overlaps well with the exact direct matrix exponentiation.}\label{fig:landau_zener}
 \end{figure}
 \end{document}

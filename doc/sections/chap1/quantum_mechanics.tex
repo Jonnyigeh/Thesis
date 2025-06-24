@@ -29,46 +29,46 @@ The energy eigenstates are the stationary states of the system, and they form a 
     \Psi(x, t) = \sum_n c_n\psi_n(x),
 \end{align*}
 where $c_n$ are the coefficients of the linear combination, which are determined by the initial conditions of the system. This is a direct consequence of the linearity of the Schrödinger equation, and it allows us to express any state function as a superposition of energy eigenstates \cite{griffiths2018introduction, berera2021quantum}.
+% %% DO WE REMOVE??
+% %% 2nd quantization
+% \subsection{Second Quantization}
+% As the earliest formulations of quantum mechanics introduced the ground-breaking concept that physical properties such as energy, momentum and angular momentum are inherently quantized, this formulation is now often referred to as "first quantization". In first quantization, observables are represented by linear operators with real eigenvalues and each individual particle is assigned a wavefunction in a fixed $N$-dimensional Hilbert space.
+% However, as the theory matured, it became clear that first quantization was inadequate to describe true many-body systems - like systems with indistinguishable particles, where one must (anti-)symmetrize the $N-$ particle wavefunction, or natural processes like particle creation and annihilation, as occurs in chemical reactions or in high-energy physical processes. In these cases the wavefunction must account for all possible particle configurations (outcomes), which quickly becomes unwieldy. The number of terms grows exponentially with the number of particles, making both manipulation and storage intractable \cite{helgaker2013molecular, szabo1996modern}\\
 
-%% 2nd quantization
-\subsection{Second Quantization}
-As the earliest formulations of quantum mechanics introduced the ground-breaking concept that physical properties such as energy, momentum and angular momentum are inherently quantized, this formulation is now often referred to as "first quantization". In first quantization, observables are represented by linear operators with real eigenvalues and each individual particle is assigned a wavefunction in a fixed $N$-dimensional Hilbert space.
-However, as the theory matured, it became clear that first quantization was inadequate to describe true many-body systems - like systems with indistinguishable particles, where one must (anti-)symmetrize the $N-$ particle wavefunction, or natural processes like particle creation and annihilation, as occurs in chemical reactions or in high-energy physical processes. In these cases the wavefunction must account for all possible particle configurations (outcomes), which quickly becomes unwieldy. The number of terms grows exponentially with the number of particles, making both manipulation and storage intractable \cite{helgaker2013molecular, szabo1996modern}\\
+% Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles, and makes the statefunction also expressed in terms of operators. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in \emph{state} $i$?". \cite{szabo1996modern, shavitt2009many, helgaker2013molecular}. As such, second quantization is often referred to as the "occupation number representation" of quantum mechanics. This moves the focus from the individual particles to the orbitals they occupy. This reformulation also reduces much of the manipulation of the wavefunction to algebraic operations, which makes numerical implementations more efficient, and easier to understand \cite{helgaker2013molecular}.
+% \\ 
 
-Second quantization solves this problem by introducing a new mathematical framework, which accounts for both the particle indistinguishability and the creation and annihilation of particles, and makes the statefunction also expressed in terms of operators. Furthermore, second quantization allows for a more intuitive and compact notation for many-body systems, where instead of asking "where is particle $i$?", we ask "how many particles are in \emph{state} $i$?". \cite{szabo1996modern, shavitt2009many, helgaker2013molecular}. As such, second quantization is often referred to as the "occupation number representation" of quantum mechanics. This moves the focus from the individual particles to the orbitals they occupy. This reformulation also reduces much of the manipulation of the wavefunction to algebraic operations, which makes numerical implementations more efficient, and easier to understand \cite{helgaker2013molecular}.
-\\ 
+% In second quantization, we introduce a set of creation and annihilation operators, $a^\dagger$ and $a$, which create and annihilate particles in a given state. An important thing to note, is that these operators differ depending on the type of particles. For bosons, these operators satisfy the following commutation relations:
+% \begin{align}
+%     [a_i, a_j] = [a^\dagger_i, a^\dagger_j] = 0, \quad [a_i, a^\dagger_j] = \delta_{ij}\label{eq:commutation},
+% \end{align}
+% where $[A, B] = AB - BA$, and for fermions, the \emph{anti-}commutation relations are:
+% \begin{align}
+%     \{a_i, a_j\} = \{a^\dagger_i, a^\dagger_j\} = 0, \quad \{a_i, a^\dagger_j\} = \delta_{ij}\label{eq:anti_commutation},
+% \end{align}
+% where $\{A, B\} = AB + BA$.
+% \textcolor{red}{TODO: Nice section but is it necessary to include? Yeah we probably need to, as we have the section on Fock space (which we need. Should probably make sure to mention fock space more explicitly further on?)}
+% %% FOCKSPACE
+% \subsection{Fock Space}\textcolor{red}{TODO: We are not really using the Fock space, that is not where our product states live. Should we maybe exclude this section? What to replace it with? We kinda use the Fock Space when we compare anti-symmetric states to our distinguishable product states, but we do not use the Fock space formalism. Maybe we should just mention it briefly, and then refer to the literature?}
+% In the framework of second quantization, the concept of a \emph{Fock space}\footnote{First introduced by V. A. Fock in \cite{fock1932konfigurationsraum}} emerge naturally as a mathematical structure for describing quantum systems with variable, or uknown, number of particles. A Fock space is a direct sum of Hilbert spaces
+% \begin{align*}
+%     \mathcal{F} = \bigotimes_{n=0}^\infty S_{\pm} \mathcal{H}_n,
+% \end{align*}
+% where each space, $\mathcal{H}_n$ represents a state with fixed a number of particles, and $S_{\pm}$ is the symmetrization operator for bosons ($+$) and fermions ($-$). Meaning, the zero-particle states, one-particle states, two-particle states etc. This encapsulates all possible configurations of a many-body system elegantly. Using the occupation number representation introduced in second quantization, a state in Fock space is not expressed by momenta or position, but rather by the number of particles occupying certain quantum states\cite{helgaker2013molecular}. 
+% \\
 
-In second quantization, we introduce a set of creation and annihilation operators, $a^\dagger$ and $a$, which create and annihilate particles in a given state. An important thing to note, is that these operators differ depending on the type of particles. For bosons, these operators satisfy the following commutation relations:
-\begin{align}
-    [a_i, a_j] = [a^\dagger_i, a^\dagger_j] = 0, \quad [a_i, a^\dagger_j] = \delta_{ij}\label{eq:commutation},
-\end{align}
-where $[A, B] = AB - BA$, and for fermions, the \emph{anti-}commutation relations are:
-\begin{align}
-    \{a_i, a_j\} = \{a^\dagger_i, a^\dagger_j\} = 0, \quad \{a_i, a^\dagger_j\} = \delta_{ij}\label{eq:anti_commutation},
-\end{align}
-where $\{A, B\} = AB + BA$.
-\textcolor{red}{TODO: Nice section but is it necessary to include? Yeah we probably need to, as we have the section on Fock space (which we need. Should probably make sure to mention fock space more explicitly further on?)}
-%% FOCKSPACE
-\subsection{Fock Space}\textcolor{red}{TODO: We are not really using the Fock space, that is not where our product states live. Should we maybe exclude this section? What to replace it with? We kinda use the Fock Space when we compare anti-symmetric states to our distinguishable product states, but we do not use the Fock space formalism. Maybe we should just mention it briefly, and then refer to the literature?}
-In the framework of second quantization, the concept of a \emph{Fock space}\footnote{First introduced by V. A. Fock in \cite{fock1932konfigurationsraum}} emerge naturally as a mathematical structure for describing quantum systems with variable, or uknown, number of particles. A Fock space is a direct sum of Hilbert spaces
-\begin{align*}
-    \mathcal{F} = \bigotimes_{n=0}^\infty S_{\pm} \mathcal{H}_n,
-\end{align*}
-where each space, $\mathcal{H}_n$ represents a state with fixed a number of particles, and $S_{\pm}$ is the symmetrization operator for bosons ($+$) and fermions ($-$). Meaning, the zero-particle states, one-particle states, two-particle states etc. This encapsulates all possible configurations of a many-body system elegantly. Using the occupation number representation introduced in second quantization, a state in Fock space is not expressed by momenta or position, but rather by the number of particles occupying certain quantum states\cite{helgaker2013molecular}. 
-\\
+% For instance, the state $\ket{n_1, n_2, ...}$ informs that $n_1$ particles occupy state $1$, $n_2$ particles  in state $2$. The annihilation and creation operators act on the Fock states by increasing, or decreasing, the occupation numbers of the corresponding states. Meaning, the action of the creation operator on a state is given by
+% \begin{align*}
+%     a^\dagger_i\ket{n_1, n_2, ...} = \sqrt{n_i + 1}\ket{n_1, n_2, ..., n_i + 1, ...}.
+% \end{align*}
+% and the action of the hermitian conjugate annihilation operator is given by
+% \begin{align*}
+%     a_i\ket{n_1, n_2, ...} = \sqrt{n_i}\ket{n_1, n_2, ...,n_i-1, n_i - 1, ...}.
+% \end{align*}
+% From this, these operators can describe particle interactions, transitions and dynamics in a many-body system. As the Fock space is constructed by direct sums, two states of different particle numbers are inherently orthogonal, i.e. $\braket{n|m} = \delta_{nm}$, where $n$ and $m$ are the number of particles in the two states. This orthogonality is crucial for the mathematical consistency of the notation \cite{helgaker2013molecular, shavitt2009many}.
+% \\
 
-For instance, the state $\ket{n_1, n_2, ...}$ informs that $n_1$ particles occupy state $1$, $n_2$ particles  in state $2$. The annihilation and creation operators act on the Fock states by increasing, or decreasing, the occupation numbers of the corresponding states. Meaning, the action of the creation operator on a state is given by
-\begin{align*}
-    a^\dagger_i\ket{n_1, n_2, ...} = \sqrt{n_i + 1}\ket{n_1, n_2, ..., n_i + 1, ...}.
-\end{align*}
-and the action of the hermitian conjugate annihilation operator is given by
-\begin{align*}
-    a_i\ket{n_1, n_2, ...} = \sqrt{n_i}\ket{n_1, n_2, ...,n_i-1, n_i - 1, ...}.
-\end{align*}
-From this, these operators can describe particle interactions, transitions and dynamics in a many-body system. As the Fock space is constructed by direct sums, two states of different particle numbers are inherently orthogonal, i.e. $\braket{n|m} = \delta_{nm}$, where $n$ and $m$ are the number of particles in the two states. This orthogonality is crucial for the mathematical consistency of the notation \cite{helgaker2013molecular, shavitt2009many}.
-\\
-
-For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \eqref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \eqref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation \cite{pethick2008bose}.
+% For systems of indistinguishable particles, Fock spaces naturally incorporate the Pauli exclusion principle, as the anti-commutation relations \eqref{eq:anti_commutation} ensure that no two fermions can occupy the same quantum state. This fundamental property of fermions explains, for example, why electrons in an atom cannot share identical quantum numbers. For bosonic systems (distinguishable particles), the commutation relations \eqref{eq:commutation} instead allow multiple particles to occupy the same state, which is crucial for phenomena such as Bose-Einstein condensation \cite{pethick2008bose}.
 
 
 \subsection{Hartree approximation}\label{sec:hartree_theory}
@@ -182,8 +182,8 @@ To build our qubit system, we need to define some form of potential trap that we
 
 One could think that using the QHO potential for our qubit would be a natural choice, but there are some nuances necessary to consider. The QHO double well potential is perfectly symmetric, meaning the energy levels are uniformly spaced, and equal across both wells. This is not ideal for qubit systems, as we need more control over energy levels in both wells - and the uniform energy spacing makes one-qubit operations unstable as we lack control over what energy levels we excite \cite{devoret2013superconducting}. 
 
+\subsubsection*{Single-well Morse potential}
 To achieve this, we will instead use the Morse potential, first introduced by Philip M. Morse in 1929 as a solution to the Schrödinger equation representing the motion of the nuclei in a diatomic molecule\cite{morse1929diatomic}. This potential has non-uniform energy levels, and more parameters, and is widely used in quantum mechanics to describe anharmonic oscillators. An extension of the Morse potential, Morse/Long-rangee potential is one of the most popular potentials to model potential energy surfaces used for spectroscopy\cite{zhai2018constructing}. Given that this potential has already seen alot of study within quantum dot systems, and molecular systems in general, it is natural to belive that this potential, should we succeed in our study, prove to be a promising candidate for a prototype (near) room-temperature qubit system\cite{khordad2014linear, hayrapetyan2015exciton, sargsian2021effects}. \\
-
 The Morse potential is given as
 \begin{align*}
     V(r) = De^{-2a(r-r_0)} - 2De^{-a(r-r_0)}.
@@ -203,11 +203,11 @@ Expanding a Taylor series about the well minima, we can see that the potential i
 \begin{align*}
     V(r) = V(r_0) + V'(r_0)(r-r_0) + \frac{1}{2}V''(r_0)(r-r_0)^2 + ...,
 \end{align*}
-and, since we are operating around the minima, higher order terms can be neglected as they become very small ($\Delta r^n = (r - r_0)^n\to 0$ for $n>2$\textcolor{red}{TODO: Should we instead writ this as $\mathcal{O}(\Delta r^n)$? or something along these lines.}). By shifting the zero point of the potential to $r_0$, we have $V(r_0) = 0$. Furthermore, as $r_0$ is a minima of the potential, $V'(r_0) = 0$, as the slope of the potential function is flat at this point\textcolor{red}{TODO: This is a trivial statement, do we need to cite or prove?}. This simplifies our expression to
+and, since we are operating around the minima, higher order terms can be neglected as they become very small ($\mathcal{O}(\Delta r^n)$). By shifting the zero point of the potential to $r_0$, we have $V(r_0) = 0$. Furthermore, as $r_0$ is a minima of the potential, $V'(r_0) = 0$, as the slope of the potential function is flat at this point. This simplifies our expression to
 \begin{align*}
     V(r) = \frac{1}{2}V''(r_0)(r-r_0)^2,
 \end{align*}
-which we identify as the harmonic oscillator potential, with the spring constant $k = V''(r_0)$, and if we, by differentiation w.r.t $r$, use it to find the force on a particle we indentify Hooke's Law. This gives us a new parameter to control the width of the well, and the curvature of the potential, which is expressed as
+which we identify as the harmonic oscillator potential, with the spring constant $k = V''(r_0)$, and if we, by differentiation w.r.t $r$, use it to find the force on a particle we indentify Hooke's Law \cite{piela2006ideas}. This gives us a new parameter to control the width of the well, and the curvature of the potential, which is expressed as
 \begin{align*}
     V' &= 2D(1 - e^{-a(r-r_0)})a \\
     V'' &= 2Da^2e^{-a(r-r_0)} \\
@@ -222,13 +222,27 @@ which we identify as the harmonic oscillator potential, with the spring constant
 \end{figure}
 Figure \ref{fig:morse_potential} shows the Morse potential, with the 5 lowest energy levels and corresponding energy eigenfunctions. \\
 
+This potential admit closed form solutions to the Schrödinger equation, and the energy eigenstates are given by
+\begin{equation}
+    \psi_n(z) = N_n e^{-\frac{z}{2}}z^{\lambda - n - \frac{1}{2}}L_n^{(2\lambda - 2n - 1)}(z), \quad z = 2\lambda e^{-a(r-r_0)}, \quad \lambda = \frac{D}{a^2},\label{eq:morse_eigenstates}
+\end{equation}
+where $L_n^{(\alpha)}$ are the generalized Leguerre polynomials, and the normalization constant $N_n$ is given by
+\begin{equation*}
+    N_n = \sqrt{\frac{n! (2\lambda - 2n - 1)a}{\Gamma(2\lambda - n)}}.
+\end{equation*}
+These energy eigenstates are the solutions to the Schrödinger equation for the Morse potential, with the corresponding energy eigenvalues
+\begin{equation}
+    E_n = -D + h\nu(n + \frac{1}{2}) - \frac{ah\nu}{\sqrt{8D}}(n + \frac{1}{2})^2, \quad n = 0, 1, 2, ...\label{eq:morse_energy_levels},
+\end{equation}
+where $h$ is Planck's constant, $n$ the vibrational quantum number, and $\nu=\frac{a}{2\pi}\sqrt{\frac{2D}{m}}$ is the characteristic frequency of the potential, with $m$ being the mass of the particle. The first term is the zero-point energy, the second term is the harmonic oscillator energy, and the third term is the anharmonic correction to the energy levels. The anharmonicity of the Morse potential gives us non-uniform energy spacing, which is crucial for our qubit system, as it allows for independent control of specific energy states \cite{piela2006ideas, morse1929diatomic}. \textcolor{red}{TODO: Note the re-write of the eigenstates here are not entirely consistent with either of the sources. Try to recall how this re-write was done, should be in my notes somewhere.}
 
 %% Double well
+\subsubsection*{Double-well Morse potential}
 Now, we would like to make a potential trap for \emph{two} separate particles, as our qubit system will be a two-particle system. To do so, we construct a double Morse potential well, simply by adding two Morse potentials together. We flip the right potential well, so that the minima are at the same position, and the potential is symmetric (given symmetric parameters). This gives us the double Morse potential as
 \begin{equation}
     V(r) = D_L(e^{-a_L(r-r_{0,L})} - 1)^2 + D_R(e^{a_R(r-r_{0,R})} - 1)^2\label{eq:double_well_morse_potential},
 \end{equation}
-where the subscripts L and R correspond to left and right well, respectively. The parameter $D$ controls the depth of the potential well, whilst $a$ has some control over the width of the well, through the steepness of the exponential functions decay (and thus the curvature, and width, of the well). A smaller $a$ parameter constitues a wider well as the function would then decay slowly, recall also this parameters relation with the spring-like constant $k=2Da^2$, which is the parameter we shall use instead\textcolor{red}{TODO: Change the expressions for the potentials so that $k$ is used instead? Or leave as is?}. The parameter $r_0$ is the position of the well minima. It is this potential that we shall study in great detail in this thesis, and we will use it to construct our qubit system. The parameters will be tuned throughout the time-evolution to achieve the desired energy level structure, and thus control the qubit system parametrically.
+where the subscripts L and R correspond to left and right well, respectively. The parameter $D$ controls the depth of the potential well, whilst $a$ has some control over the width of the well, through the steepness of the exponential functions decay (and thus the curvature, and width, of the well). A smaller $a$ parameter constitues a wider well as the function would then decay slowly, recall also this parameters relation with the spring-like constant $k=2Da^2$, which is the parameter we shall use in our numerical implementations. The parameter $r_0$ is the position of the well minima. It is this potential that we shall study in great detail in this thesis, and we will use it to construct our qubit system. The parameters will be tuned throughout the time-evolution to achieve the desired energy level structure, and thus control the qubit system parametrically.
 
 \begin{figure}[h!]
     \centering
