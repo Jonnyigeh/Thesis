@@ -1,12 +1,28 @@
 \documentclass{subfiles}
 \begin{document}
 \chapter{Results}
-In this chapter, we present parameter-optimization and dynamical-simulation results that test our implementation of the Morse double-well. We have two main goals: first, to identify the optimal parameters for the Morse double-well configuration $C_I$ and $C_{II}$ with the desired enrgy and entanglement properties and, second, driving the system adiabatically from configuation $C_I$ to configuration $C_{II}$ and back to implement an iSWAP-like two-qubit operation. After a brief introduction to the optimization and simulation methods, we divide our results into three sections: the static optimization of the potential paramteres (Section \ref{sec:optimization_result}), analysis of the reduced basis, entanglement measures and state populations (Section \ref{sec:general_study_results}), and the time-dependent simulation of the iSWAP-like operation, investigating state and energy evolution under the ramp protocol (Section \ref{sec:time_evolution}), and a preliminary assessment of gate fidelity.\textcolor{red}{TODO: Should refeence to section on gate fidelity, also do we add a short summary of what results are being presented in each section?}
+In this chapter, we present the results of our parameter optimization and dynamical simulations aimed at validating and operationalizing the Morse double-well system. Our primary objectives are twofold: first, to determine optimal parameters for two distinct configurations ($C_I$ and $C_{II}$) of the Morse double-well that exhibit the desired energy and entanglement properties; second, to explore the feasibility of adiabatically driving the system between these configurations to implement a SWAP-like two-qubit gate operation.
+
+\begin{quote}
+    \centering
+    \textit{“If you want to make a simulation of Nature, you'd better make it quantum mechanical."}\\
+    \vspace{0.2cm}
+    --- Richard P. Feynman    
+\end{quote}
+
+
+
+We structure our findings into three main sections. First, we undertake a general preliminary study of the system to verify key foundational properties. We confirm the negligible impact of the exchange interaction between wells at moderate inter-well separations, justifying our treatment of the system as two separable subsystems. Furthermore, we validate our numerical framework - specifically the Sinc discrete variable representation (Sinc-DVR) - by direct comparison with the known analytical solutions of the Morse potential, and we benchmark our proposed numerical methods for time-evolution using a simplified Landau-Zener model \eqref{eq:landau_zener}.
+
+Subsequently, we report on the results of our parameter optimization routines, presenting optimal paramters for the two configurations $C_I$ and $C_{II}$, that achieve desired entanglement properties and targeted eigenstate population, illustrated visually by population plots.
+
+Finally, we detail our time-dependent simulations. Here, we first demonstrate dynamics within a simplified two-level model, showcasing the feasibility of adiabatically driving the system between configurations $C_I$ and $C_{II}$ to implement desired population transfer. Following this, we present a more comprehensive time-evolution simulation of the full (four-level) two-particle Morse double-well system. This includes rigorous assessment of gate fidelity, and results incorporating phase correction techniques to enhance gate performance.
+
 \newpage
 \subfile{../sections/chap3/general_study_results.tex}
 \subfile{../sections/chap3/Optimization_config.tex}
-\subfile{../sections/chap3/time_independent_basis.tex}
 \subfile{../sections/chap3/time_evolution_res.tex}
+% \subfile{../sections/chap3/time_independent_basis.tex} # Moved into general study results
 % \subfile{../sections/chap3/} \\
 % \subfile{../sections/chap3/} \\
 \end{document}

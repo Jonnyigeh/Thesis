@@ -19,16 +19,10 @@ To make an assessment of the systems distinguishability we will firstly look at 
     \begin{align*}
         \Psi(\mathbf{r}_1, \mathbf{r}_2) = \phi_L(\mathbf{r}_1)\otimes\phi_R(\mathbf{r}_2),
     \end{align*} 
-    where $\phi_L$ and $\phi_R$ are the single-particle functions located in the left and right well respectivley. We then calculate the energy by diagonalizing the Hamiltonian matrix for this product state system. In such a product state system the Hamiltonian matrix becomes
-    \begin{align*}
-        H = H_L \otimes I + I \otimes H_R + V,
-    \end{align*}
-    where $H_L$ and $H_R$ are the single-particle Hamiltonians for the left and right well, and $V$ is the interaction term between the two particles.
-    \item Assume the particles to be indistinguishable, and construct a Slater determinant that we solve using Hartree-Fock theory.
+    where $\phi_L$ and $\phi_R$ are the single-particle functions located in the left and right well respectivley. We then calculate the energy by diagonalizing the Hamiltonian matrix for this product state system. In such a product state system the Hamiltonian matrix becomes as in eq. \eqref{eq:two_particle_hamiltonian}.
+    \item Assume the particles to be indistinguishable, and construct an anti-symmetric wavefunction using sums of the product states (to account for exhange) that we then solve using Configuration Interaction (CI) theory.
 \end{itemize}
-
-
-If we are successful, we should find that for a certain distance between the wells, the "true" distinguishable energy will overlap with the indistinguishable HF-energy. Should this be the case, we can safely assume that the particles behave as distinguishable particles for our intents and purposes. 
+If we are successful, we should find that for a certain distance between the wells, the distinguishable energy will overlap with the indistinguishable energy, and the deviation $\Delta E$ goes to zero as we increase the separation of particles. 
 
 
 %% Optimization of the potential parameters
@@ -83,7 +77,7 @@ An objective function is constructed for the optimizer, which is the object to b
 \begin{equation*}
     \zeta = E_4 - E_1 - E_2 + E_0,
 \end{equation*}
-and we can identify this as the \emph{accumulated phase} of the rotated time-evolution operator $U = e^{-iHt}$, expressed in terms of the energy eigenstates, $U = \sum_i^4 e^{-iE_it}\ket{\phi_i}\bra{\phi_i}$. We see that written in matrix form in the logical state basis $\{|ij>\}$, this propagator is (where $\ket{11}$ is the 4th energy eigenstate)
+and we can identify this as the \emph{accumulated phase} of the rotated time-evolution operator $U = e^{-iHt}$, expressed in terms of the energy eigenstates, $U = \sum_i^4 e^{-iE_it}\ket{\phi_i}\bra{\phi_i}$. We see that written in matrix form in the logical state basis $\{\ket{ij}\}$, this propagator is (where $\ket{11}$ is the 4th energy eigenstate)
 \begin{align*}
     U = \begin{pmatrix}
         e^{-iE_{00}t} & 0 & 0 & 0 \\
@@ -94,7 +88,7 @@ and we can identify this as the \emph{accumulated phase} of the rotated time-evo
 \end{align*}
 The energy eigenstates themselves are not unique, because we are free to apply arbitrary single-qubit phase rotations to shift their individual phases without affecting populations (as they are cancelled in any innerproduct). By performing local Z-rotations on qubit A and B, we can absorb the phases on the first three states ($\ket{00}$, $\ket{10}$, $\ket{01}$) into $\ket{11}$. In other words, invoking a single global phase, we use single-qubit rotations on each qubit to collect the relative phases onto $\ket{11}$. After the rotations, the condition
 \begin{align*}
-    E_{11} = E_{10} + E_{01} - E_00
+    E_{11} = E_{10} + E_{01} - E_{00}
 \end{align*}
 means that the excitation energy from the 0th state $\ket{00}\to\ket{11}$ equals the sum of excitations $\ket{00}\to\ket{10}$ and $\ket{00}\to\ket{01}$, which aids in ensuring phase stability in our iSwap-like two-qubit gate operation \cite{ku2020suppression}. 
 \\\\

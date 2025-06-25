@@ -100,11 +100,15 @@ This equation represents a \textbf{linear system} of equations for the wavefunct
 \begin{align*}
     U_{CN} (\Delta t) = \bigg[\mathbb{I} + \frac{i\Delta t}{2\hbar}H(t + \Delta t)\bigg]^{-1}\bigg[\mathbb{I} - \frac{i\Delta t}{2\hbar}H(t)\bigg].
 \end{align*}
-This expression is a \textbf{Padé approximation} to the exponential function, and it provides a second-order accurate approximation to the time-evolution operator that is norm-preserving. It acts as (1,1) Padé rational to the exponential time-evolution operator \cite{moler2003nineteen, higham2008functions}, and takes the following form in the time-independent case:\textcolor{red}{TODO: Add maybe a section in the appendix with derivation? }
+This expression is a \textbf{Padé approximation} to the exponential function, and it provides a second-order accurate approximation to the time-evolution operator that is norm-preserving. It is the (1,1) Padé rational to the exponential time-evolution operator \cite{moler2003nineteen, higham2008functions}, and takes the following form in the time-independent case:
 \begin{align*}
     U = e^{-iH\Delta t/\hbar} \approx \frac{\mathbb{I} - \frac{i\Delta t}{2\hbar}H}{\mathbb{I} + \frac{i\Delta t}{2\hbar}H}.
 \end{align*}
-For a time-dependant Hamiltonian, the Crank-Nicolson method can be viewed as a midpoint evaluation of the Hamiltonian, where the midpoint of the Hamiltonian $H = 1/2(H(t+\Delta t) + H(t))$ is used to compute the time-evolution operator to enforce unitarity, which is especially important for rapidly varying Hamiltonians, and is the procedue we shall use in our study. For a proof of unitarity, see appendix \ref{sec:crank_nicolson_proof}\textcolor{red}{TODO: Do proof.}.
+For a time-dependant Hamiltonian, we use the midpoint of the Hamiltonian 
+\begin{align*}
+H = 1/2(H(t+\Delta t) + H(t))
+\end{align*} 
+in place of $H$ to ensure unitarity, which is especially important for rapidly varying Hamiltonians, and is the procedure we shall use in our study. For a proof of unitarity, see appendix \ref{app:appendix_B}.
 
 Viewed as such, the Crank-Nicolson method situates itself somewhere in between numerical integration methods and approximate exponentiaion schemes, providing a physical, flexible and efficient framework for quantum state time-evolution. Some of the key advantages of the Crank-Nicolson method include:
 \begin{itemize}

@@ -1,13 +1,25 @@
 \documentclass{subfiles}
 \begin{document}
-\chapter{Methods}
-This chapter will present the methods behind all our results, both intermediate analyses and the final results. We will attempt to have some form of chronological order in the presentation of the methods, so the reader can follow the development of the project. Meaning, we will start by presenting the methods from the background analyis done on the system, and then move onwards to the methods that consitute our main goal of the project. As we are working with a rather unknown double well potential, expressed (hopefully) as a distinguishable system, there are many aspects we should study to confirm the viability of our approach. All of our methods are implemented numerically in Python, and some of the methods will be presented in a general sense, whilst more technical details will be presented as pseudo-code. All code used in the project is readily available at: \url{https://github.com/Jonnyigeh/Thesis} \textcolor{red}{(TODO: Make repo public, and CLEAN IT)}.
-\begin{figure}
-\centering
-\includegraphics[width=0.5\textwidth]{figs/placeholder_image.jpeg}
-\caption{TODO: Replace this placeholder image with a relevant figure. }
-\label{fig:methods_intro}
-\end{figure}
+\chapter{Methods \& Implementation}
+This chapter details the methodologies and implementation strategies that underpin both intermediate analyses and the final results of our thesis. Structured chronologically, our approach aims to guide the reader to an understanding of the progression and refinement of methods throughout the project. 
+
+\begin{quote}
+    \centering
+    \textit{"Science is what we understand well enough to explain to a computer. Art is everything else we do."}\\
+    \vspace{0.2cm}
+    --- Donald E. Knuth
+\end{quote}
+
+
+Initially, we describe the foundational setup and system initialization, outlining the Morse double-well potential implementation and its essential components and conditions required for simulation. Next, we present the methods used for the preliminary background analysis of the Morse double-well system, which provide critical insights and understandings necessary for the subsequent time-dependent simulations. Following this, the Hartree approximation method is introduced, detailing the numerical implemntation and its significance in substantially reducing the computational complexity of the system.
+
+Central to our project's objective, we then delve into the sophisticated numerical techniques used for simulating time-evolution dynamics. Particular attention is given to ensuring the accuracy, stability and robustness of thse numerical schemes. Subsequently, our attention shifts toward post-processing techniques, which include the calculation of physical observables, such as state populations and entanglement measures, and phase-correction techniques to enhance the fidelity of our quantum gates.
+
+Finally, we conclude with a comprehensive overview of the workflow, clearly illustrating how individual methodological components interconnect. This summary serves as a roadmap, ensuring the reader appreciates how each element integrates seamlessly to achieve our research goals.
+
+All numerical implementations were done in Python, with complex computational algorithms presented clearly with code snippets and pseudo-code. The complete codebase is available on GitHub at: \url{https://github.com/Jonnyigeh/Thesis} \textcolor{red}{(TODO: Make repo public, and CLEAN IT)}.
+\newpage
+\subfile{../sections/chap2/system_init.tex}
 \subfile{../sections/chap2/general_study.tex}
 \subfile{../sections/chap2/hartree.tex}
 \subfile{../sections/chap2/time_evolution_methods.tex}

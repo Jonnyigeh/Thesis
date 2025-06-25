@@ -1,51 +1,29 @@
 \documentclass{subfiles}
 \begin{document}
 \section{Implementation summary and workflow}\label{sec:summary_workflow}
-\textcolor{red}{TODO: Should we add a prior section on post-processing? I.e overlap calculationgs, fidelity measurements and so on?}
 Having now introduced the theoretical background and numerical strategies used to solve the time-dependent Schrödinger equation (TDSE) for our Morse double well quantum dot system, we conclude this chapter with a brief summary of how the various numerical components fit together in practice. This overview outlines the structure of our simulation codebase and the logic behind the implementation. The goal is to clarify how the different parts interact to evolve the quantum state over time and realise the quantum time evolution. 
-\subsection*{Structure of the Simulation Framework}
+\subsection*{Structure of the simulation framework}
 
-The simulation pipeline in this thesis follows a logical sequence, designed around the Morse double-well potential system for two interacting quantum particles. The key stages of the implementation are as follows:
-
+The simulation pipeline in this thesis follows a logical sequence, designed around the Morse double-well potential system for two interacting particles. The key stages of the implementation are as follows:
 \begin{enumerate}
-    \item \textbf{Numerical Construction of the Morse Double-Well Potential} \\
-    The first step is to implement a flexible and numerically stable representation of the Morse potential with a double-well structure. This involves defining the functional form of the potential, setting physical parameters (well separation, depth, width), and discretizing the spatial domain to represent the wavefunctions and operators.
+    \item \textbf{Construct the Morse double-well potential} \\
+    The first step is to implement a flexible and numerically stable representation of the Morse potential \eqref with a double-well structure. This involves defining the functional form of the potential, setting physical parameters (well separation, depth, width), and discretizing the spatial domain to represent the wavefunctions and operators. 
 
-    \item \textbf{Setup of the Quantum Basis and Hamiltonian Matrix} \\
-    A key component of the simulation is constructing the full basis set for the two-particle system. The code computes all relevant matrix elements — both one-body terms (single-particle Hamiltonians) and two-body terms (Coulomb interaction) — by numerically integrating the corresponding expressions. This yields a complete Hamiltonian matrix in a suitable truncated basis through the Hartree procedure (see Section \ref{sec:bipartite_hartree}). The basis set can be either a finite-difference representation (e.g., Sinc-DVR) or a more general numerical basis, depending on the simulation settings.
+    \item \textbf{Setup of the Hamiltonian matrix} \\
+    In our Sinc-DVR basis, we compute all one-body (kinetic + potential) and two-body (Coulomb) integrals to set up our full two-particle Hamiltonian matrix (Section \ref{sec:sinc_dvr_validation}). We then construct the Hartree matrices for the two subsystems, which are used to diagonalize the system and project the full Hamiltonian onto a smaller subspace that accurately captures the essential dynamics of our system.
 
-    \item \textbf{Preparation of the quantum system} \\
-    Before time evolution, an initial quantum system must be selected. This is done by the parameter optimization (see Section \ref{sec:optimization_procedure}), which finds the optimal parameters for the Morse double-well potential to achieve the desired configurations. The system is then prepared in configuration $C_I$ (separable), and the basis set is constructed accordingly. 
+    \item \textbf{System preparation} \\
+    A separate optimization routine searches for two target configurations - $C_I$, in which the wells have well-separated, non-degenerate transition energies, and $C_{II}$, where the first excited states of the two subsystems are nearly degenerate. Once the optimal parameters are found, we rebuild the Hartree basis at $C_I$ and use this basis throughout the evolution for consistent overlap calculations.
 
-    \item \textbf{Time Discretization and Control of Driving Protocol} \\
-    The time domain is discretized using a fixed step size $\Delta t$ over a total simulation time $T$. The time grid also defines a ramping protocol, where parameters of the protocol allows for more control over the time evolution. The protocol is set to ramp the system from configuration $C_I$ to $C_{II}$, where the first excited states of the two subsystems are degenerate, allowing for coherent mixing of the logical states $\ket{10}$ and $\ket{01}$. The amping protocol allows for various ramping speeds, and evolution durations.
+    \item \textbf{Time discretization and ramp protocol} \\
+    We lay down a uniform time grid with step size $\Delta t$ over a total time $T$. On that grid we specify a ramping protocol that linearly interpolates the potential parameters from $C_I$ to $C_{II}$ and back at a chosen speed, staying entirely within the initial Hartree basis. 
 
-    \item \textbf{Numerical Time Evolution} \\
-    The system is evolved in time using one of several numerical methods:
-    \begin{itemize}
-        \item Direct application of the time-evolution operator via matrix exponentiation.
-        \item Numerical integrators like Crank-Nicolson or Runge-Kutta applied directly to the TDSE.
-    \end{itemize}
-    The choice of method is specified in the simulation settings. Each method is implemented modularly, allowing for easy swapping and benchmarking.
+    \item \textbf{Time-propagation} \\
+    We then evolve the quantum state using one of two interchangable propagators - either direct matrix exponentition of the Hamiltonian, or the implicit Crank-Nicolson time integrator. Choice of method depends on the specific requirements of the simulation.
 
-    \item \textbf{Storing Results and Observables} \\
-    During propagation, the time-dependent wavefunction is stored along with any derived observables, such as:
-    \begin{itemize}
-        \item State populations in the eigenbasis or diabatic basis.
-        \item Transition probabilities.
-        \item Wavefunction norm and energy.
-        \item Entanglement measures (if relevant).
-    \end{itemize}
-
-    \item \textbf{Post-Processing and Visualization} \\
-    After simulation, a set of standardized analysis routines are used to extract relevant features from the time-evolved data. These include:
-    \begin{itemize}
-        \item Plots of population dynamics.
-        \item Comparison to analytical solutions (e.g., Landau-Zener transition probabilities).
-        \item Benchmarking performance of numerical integrators.
-    \end{itemize}
+    \item \textbf{Post-processing and analysis} \\
+    After time evolution, we overlaps and state populations, von Neumann entropies, and other physical observables of interest. We also compute the unitary matrix $U$ that represents the time-evolved gate operation, and apply phase correction single-qubit rotations before computing gate fidelity measures to assess the performance of our quantum gate. 
 \end{enumerate}
-
 \subsection*{Summary}
 
 The overall workflow — from system definition to result analysis — closely mirrors the physical logic of quantum simulation:
@@ -54,6 +32,7 @@ The overall workflow — from system definition to result analysis — closely m
     \item Prepare the system (potential parameters),
     \item Define the time domain and control fields,
     \item Evolve the state using a suitable propagator,
+    \item Correct for any phase misalignments,
     \item Extract and analyze physical quantities of interest.
 \end{enumerate}
 
@@ -61,8 +40,8 @@ This structure provides a coherent and extensible framework for studying both fu
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.5\textwidth]{figs/placeholder_image.jpeg}
-    \caption{TODO: Replace with image. This figure illustrates the workflow of the simulation framework, showing how the various components in our numerical implementation interact to evolve the quantum system in time}
+    \includegraphics[width=1.0\textwidth]{figs/Flowchart.pdf}
+    \caption{Graphical overview of the numerical workflow for simulating the two-particle Morse double-well potential system. The flowchart illustrates the main components of the simulation, from system setup and optimization, through time evolution and post-processing and gate fidelity calculations. }
 \end{figure}
 
 \end{document}

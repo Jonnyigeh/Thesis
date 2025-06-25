@@ -1,0 +1,41 @@
+\documentclass{subfiles}
+\begin{document}
+\section{Midpoint Hamiltonian in CN}\label{app:appendix_B}
+In what follows, we present a simple proof of the unitarity of the Crank-Nicolson (CN) update rule for the midpoint Hamiltonian, which is given by
+\begin{align*}
+    H_{CN} = \frac{H(t) + H(t+\Delta t)}{2}.
+\end{align*}
+Put into the update rule for the Crank-Nicolson propagator, we have
+\begin{align*}
+    U_{CN} = \bigg[\mathbb{I} - i \frac{\Delta t}{2} H_{CN}\bigg]^{-1} \bigg[\mathbb{I} + i \frac{\Delta t}{2} H_{CN}\bigg].
+\end{align*}
+To show that this propagator is unitary, we need to show that $U_{CN}^\dagger U_{CN}  = \mathbb{I}$. Since the Hamiltonian is Hermitian, so is any sum of Hamiltonians, and thus $H_{CN}$ is Hermitian. Meaning
+\begin{align*}
+    H_{CN}^\dagger = H_{CN}.
+\end{align*}
+Defining new operators
+\begin{align*}
+    A &= \mathbb{I} - i \frac{\Delta t}{2} H_{CN}, \\
+    B &= \mathbb{I} + i \frac{\Delta t}{2} H_{CN},
+\end{align*}
+we can rewrite the propagator as
+\begin{align*}
+    U_{CN} = A^{-1} B.
+\end{align*}
+Note that, since $H_{CN}$ commutes with itself, $[A, B] = 0$ since they are built from identity and $H_{CN}$. 
+
+Computing the adjoint (hermitian conjugate) of the new operators $A$ and $B$, we have
+\begin{align*}
+    A^\dagger &= \mathbb{I} + i \frac{\Delta t}{2} H_{CN} = B, \\
+    B^\dagger &= \mathbb{I} - i \frac{\Delta t}{2} H_{CN} = A.
+\end{align*}
+Which means that the adjoint of the propagator is
+\begin{align*}
+    U_{CN}^\dagger = (A^{-1} B)^\dagger = B^\dagger (A^\dagger)^{-1} = A B^{-1}. 
+\end{align*}
+And we can check the unitarity condition
+\begin{align*}
+    U_{CN}^\dagger U_{CN}  = (AB^{-1}) (A^{-1} B) = A(B^{-1}A^{-1})B  = A(A^{-1}B^{-1})B = A\mathbb{I}B = AB = \mathbb{I},
+\end{align*}
+where we used the fact that $A$ and $B$ commute, and that $A A^{-1} = \mathbb{I}$ and $B B^{-1} = \mathbb{I}$. Thus, we have shown that the Crank-Nicolson propagator with the midpoint Hamiltonian is unitary, i.e. $U_{CN}^\dagger U_{CN}  = \mathbb{I}$.
+\end{document}

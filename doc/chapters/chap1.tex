@@ -1,22 +1,28 @@
 \documentclass{subfiles}
 \begin{document}
 \chapter{Theory}
-\begin{figure}
-\centering
-\includegraphics[width=0.5\textwidth]{figs/placeholder_image.jpeg}
-\caption{TODO: Replace this placeholder image with a relevant figure. }
-\label{fig:theory_intro}
-\end{figure}
-In this chapter we will cover the fundamental theory that we've built this thesis upon, starting from (what we believe to be) the most fundamental aspects in quantum mechanics.
-There is an assumption that the reader have some basic knowledge of quantum physics, but this chapter will still follow a pedagogical approach, building from the ground up.
-We start by introducing the fundamental Schrödinger equation, which naturally flows into the notion of a Hamiltonian operator and operators in general. From there, we move into 
-second quantization, a useful transformation of the mathematical framework in quantum mechanics. In second quantization, we can easily build intuition and build understanding for
-the following many-body quantum mechanical problems, and it's approximative solutions. Here we will cover some of the most applied approximations, and the most studied methods for solving
-such systems, namely Hartree-Fock methods and Configuration Interaction. We will in this thesis work with atomic units, where $\hbar = m = e = 4\pi\epsilon_0 = 1$. For a detailed derivation of the conversion between atomic units and SI units, see appendix \ref{app:atomic_units}, and we will refer the reader to chapter 2.1.1 in \cite{szabo1996modern} for a more detailed introduction to atomic units.
+In this chapter, we lay out the theoretical foundations upon which this thesis is built, introducing what we consider to be the most essential aspects of quantum mechanics necessary for a clear understanding of the subsequent work. Although we presume that the reader possesses familiarity with quantum physics, we adopt a pedagogical approach throughout, gradually progressing from simple illustrative examples to more complex concepts. Our goal is to ensure the reader can comfortably follow the development of the project and grasp the methods and results presented in later chapters.
+
+\begin{quote}
+    \centering
+    \textit{“Anyone who is not shocked by quantum theory has not understood it.”}\\
+    \vspace{0.2cm}
+    --- Niels Bohr
+\end{quote}
+
+
+We begin with a concise, yet thorough review of the linear algebra and mathematical framework that underpins quantum mechanics, including Dirac notation, operators and their properties, the concept of Hilbert spaces, and a short introduction to various basis sets. Collectively, these tools provide the language and mathematical structure necessary to describe quantum systems and their dynamics. Having established the mathematical framework, we then introduce the fundamental wave equation of quantum mechanics, the Schrödinger equation, which describes how quantum states evolve over time, including remarks on various numerical methods to solve this equation, like Hartree and Configuration Interaction. We discuss various numerical methods to solve this equation, notably Hartree and Configuration Interaction methods. Utilizing these methods, we introduce our chosen quantum system, the Morse double-well potential, and explore how it can be numerically evolved to study dynamic behavior. Preliminary test results are provided to validate our numerical approaches and highlight the respective strengths of different methods in simulating quantum dynamics.
+
+Next, we introduce the concept of entanglement, a uniquely quantum feature responsible for correlations between particles that defy classical explanations. We discuss how entanglement can be quantified and leveraged for quantum computational tasks, and we highlight the quantum mechanical phenomenon known as the avoided crossing.
+Finally, we conclude the chapter by introducing quantum logic and control protocols essential for practical quantum computing implementations. We outline the basic principles of quantum gates and demonstrate how our quantum system can implement both single- and two-qubit gates. To evaluate these gates' effectiveness, we discuss the concept of gate fidelity, a measure of a quantum gate's accuracy in performing its intended operation. Additionally, we describe methods for implementing phase-corrected single-qubit rotations to achieve higher gate fidelities.
+
+Throughout this thesis, we employ atomic units, setting . For a detailed derivation relating atomic units to SI units, see Appendix \ref{app:appendix_A}; readers seeking further detail can consult Chapter 2.1.1 in Szabo and Ostlund \cite{szabo1996modern}.
+
+
 \newpage
 \subfile{../sections/chap1/lin_alg.tex}
 \subfile{../sections/chap1/quantum_mechanics.tex}
-\subfile{../sections/chap1/entanglement.tex}
 \subfile{../sections/chap1/time_evolution.tex}
+\subfile{../sections/chap1/entanglement.tex}
 \subfile{../sections/chap1/quantum_computing.tex}
 \end{document}

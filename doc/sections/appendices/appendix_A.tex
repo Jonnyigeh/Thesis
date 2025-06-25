@@ -1,0 +1,33 @@
+\documentclass{subfiles}
+\begin{document}
+\section{Effective mass and SI conversion}\label{app:appendix_A}
+In an effective-mass/dielectric medium we define the effective Bohr radius as
+\begin{align}
+    a_0^* = \frac{\epsilon_r}{m^*/m_e}a_0,
+\end{align}
+where $a_0=5.291772108 \times 10^{-11}$ m is the Bohr radius, $m^*$ is the effective mass of the electron in the medium, $m_e$ is the mass of a free electron, and $\epsilon_r$ is the relative permittivity of the medium. As the length scales in our simulations are in the region $\approx 15$ a.u. we choose to express the lengths in effective Bohr radii, $a_0^*$ (as we are free to do so, as long as we are consistent), to properly assess the physical relevance of our results. 
+Similarly, we can convert both time and energy into effective mass units. The conversion factors are
+\begin{align*}
+    E_h^* &= \frac{m^*/m_e}{\epsilon_r^2}E_h, \\
+    t_0^* &= \frac{\hbar}{E_h^*},
+\end{align*}
+where $E_h \approx 27.21 eV$ is the Hartree energy.
+
+In this appendix, we present the conversion of our result into the effective mass picture of GaAs-based quantum dots, which is the most common material used in quantum dot fabrication \cite{jacak2013quantum, garcia2021semiconductor}. The effective mass of the electron in GaAs is $m^* = 0.067 m_e$ and the relative permittivity is $\epsilon_r = 12.9$. This gives us an effective Bohr radius of
+\begin{align}
+    a_0^* = \frac{12.9}{0.067}a_0 \approx 1.0185\times10^{-8} = 10.19 \text{nm},
+\end{align}
+and correspondingly the effective Hartree energy, and unit of time is
+\begin{align*}
+    E_h^* &= \frac{0.067}{12.9^2}E_h \approx 11meV, \\
+    t_0^* &= \frac{\hbar}{E_h^*} \approx 5.9\times10^{-14} \approx 60 \text{fs}. 
+\end{align*}
+
+We can now convert our results from a.u. by the conversion factors
+\begin{align*}
+    \text{A length of }15\text{a.u.} \to 15 a_0^* = 153\text{nm}, \\
+    \text{Gate duration }22000\text{a.u.} \to 22000 t_0^* = 1.32 \text{ns}, \\ 
+    \text{Ground state energy }7.5\text{a.u.} \to 7.5 E_h^* = 82.5\text{meV}.
+\end{align*}
+This shows that our results are in the right ballpark for GaAs-based quantum dots, where typical quantum dot structures have lengths in the range of tens to hundreds of nanometers, gate durations in the sub-nanosecond to nanosecond range,  and energy level spacings from a few meV to tens of meV \cite{jacak2013quantum, garcia2021semiconductor}. For our theoretical model, this means that we are well within reasonable physical paramters for certain quantum dot systems, and experimentally realizable gate operations. We note that we are on the larger side of the length scale, which is not a problem as we are interested in the qualitative behavior of the system, and not the exact numerical values.
+\end{document}

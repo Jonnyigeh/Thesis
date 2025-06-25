@@ -54,11 +54,11 @@ The concept of a Hilbert space is fundamental to quantum mechanics, as it provid
 \begin{itemize}
     \item \textbf{Completeness:} Every Cauchy sequence $\{x_n\}$ in the space $V$ converges to a limit in the space. Specifically, $V$ is complete if:
     \begin{equation}
-        \forall \epsilon > 0, \exists N \in \mathbb{N} : |x_n - x_m| < \epsilon, \forall n,m > N
+        \forall \epsilon > 0,\quad \exists N \in \mathbb{N} : |x_n - x_m| < \epsilon, \quad \forall n,m > N
     \end{equation}
     \item \textbf{Positivity:} The inner product of a vector with itself is always positive, and zero if and only if the vector is the zero vector. That is:
     \begin{equation}
-        \braket{\phi|\psi}\geq 0 \text{and} \braket{\phi|\phi} = 0 \iff \ket{\phi} = \ket{0} 
+        \braket{\phi|\psi}\geq 0, \quad \text{and} \braket{\phi|\phi} = 0 \iff \ket{\phi} = \ket{0} 
     \end{equation}
     \item \textbf{Multiplicativity:} The inner product is linear in the second argument and conjugate linear in the first argument, meaning:
     \begin{equation}
@@ -103,7 +103,7 @@ This relation allows the insertion of the identity operator in calculations, to 
 We can also study how the matrix representation of an operator change under a basis transformation between complete orthonormal basis sets \cite{szabo1996modern}.
 Assume that $\hat O$ is an operator in the basis $\{\ket{i}\}$, and $\hat O'$ is the same operator expressed in the basis $\{\ket{\alpha}\}$, then the transformation between the two operators is given by:
 \begin{align*}
-    O'_{\alpha\beta} = \braket{\alpha|\hat O|\beta} = \sum_{ij}\bra{\alpha}\ket{i}\bra{i}\hat O\ket{j}\bra{j}\ket{\beta} = \sum_{ij}U_{\alpha i}O_{ij}U^\dagger_{j\beta}
+    O'_{\alpha\beta} = \braket{\alpha|\hat O|\beta} = \sum_{ij}\braket{\alpha|i}\bra{i}\hat O\ket{j}\braket{j|\beta} = \sum_{ij}U_{\alpha i}O_{ij}U^\dagger_{j\beta}
 \end{align*}
 And thus, we have the following transformation rule for operators under a basis transformation:
 \begin{align*}
@@ -154,7 +154,24 @@ Using the known analytical solution of these integrals with the sinc function pr
         \frac{(-1)^(n-m)}{\Delta x^2(n - m)^2} & \text{if } n \neq m.
     \end{cases}\label{eq:sinc_dvr_kinetic}
 \end{align}
-This provides us with a simple matrix expression for the Sinc-DVR Hamiltonian that is easily implemented numerically, as it removes the need for numerical differentiation.
+This provides us with a simple matrix expression for the Sinc-DVR Hamiltonian that is easily implemented numerically, as it removes the need for numerical differentiation. 
 
+To compute the Coulomb interaction matrix elements in the Sinc-DVR basis, we start from the general form of the Coulomb interaction between two particles with the shielded Coulomb potential:
+\begin{align*}
+    V_{nmpq} = \int \int \frac{\phi_n(x_1)\phi_m(x_2)}{\frac{\alpha}{|x_1 - x_2| + a^2}}\phi_p^*(x_1)\phi_q^*(x_2) dx_1 dx_2,
+\end{align*}
+where $\alpha$ is the Coulomb constant, and $a$ is a small shielding parameter to avoid singularities when the particles are very close together. In the DVR basis, this integral becomes a double sum over the grid points with weight $\Delta x^2$. Since each basis function is peaked at a grid point, it satisfies the delta-like property
+\begin{align*}
+    \phi_n(x_i) = \frac{1}{\sqrt{\Delta x}}\delta_{n,i}.
+\end{align*}
+Inserting this property into the 4-index two-body integral all four indices collapse via the Kronecker delta. One can then show that the interaction matrix elements in the Sinc-DVR basis are given by
+\begin{align*}
+    V_{nmpq} = \sum_{i,j}\frac{1}{\Delta x^2}\delta_{n,i}\delta_{m,j}\frac{\alpha}{|x_i - x_j| + a^2}\delta_{p,i}\delta_{q,j} \Delta x^2.
+\end{align*}
+where we've assumed a uniform grid spacing $\Delta x_1 = \Delta x_2 = \Delta x$. This gives us the final $N\times N$ interactions matrix
+\begin{equation}
+    V_{nm} = \frac{\alpha}{|x_n - x_m| + a^2}\label{eq:sinc_dvr_coulomb}
+\end{equation}
+and it is clear that the interaction matrix is sparse in the Sinc-DVR basis, since the basis functions are highly localized at the grid points. This sparsity significantly reduces the computational cost of evaluating the interaction elements as they are often zero, or negligible. As a result, the Sinc-DVR approach is particularly well-suited for systems with local interactions and enables efficient numerical simulations of quantum systems with large basis sets \cite{light2000discrete}.
 
 \end{document}
