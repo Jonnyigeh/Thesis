@@ -12,20 +12,12 @@ In this context, our double well Morse potential serves as a minimal platform to
 Achieving reliable single-qubit operations in our system requires energy levels to be well-separated and non-degenerate. This is crucial so that one can apply external fields to induce transitions in a single qubit without inducing unwanted transitions in the other qubit. With the 4 tunable parameters in our double well Morse potential \eqref{eq:double_well_morse_potential}, we can achieve this by finding such a configuration that dinstinguishes the lowest lying single particle energy levels. The single particle energies are the Hartree energies of the two subsystems, found through the Hartree calculation\ref{sec:bipartite_hartree}. In our work, this shall be referenced as the \emph{measurement configuration}, or \emph{configuration I}. It is in this configuration we want to make measurements of the system. 
 \\ 
 
-The second configuration, \emph{configuration II}, aims to induce a transition between the two lowest lying single particle states. This configuration make the first excited states of both subsystems degenerate, while maintaining separation among higher levels. In this configuration, we expect the respective energy eigenstates to mix, and this will entangle our two qubits - which in turn, allows for two-qubit operations such as the iSwap gate, or the CNOT gate to mention a few\cite{leinonen2024coulomb, nichol2017high}.
+The second configuration, \emph{configuration II}, aims to induce a transition between the two lowest lying single particle states. This configuration make the first excited states of both subsystems degenerate, while maintaining separation among higher levels. In this configuration, we expect the respective energy eigenstates to mix, and this will entangle our two qubits - which in turn, allows for two-qubit operations such as the Swap gate, or the CNOT gate to mention a few\cite{leinonen2024coulomb, nichol2017high}.
 %% QUANTUM LOGIC
 \subsection{Quantum Logic}
 \subsubsection*{Two-qubit operations}
-In our model, we aim to emulate the Swap and iSwap gate approximatively through Swap-like behaviour by dynamically tuning the system into configuration II as previously described. The iSwap gate is a two-qubit gate that swaps the states of two qubits while introducing a phase factor \cite{nielsen2010quantum}. It is defined as:
-\begin{equation}
-    \text{iSwap} = \begin{pmatrix}
-    1 & 0 & 0 & 0 \\
-    0 & 0 & i & 0 \\
-    0 & i & 0 & 0 \\
-    0 & 0 & 0 & 1
-    \end{pmatrix} \label{eq:iswap_gate},
-\end{equation}
-where the Swap gate is similarly defined, without introducing the phase factor, as:
+\textcolor{red}{TODO: Re-write so that we focus only on SWAP gate unless we get dcent results rotating to the iSWAP gate.}
+In our model, we aim to emulate the Swap- and $\sqrt{\text{SWAP}}$-gate by dynamically tuning the system into configuration II as previously described. The Swap gate is a two-qubit gate that swaps the states of two qubits \cite{nielsen2010quantum}. It is defined as:
 \begin{equation}
     \text{Swap} = \begin{pmatrix}
     1 & 0 & 0 & 0 \\
@@ -43,10 +35,10 @@ and we have the square root of the Swap gate, $\sqrt{\text{Swap}}$, which maxima
     0 & 0 & 0 & 1
     \end{pmatrix} \label{eq:sqrt_swap_gate}.
 \end{equation}
-The ordinary Swap gate simply exchanges the states of two qubits without introducing any correlations, whereas its square-root variant $\sqrt{\text{Swap}}$, split amplitude coherently between the two qubits, therefore turning a separable state input, $\ket{01}$ or $\ket{10}$, into a maximally entangled Bell state \eqref{eq:bell_states}. These states are indispensable resources for many quantum algorithms and protocols, such as quantum teleportation, entanglement-based cryptography and many error-correcting codes \cite{nielsen2010quantum, bouwmeester1997experimental, yin2020entanglement}. The iSwap gate goes one step further by also inserting a relative phase factor $i$, which not only swaps (or entangles) the states but also provides an extra phase degree of freedom. This phase factor is crucial for implementing certain quantum algorithms and protocols, such as quantum error correction codes, which require precise control over the relative phases of quantum states \cite{tanamoto2008efficient, shor1996fault}. Together, these gates form a versatile toolkit for both coherent state transfer and on-demand entanglement generation in quantum algorithms and communication protocols. 
+The ordinary Swap gate simply exchanges the states of two qubits without introducing any correlations, whereas its square-root variant $\sqrt{\text{Swap}}$, split amplitude coherently between the two qubits, therefore turning a separable state input, $\ket{01}$ or $\ket{10}$, into a maximally entangled Bell state \eqref{eq:bell_states}. These states are indispensable resources for many quantum algorithms and protocols, such as quantum teleportation, entanglement-based cryptography and many error-correcting codes \cite{nielsen2010quantum, bouwmeester1997experimental, yin2020entanglement}. 
 \\
-In our work, configuration $C_{II}$ is designed to bring the first excited states of the two subsystmems into resonance, which allows for a coherent exchange of population between the qubit states. This is due to the Coulomb interaction between the particles at this near-degenerate condition, akin to the avoided crossing shown in Section \ref{sec:avoided_crossings}. Although we will not explicitly model the phase evolution needed to realize the exact Swap or iSwap matrix, the behavior of our system mimics the essential ingredients of an iSwap-like gate: resonant exchange and entanglement generation. \\
-By controlling the duration for which the system remains in the various configurations, and the time spent ramping between them, we can identify time windows where the system approximates the desired state-swapping behavior. This is analogous to how iSwap or $\sqrt{\text{iSwap}}$ gates are implemented in superconducting or trapped-ion systems through Hamiltonian engineering and pulse timing \cite{picard2025entanglement}. \\
+In our work, configuration $C_{II}$ is designed to bring the first excited states of the two subsystmems into resonance, which allows for a coherent exchange of population between the qubit states. This is due to the Coulomb interaction between the particles at this near-degenerate condition, akin to the avoided crossing shown in Section \ref{sec:avoided_crossings}. Although we will not explicitly model the phase evolution needed to realize the exact Swap or $\sqrt{\text{SWAP}}$ matrix, the behavior of our system mimics the essential ingredients of a Swap-like gate: resonant exchange and entanglement generation. \\
+By controlling the duration for which the system remains in the various configurations, and the time spent ramping between them, we can identify time windows where the system approximates the desired state-swapping behavior. This is analogous to how SWAP-gates are implemented in superconducting or trapped-ion systems through Hamiltonian engineering and pulse timing \cite{picard2025entanglement}. \\
 
 Thus, our model represents a novel first step towards demonstrating quantum logic operations using Morse-type double well potentials. The anharmonicity of the Morse potential enables isolation of low-lying states and avoids (unwanted) higher-level leakage, which is essential for the construction of robust, tunable qubit architectures\cite{nielsen2010quantum}.
 
@@ -60,7 +52,8 @@ In our study we focus mainly on \emph{Z-rotations}, which are rotations around t
     0 & e^{i\theta/2}
     \end{pmatrix} \label{eq:z_rotation_gate},
 \end{equation}
-where $\theta$ is the rotation angle. Written more compactly using the Pauli $Z$ operator\textcolor{red}{TODO: We can assume reader knows it, or atleast can deduce it from here right?}, this can be expressed as $R_z(\theta) = \text{exp}(-i\theta Z/2)$ \cite{nielsen2010quantum}. The ultimate goal of these single-qubit operations is to increase the fidelity of our two-qubit operations, such as the iSwap gate, by correcting for any unwanted relative phases that misaligns the evolved statse with the target states. We note that $X$ and $Y$ rotations similarly can be performed, but our present work is limited to Z-rotations for phase correction.
+where $\theta$ is the rotation angle. Written more compactly using the Pauli $Z$ operator, this can be expressed as $R_z(\theta) = \text{exp}(-i\theta Z/2)$ \cite{nielsen2010quantum}. The ultimate goal of these single-qubit operations is to increase the fidelity of our two-qubit operations, such as the SWAP gate, by correcting for any unwanted relative phases that misaligns the evolved statse with the target states. We note that $X$ and $Y$ rotations similarly can be performed, but our present work is limited to Z-rotations for phase correction.
+
 \subsection{Fidelity measures}\ref{sec:fidelity_measures}
 To quantify, and assess the performance of our quantum control protocols we will measure the \emph{fidelity} of the numerically generated two-qubit operation $U = \Psi_0^\dagger\Psi(t_f)$ against the ideal target operation $U_{target}$, where the target operation are the two-qubit gate matrices e.g \eqref{eq:swap_gate}. 
 We introduce the following fidelity measures:

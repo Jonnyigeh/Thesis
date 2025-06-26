@@ -90,7 +90,7 @@ Building on the Hartree method, our CI implementation projects the full two-part
     \item Build the CI Hamiltonian by calculating the matrix elements of the two-particle Hamiltonian in this reduced basis.
     \item Diagonalize the CI Hamiltonian to obtain the energy eigenstates and eigenvalues.
 \end{itemize}
-To perform the CI procedure, we build a linear map $P$ that projects any vector in the $M$-dimensional product-state Hilbert space down onto our anti-symmtric subspace of dimension $\binom{N}{2}$. Concretely, this means that we enumrate all possible unordered pair of orbitals with $0\leq i < j < N$, and for each pair construct the anti-symmetric basis state
+In practice, to perform the CI procedure, we build a linear map $P$ that projects any vector in the $M$-dimensional product-state Hilbert space down onto our anti-symmtric subspace of dimension $\binom{N}{2}$. Concretely, this means that we enumrate all possible unordered pair of orbitals with $0\leq i < j < N$, and for each pair construct the anti-symmetric basis state
 \begin{align*}
     \ket{\phi_i, \phi_j} = \frac{1}{\sqrt{2}}(\ket{\phi_i}\otimes\ket{\phi_j} - \ket{\phi_j}\otimes\ket{\phi_i}).
 \end{align*}

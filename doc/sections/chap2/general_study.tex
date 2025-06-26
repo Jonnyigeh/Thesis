@@ -10,19 +10,29 @@ In this secton we will outline the methods used to study our system in general. 
     \item How do we ensure that our system is stable, and well-defined - and also physically meaningful?
 \end{itemize}
 %% Distinguishability of the particles
-\subsection{Distinguishability of the particles}\label{sec:distinguishability}
-One of the core features of our system - and the foundation of our qubit design - is that the two particles confined in our potential trap act as \emph{distinguishable} particles. As we are looking to trap electrons, indistinguishable particles, we are dealing with fermions, and the Pauli exclusion principle states clearly that two fermions cannot occupy the same quantum state. This fundamental principle would normally prevent us from constructing product states, as the quantum state of any fermionic system must be anti-symmetric under particle exchange.\textcolor{red}{is this really true? and if not, WHEN is it true?}
-\\ However, we are assuming that the potential trap can be constructed in such a way that there are minimal correlations between the two particles, and that the wavefunction can be approximated as a product state. In this analysis we shall look at how "distinguishable" (or separable) our system actually is, and find a distance between wells where we can safely assume the particles to be distinguishable. \\ \\
-To make an assessment of the systems distinguishability we will firstly look at the eigen-energies of the system given that we either:
+\subsection{Assessing validity of product state approximation}\label{sec:distinguishability} %% Should we instead call 'Asses validity of product state approximation'?
+One of the core featues of our qubit design is that each electron is tightly confined in its own well of the Morse double-well potential, so that their spatial wavefunctions have minimal overlap. Strictly speaking, electrons are indistinguishable fermions and their total two-particle wavefunction must be anti-symmetric under particle exchange to adhere to the Pauli exclusion principle \cite{berera2021quantum, griffiths2018introduction}. However, when the spatial overlap between localized orbitals $\braket{\phi_L|\phi_R}$  becomes vanishingly small (for large separations $d$ and/or very deep, narrow wells), the exchange integral tends to zero. In that limit, the anti-symmetric wavefunction
+\begin{align*}
+    \Psi_A(x_1, x_2) = \frac{1}{\sqrt{2}} \bigg[\phi_L(x_1)\phi_R(x_2) - \phi_L(x_2)\phi_R(x_1)\bigg]
+\end{align*}
+reduces to a simple product state $\phi_L(x_1)\phi_R(x_2)$, and the electrons behave as effectively \emph{distinguishable} particles. 
+
+In this analysis we aim to quantify the degree of distinguishability between the two particles in our system, and determine the conditions under which we can treat them as distinguishable and identify the inter-well separation limit where our product state approach is valid. Concretely, for each inter-well separation $d$, we compute
 \begin{itemize}
-    \item Assume the particles to be distinguishable: \\ We construct the wavefunction as a product state
+    \item \textbf{The product state energy}
+    We form the separable product state wavefunction
     \begin{align*}
-        \Psi(\mathbf{r}_1, \mathbf{r}_2) = \phi_L(\mathbf{r}_1)\otimes\phi_R(\mathbf{r}_2),
-    \end{align*} 
-    where $\phi_L$ and $\phi_R$ are the single-particle functions located in the left and right well respectivley. We then calculate the energy by diagonalizing the Hamiltonian matrix for this product state system. In such a product state system the Hamiltonian matrix becomes as in eq. \eqref{eq:two_particle_hamiltonian}.
-    \item Assume the particles to be indistinguishable, and construct an anti-symmetric wavefunction using sums of the product states (to account for exhange) that we then solve using Configuration Interaction (CI) theory.
+        \Psi(x_1, x_2) = \phi_L(x_1)\phi_R(x_2),
+    \end{align*}
+    and assemble the Hamiltonian matrix for this product state system $H$ = $H_L\otimes I + I \otimes H_R + V_{LR}$, where $H_L$ and $H_R$ are the single-particle Hamiltonians for the left and right wells, respectively, and $V_{LR}$ is the inter-well coupling potential. We diagonalize this Hamiltonian to obtain the product state energy $E_{prod}(d)$.
+    \item \textbf{The anti-symmetric (CI) energy}
+    We construct the anti-symmetric wavefunction $\Psi_A$ as a sum of product state and solve the full two-body Configuration Interaction (Section \ref{sec:CI_method}) to find $E_{anti}(d)$. 
 \end{itemize}
-If we are successful, we should find that for a certain distance between the wells, the distinguishable energy will overlap with the indistinguishable energy, and the deviation $\Delta E$ goes to zero as we increase the separation of particles. 
+We then examine the energy difference between the two states to quantify the exchange interaction
+\begin{align*}
+    \Delta E(d) = E_{anti}(d) - E_{prod}(d).
+\end{align*}
+which should tend to zero as the inter-well separation $d$ increases, indicating that the exchange interaction becomes negligible and the particles can be treated as distinguishable. The distance $d^*$ at which $\Delta E(d^*) \approx 0$ defines the regime where the product-state treatment becomes fully justified.
 
 
 %% Optimization of the potential parameters
@@ -91,7 +101,8 @@ The energy eigenstates themselves are not unique, because we are free to apply a
     E_{11} = E_{10} + E_{01} - E_{00}
 \end{align*}
 means that the excitation energy from the 0th state $\ket{00}\to\ket{11}$ equals the sum of excitations $\ket{00}\to\ket{10}$ and $\ket{00}\to\ket{01}$, which aids in ensuring phase stability in our iSwap-like two-qubit gate operation \cite{ku2020suppression}. 
-\\\\
+\\
+
 Configuration I, as we've mentioned, should have all energy levels distinct. This introduces penalties in our objective function corresponding to the overlap between energy eigenvalues and we want to Von Neumann entropies to be as close to zero as possible. In python we realise this in the following way
 \begin{lstlisting}[language=Python]
 target_entropy = np.zeros(4)
@@ -115,47 +126,50 @@ J_deltaE_penalty = - np.abs(J_12 / deltaE_12 + 1e-12)
 
 %%% DVR basis
 \subsection{Sinc-Discrete Variable Representation}\label{sec:sinc_dvr_validation}
-In this section, we show how to implement the Sinc Discrete Variable Representation (Sinc-DVR) basis used throughout this thesis, and the framework used to validate, and motivate, its usage by comparing the results of the DVR basis against more traditional basis sets, such as the (exact) energy eigenbasis. We do so in a simplified system, where we have a single particle in a Morse potential. This will allow us to compare the results to known analytical solutions. 
-
-As a grid-based basis, Sinc-DVR offers practical computational advantages, particularly when dealing with operators that are diagonally representable and/or localized states. Its effectiveness depends however, on the ability to accurately represent the relevant physical states of the system at hand. To test this, we examine how the DVR basis functions overlap with the exact energy eigenstates of the system, and we use the DVR basis to compute the ground state energy of the system, which we then compare to the result obtained from the exact energy eigenstates by diagonalizaton of the Hamiltonian. 
-
-To validate the Sinc-DVR basis, we compare its performance to the exact energy eigenstates of the system, obtained by directly diagonalizing the Hamiltonian of the system. This mirrors the procedure used to solve the time-independent Schrödinger equation \eqref{eq:tise}, where the eigenvalues and eigenfunctions define the stationary states of the system.
+We implement the Sinc-Discrete Variable Representation (Sinc-DVR) basis in Python to discretize our one-dimensional quantum problem on a uniform grid. Sinc-DVRs delta-like basis functions render the kinetic operator analytic and collapse multi-dimensional integrals (Section \ref{sec:basis_set}), making it both efficient and accurate for smooth, localized potentials. Its effectiveness depends however, on the ability to accurately represent the relevant physical states of the system at hand.  \\
 
 As a test case, we consider a single particle trapped in a Morse potential\eqref{eq:morse_potential}, which models an anharmonic bounded oscillator potential with well-known analytical and numerical solutions. A brief reminder, the Morse potential is given by
 \begin{align*}
     V(x) = D \left(1 - e^{-a(x - x_0)}\right)^2,
 \end{align*}
-where $D$ is the depth of the potential well, $a$ is the width of the potential, and $x_0$ is the equilibrium position of the potential. This potential is well-suited for benchmarking, as it is smooth and localised, and also well represents the more complex double-well potential we are later interested in. It will allow us to compare the DVR-computed energy states to the exact energy eigenstates of the system, and also to test the accuracy of the DVR basis functions in representing the energy eigenstates. Moving on, we will examine both the energy spectrums and the overlap between DVR basis and exact energy eigenstates. 
-
-To summarize, in practice we construct the Sinc-DVR basis by sampling the analytical basis functions $\phi_n(x)$ \eqref{eq:sinc_dvr} over a uniform grid, using standard \texttt{python} libraries such as \texttt{numpy} and \texttt{scipy} for sinc-function evaluation. The grid parameters are chosen to ensure convergence and that the basis functions are well-localized within the potential well, as we will discuss more in following sections. 
-\subsubsection*{Energy spectrum} 
-The procedure to compute, and compare, the energy spectrum of the Morse potential using the Sinc-DVR basis and the exact energy eigenstates is as follows:
+where $D$ is the depth of the potential well, $a$ is the width of the potential, and $x_0$ is the equilibrium position of the potential. This potential is well-suited for benchmarking, as it is smooth and localised, and also well represents the more complex double-well potential we are later interested in. The exact eigenstates and eigenvalues are computed analytically, using the expressions in \eqref{eq:morse_eigenstates} and \eqref{eq:morse_eigenvalues}, which are derived from the Schrödinger equation for the Morse potential
+The procedure to compute, and compare, the energy spectrum and eigenstates of the Morse potential using the Sinc-DVR basis and the exact energy eigenstates is as follows:
 \begin{itemize}
     \item Set up the potential using a set of parameters $D$, $a$, and $x_0$.
     \item Construct the Sinc-DVR basis functions $\phi_n(x)$ over a uniform grid of points $x_i$.
-    \item Construct the Hamiltonian matrix $H$.
+    \item Construct the Hamiltonian matrix $H$ using analytical expressions for Sinc-DVR.
     \item Diagonalize the Hamiltonian matrix to obtain the energy eigenvalues and eigenstates.
+    \item Compute overlaps $S_{nm}$ and energy deviations $\Delta E_n$ between the Sinc-DVR and exact eigenstates.
 \end{itemize}
-We construct the Hamiltonian matrix for the system, using the following expression:
-\begin{align*}
-    H = -\frac{1}{2} \frac{d^2}{dx^2} + V(x),
-\end{align*}
-where $V(x)$ is the Morse potential. For the exact energy eigenstates, we can compute the Hamiltonian matrix by discretizing the second derivative operator using finite differences, more specifically, we use the central difference approximation for the second derivative \cite{langtangen2017finite}\footnote{This is a common numerical method for approximating derivatives, and is widely used in numerical analysis. For more details, we refer specifically to ch. 1.1.2 of \cite{langtangen2017finite}.}:
-\begin{align}
-    \frac{d^2}{dx^2} \approx \frac{f(x + \Delta x) - 2f(x) + f(x - \Delta x)}{\Delta x^2}\label{eq:finite_difference_2nd_derivative}, 
-\end{align}
-where $\Delta x$ is the grid spacing. As is evident, the approximation \eqref{eq:finite_difference_2nd_derivative} converges to the exact second derivative as $\Delta x \to 0$. The Sinc-DVR kinetic elements are given analytically as in \eqref{eq:sinc_dvr_kinetic}. With these definitions, we have the full one-body Hamiltonian matrix elements for our single particl trapped in a Morse potential.
-\\ 
+This procedure allows us to validate the Sinc-DVR basis by comparing the computed energy eigenvalues and eigenstates with the exact solutions of the Morse potential. We aim for high accuracy in the lowest lying energy eigenstates and energy levels, as these are the most relevant for our quantum control protocols. In the following sections, we will outline the numerical implementation of these steps.
+\subsubsection*{Energy spectrum} 
 In the following code snippet, we highlight some of the key steps in the construction of the quantum mechanical system and the diagonalization of the Hamiltonian matrix, which is used to obtain the energy eigenstates and eigenvalues of the system. 
 \begin{lstlisting}[language=Python, label=lst:dvr_validation]
 N = 200
 x = np.linspace(-1, 2, N)
 dx = x[1] - x[0]
+def morse_function(x, n, lmbda, x_e, c):
+    def normalization(n, lmbda, c):
+        return (
+            (scipy.special.factorial(n) * (2 * lmbda - 2 * n - 1) * c /
+             scipy.special.gamma(2 * lmbda - n))**0.5 # Gamma(n+1) = factorial(n)
+        )
+    z = 2 * lmbda * np.exp(-c * (x - x_e))
+    return (
+            normalization(n, lmbda, c) *
+             z**(lmbda - n - 0.5) * np.exp(-z / 2) * 
+                scipy.special.genlaguerre(n, 2 * lmbda - 2 * n - 1)(z)
+    )
+def compute_eigenenergies(c, D, l):
+    hnu = 2 * c * np.sqrt(D / 2)
+    E_n = np.zeros(l)
+    for n in range(l):
+        E_n[n] = hnu * (n + 0.5) - (c * hnu * (n + 0.5)**2) / np.sqrt(8 * D)
+
+    return E_n
 
 def morse_potential(x, D, a, x0):
-    """
-    Morse potential function.
-    """
+    
     return D * (1 - np.exp(-a * (x - x0)))**2 - D
 
 V_matrix = np.diag(morse_potential(x, D, a, x0))
@@ -166,26 +180,18 @@ for i in range(N):
             T_dvr[i, j] = np.pi**2 / (6 * dx**2)
         else:
             T_dvr[i, j] = ((-1)**(i - j)) / (dx**2 * (i - j)**2)
-T_exact = np.zeros((N, N))
-T_d = 1 / dx**2 
-T_off_d = -1 / (2 * dx**2)
-for i in range(N):
-    for j in range(N):
-        if i == j:
-            T_exact[i, j] = T_d
-        elif abs(i - j) == 1:
-            T_exact[i, j] = T_off_d
-        else:
-            T_exact[i, j] = 0
 
-
-H_exact = T_exact + V_matrix
 H_dvr = T_dvr + V_matrix
 # Diagonalize the Hamiltonian
 E_dvr, psi_dvr = np.linalg.eigh(H_dvr)
-E_exact, psi_exact = np.linalg.eigh(H_exact)
+E_exact = compute_eigenenergies(c, D, N)
+psi_exact = morse_function(x, np.arange(N), lmbda, 0, c)
 \end{lstlisting}
-
+To then actually assess the performance of the Sinc-DVRs ability to reproduce the energy eigenvalues, we compute the absolute deviance
+\begin{align*}
+    \Delta E_n = |E_n^{\text{DVR}} - E_n^{\text{exact}}|,
+\end{align*}
+where $E_n^{\text{DVR}}$ is the $n$th energy eigenvalue computed using the Sinc-DVR basis, and $E_n^{\text{exact}}$ is the exact energy eigenvalue of the system. The goal is to show that the Sinc-DVR basis can reproduce the relevant energy levels of the system with high accuracy.
 \subsubsection*{Energy eigenstates}
 To compare the energy eigenstates of the two basis sets, we compute the overlap between the Sinc-DVR basis functions and the exact energy eigenstates of the system. The overlap is defined as
 \begin{align*}

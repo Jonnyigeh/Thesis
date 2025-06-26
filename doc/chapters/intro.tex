@@ -1,0 +1,25 @@
+\documentclass{subfiles}
+\begin{document}
+\chapter{Introduction}
+\section{Background and Motivation}
+Quantum-dot platforms have emerged as a leading candidate for scalable quantum computing due to their compatibility with semiconductor fabrication and the potential for on-chip qubit integration. Yet, implementing high-fidelity gate operations in such systems often demands complex control hardware—microwave drives, rapid voltage pulses, and magnetic field gradients—making them susceptible to charge noise, phase instabilities, and crosstalk. Purely electrostatic approaches, which manipulate qubit states by shaping static or slowly varying potential landscapes, promise simpler, lower-noise architectures. The Morse double-well potential, with its tunable anharmonic profile and direct analogy to molecular bonding, offers a natural testbed for these electrostatic quantum control strategies.\textcolor{red}{TODO: Re-do this section with more citations and references to the literature.}
+
+\section{Goals}
+This thesis is structured around four main objectives:
+\begin{enumerate}
+\item \textbf{Numerical framework development}: Combine a grid based Sinc-Discrete Variable Representation (Sinc-DVR) with a product-state Hartree approximation to accurately solve both the time-independent and time-dependent Schrödinger equations for two interacting particles in a Morse double-well.
+\item \textbf{Parameter optimization}: Identify two operational configurations—an \textit{idle} mode with large single-particle energy gaps and suppressed entanglement, and a \textit{gate} mode that enforces near-degeneracy of the first excited states to induce two-particle entanglement and population transfer.
+\item \textbf{Time-evolution simulations}: Implement and test coherent SWAP and $\sqrt{\text{SWAP}}$ gate protocols by dynamically tuning the one-body potential, monitoring population transfer and entanglement generation.
+\item \textbf{Performance assessment}: Quantify gate performance through classical and average (coherent) fidelity measures, after phase correction, and assess diabatic leakage outside the logical subspace.
+\end{enumerate}
+
+\section{Thesis Structure}
+The remainder of this thesis is organized as follows:
+\begin{itemize}
+\item \textbf{Chapter 2 - Theory}: Covers the necessary mathematical foundations (Dirac notation, operators, basis expansions), quantum-mechanical methods (Hartree and configuration interaction, Morse potential), time evolution operator theory, entanglement measures, and fidelity metrics.
+\item \textbf{Chapter 3 - Methods & Implementation}: Details system setup, validation of the Sinc-DVR basis, Hartree product approximation, configuration-interaction, numerical propagators (Crank-Nicolson, finite differences, ramp protocols), post-processing for phase correction, and fidelity extraction workflows.
+\item \textbf{Chapter 4 - Results}: Presents intermediate benchmarks (exchange shifts, DVR accuracy, propagator performance), optimized Morse-well configurations for idle and gate modes, and time-domain simulations of SWAP and $\sqrt{\text{SWAP}}$ gates with fidelity and entanglement analysis.
+\item \textbf{Chapter 5 - Concluding Remarks and Outlook}: Summarizes key findings, discusses their implications for quantum-dot qubit architectures, outlines study limitations, and proposes future research directions.
+\item \textbf{Appendix A}: Contains supplementary derivations and discussions, including effective mass conversions and the midpoint Hamiltonian formulation for Crank-Nicolson propagation.
+\end{itemize}
+\end{document}

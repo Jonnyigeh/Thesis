@@ -119,4 +119,19 @@ which governs the probability of the system to transitions dibatically (i.e rema
     \label{fig:landau_zener}
 \end{figure} 
 
+\subsection{Rabi-oscillations in two-level systems}
+The evolution of coupled states in a two-level system follows coherent oscillations, known as \emph{Rabi oscillations}\cite{nielsen2010quantum, sakurai1986modern}. At resonance, the system oscillates between the two states $\ket{0}$ and $\ket{1}$ with a frequency determined by the coupling strength $J$. The transition probability between the two states are (in atomic units)
+\begin{align*}
+    P_{0\to1}(t) = \frac{J^2}{\Delta^2 + J^2}\sin^2\bigg(\frac{1}{2}\sqrt{\Delta^2 + J^2}t\bigg),
+\end{align*} 
+where at resonance, $\Delta = 0$, so the probability simplifies to
+\begin{equation}
+    P_{0\to1}(t) = \sin^2\bigg(\frac{1}{2}Jt\bigg).\label{eq:rabi_oscillation}
+\end{equation}
+This gives us a simple way to compute the optimal gate duration for our qubit operations. For example, if we aim to implement the SWAP-gate, we want 100\% population transfer between the two states, which means we want a transition probability of $P_{0\to1}(t) = 1$. This gives the optimal gate duration as
+\begin{align*}
+    P_{0\to1}(t_{\text{SWAP}}) = \sin^2\bigg(\frac{1}{2}Jt\bigg) = 1 \implies \frac{1}{2}Jt_{\text{SWAP}} = \frac{\pi}{2}.
+\end{align*}
+This gives the optimal gate duration as $t_{\text{SWAP}} = \pi/ (2 J)$, which is the time it takes for the system to oscillate between the two states given a coupling strength $J$. If we want to implement the $\sqrt{}$SWAP-gate, we want to achieve a perfect mixture - a 50\% population transfer - between the two states, which means we want a transition probability of $P_{0\to1}(t) = 0.5$. This gives the optimal gate duration as $t_{\sqrt{\text{SWAP}}} =  t_{\text{SWAP}}/2$.
+
 \end{document}

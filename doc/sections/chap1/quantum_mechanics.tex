@@ -75,7 +75,7 @@ where $c_n$ are the coefficients of the linear combination, which are determined
 Accurately solving the Schrödinger equation for many-body systems is a formidable challenge—even a one-dimensional system with just a few interacting particles can become intractable very quickly. The core difficulty stems from the exponential growth of the Hilbert space as we add more degrees of freedom, coupled with particle interactions and, for identical particles, the need to enforce antisymmetry (the Pauli exclusion principle). In real-world applications—like molecular dynamics or solid-state physics - we often invoke the Born-Oppenheimer\footnote{Formulated by Max Born and Robert J. Oppenheimer in their 1927 paper \cite{Born_Oppenheimer_1927}} approximation to freeze out the nuclear motion, which drastically reduces the size of the electronic Hilbert space \cite{helgaker2013molecular, szabo1996modern}. Even after that simplification, however, finding an exact solution on a classical computer remains out of reach for systems of more than a few particles.
 \\ 
 
-Mean-field theory offer a practical way to approximate the many-body problem by replacing the full interacting Hamiltonian with an effective single-particle picture in which each particle feels an average field created by all the other particles. This means, solving $N$ coupled single-particle equations instead of the full many-body problem. The most widely used mean-field method is Hartree-Fock (HF),in which the trial wavefunction is a single Slater determinant\footnote{We refer the reader to ch. 2.2.3 in \cite{szabo1996modern} for details on the Slater Determinant} of orthonormal orbitals\foonote{ A detailed derivation of the Hartree-Fock procedure can be found in appendix \ref{app:HF_theory}}, thereby incorporating both Coulomb (direct) and exchange interactions automatically. In the simpler Hartree approximation, we drop exchange entirely and assume the $N$-particle wavefunction can be approximated as a product of $N$ single-particle orbitals.
+Mean-field theory offer a practical way to approximate the many-body problem by replacing the full interacting Hamiltonian with an effective single-particle picture in which each particle feels an average field created by all the other particles. This means, solving $N$ coupled single-particle equations instead of the full many-body problem. The most widely used mean-field method is Hartree-Fock (HF),in which the trial wavefunction is a single Slater determinant\footnote{We refer the reader to ch. 2.2.3 in \cite{szabo1996modern} for details on the Slater Determinant} of orthonormal orbitals \footnote{ A detailed derivation of the Hartree-Fock procedure can be found in appendix \ref{app:HF_theory}}, thereby incorporating both Coulomb (direct) and exchange interactions automatically. In the simpler Hartree approximation, we drop exchange entirely and assume the $N$-particle wavefunction can be approximated as a product of $N$ single-particle orbitals.
 
 Both HF and Hartree builds on the variational principle, which guarantees that the expectation value of the energy
 \begin{equation}
@@ -99,8 +99,8 @@ which has the solution eigenvector
 \end{align}
 with corresponding eigenvalue $E = \epsilon_1 + \epsilon_2 + ... + \epsilon_N$, i.e. the sum of single-particle energies. Equation \eqref{eq:hartree_product} is the Hartree product, and it is the simplest possible wavefunction for a many-body system. As is evident, this Hartree product is not anti-symmetric, nor indistinguishable, as the particles are designated a specific orbital to occupy and thus they are distinguishable, and the state is symmetric under particle exchange.
 In our double-well system, the two particles remain localized in separate wells and therefore behave like distinguishable subsystems rather than identical fermions, which is why we choose to solve our system using the Hartree method.
+\\ 
 
-\\ \\
 To derive this method, we select a finite basis set $\{\chi_\alpha\}$ for each subsystem $M$ (left or right well), and expand the single-particle Hartree orbitals in this basis. 
 \begin{align*}
     \ket{\phi^M_i} = \sum_{\alpha=1}^{N^M} C^M_{\alpha i}\ket{\chi_\alpha},
@@ -133,7 +133,8 @@ where $N^M$ is the number of single-particle basis functions in subsystem $M$. M
     &\frac{\partial L}{\partial C_{\alpha 0}^{A*}}  = \sum_{\beta=0}^{N_A}\big(h_{\alpha\beta}^A + \sum^{N_B}_{\gamma\delta=0}C^{B*}_{\gamma0} u_{\alpha\gamma,\beta\delta}C^B_{\delta0} \big)C^A_{\beta 0}  = \lambda^AC^A_{\alpha 0},\nonumber \\
     &\frac{\partial L}{\partial C_{\alpha 0}^{B*}}  = \sum_{\beta=0}^{N_B}\big(h_{\alpha\beta}^B + \sum^{N_A}_{\delta\gamma=0}C^{A*}_{\delta0} u_{\delta\alpha,\gamma\beta}C^A_{\gamma0} \big)C^B_{\beta 0}  = \lambda^BC^B_{\alpha 0}\label{eq:bipartite_hartree},
 \end{align}
-where $\h_{\alpha\beta} = \bra{\chi_\alpha^M}h^M\ket{\chi_\beta^M}$ are the one-body integrals, and $u_{\alpha\beta,\gamma\delta} = \bra{\chi_\alpha^M\chi_\beta^N}u^{MN}\ket{\chi_\gamma^M\chi_\delta^N}$ are the two-body interaction integrals.  \\\\
+where $\h_{\alpha\beta} = \bra{\chi_\alpha^M}h^M\ket{\chi_\beta^M}$ are the one-body integrals, and $u_{\alpha\beta,\gamma\delta} = \bra{\chi_\alpha^M\chi_\beta^N}u^{MN}\ket{\chi_\gamma^M\chi_\delta^N}$ are the two-body interaction integrals.  \\
+
 These eigenvalue equations are for subsystem A and B respectively, and we can identify the Hartree matrix as the LHS inside the big parenthesis. These two coupled equations are solved iteratively, by updating the coefficients $C_{\alpha 0}^M$ until convergence is reached (self-consistency). By diagonalization of these Hartree matrices we gain the $N_M$ lowest energy orbitals $C^M_{\alpha i}$ and energy levels $\lambda^M_i=\epsilon^M_i$\cite{leinonen2024coulomb}, which we will use as our single-particle basis for each subsystem. The equations to be solved are
 \begin{align}
     \sum_{\beta=0}^{N_M} f_{\alpha\beta}^M C^M_{\beta i} = \epsilon_i^M C^M_{\alpha i}\label{eq:hartree_eigenvalue},
@@ -167,13 +168,6 @@ Gathering all unique such pairs $i<j$ of Slater-type states, yields a basis set 
     H_{ij,kl} = \bra{\Psi_{ij}}H\ket{\Psi_{kl}} = \bra{\phi_i^A\phi_j^B}H\ket{\phi_k^A\phi_l^B},
 \end{align*}
 by evaluating the one- and two-body integrals in the truncated CI basis, and diagonalizing it to obtain the CI eigenvalues and eigenvectors. 
-
-The energy difference
-\begin{align*}
-    \Delta E = E^{\text{Hartree}} - E^{\text{CI}},
-\end{align*}
-quantifies the correlation energy captured by the CI method within our truncated orbital space. This correlation energy is a measure of how well our distinguishable treatment of our system approximates the true many-body wavefunction, and is a key indicator for the validity of our approach.\textcolor{red}{TODO: Add more on how CI can be used to validate our two-qubit gate protocol further.}
-
 
 %%% MORSE  POTENTIAL
 \subsection{Morse potential}\label{sec:morse_potential}
