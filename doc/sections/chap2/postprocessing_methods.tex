@@ -39,23 +39,23 @@ def average_fidelity(U, U_target):
 Before extracting the fidelity measures, we make certain that the time-evolution matrix $U$ is indeed unitary within numerical tolerance, i.e. $\|U U^\dagger - \mathbb{I} < 10^-{10}\|$, and we monitor leakage outside the logical subspace. Once these tests are passed we can compute the gate fidelity measures.
 
 \subsection{One-qubit phase correction}\label{sec:phase_correction}
-To recover the highest possible coherent gate fidelity, we can apply phase correction rotations to the unitary matrix $U$ after time evolution. To do so, we apply local $Z$-rotations on each qubit to cancel any misaligned phases that may have accumulated during the time evolution. This phase-correction step sits at the very end of our pipeline, immediately after we have extracted the unitary matrix $U$ from the time-evolved state. Its purpose is to remove all trivial single-qubit $Z$-phase rotations - leftover dynamical phases that have no impact on population transfer but degrade coherent fidelity - so that our final gate is as close to the ideal unitary operation as possible.
+To recover the highest possible coherent gate fidelity, we can apply phase correction rotations to the unitary matrix $U$ after time evolution. To do so, we apply local $Z$-rotations on each qubit to cancel any misaligned phases that may have accumulated during the time evolution. This phase-correction step sits at the very end of our pipeline, immediately after we have extracted the unitary matrix $U$ from the time-evolved state. Its purpose is to remove all trivial single-qubit $Z$-phase rotations—leftover dynamical phases that have no impact on population transfer but degrade coherent fidelity, so that our final gate is as close to the ideal unitary operation as possible. The phases are moved onto the $\ket{11}$ state, and if we have suceeded in minimizing the $\zeta$-parameter \eqref{eq:zeta}, the result is an ideal unitary operation. Due to us moving unwanted phases, we may achieve high-fidelity gates even for non-zero $\zeta$. 
 
 In practice, we form the overlap matrix 
 \begin{equation*}
   M = U_0^\dagger U,
 \end{equation*}
-where $U_0$ is the ideal unitary operation that we want to achieve, and $U$ is the time-evolved unitary matrix. The overlap matrix $M$ should ideally be the identity matrix, but in practice it will have some non-trivial phases, both a harmless global phase and two relative phases - one phase for each qubits logical subspace. We extract these phases, and build the phase-correction matrix $P(\theta_2, \theta_3)$ (ignoring the global phase) as follows:
+where $U_0$ is the ideal unitary operation that we want to achieve, and $U$ is the time-evolved unitary matrix. The overlap matrix $M$ should ideally be the identity matrix, but in practice it will have some non-trivial phases, both a harmless global phase and two relative phases—one phase for each qubits logical subspace. We extract these phases, and build the phase-correction matrix $P(\theta_2, \theta_3)$ (ignoring the global phase) as follows:
 \begin{equation*}
     P(\theta_2, \theta_3) = \text{diag}\bigg(e^{-i(\theta_2 + \theta_3)/2}, e^{-i(\theta_2 - \theta_3)},\dots\bigg)
 \end{equation*}
-which we can now apply to the time-evolved unitary matrix $U$ to correct for the misaligned phases, and recalculat the gate fidelity. This is the optimization, to find the optimal phase-correction angles $\{\theta_2, \theta_3\}$ that maximizes the average fidelity between the time-evolved unitary matrix $U$ and the target unitary matrix $U_0$.
+which we can now apply to the time-evolved unitary matrix $U$ to correct for the misaligned phases, and recalculate the gate fidelity. This is the optimization, to find the optimal phase-correction angles $\{\theta_2, \theta_3\}$ that maximizes the average fidelity between the time-evolved unitary matrix $U$ and the target unitary matrix $U_0$.
 The structure of the phase-correction procedure is as follows:
 \begin{algorithm}[H]
 \caption{Phase Correction Procedure}
 \label{alg:phase_correction}
 \begin{algorithmic}[1]
-  \State \textbf{Input:} Time‐evolved gate $U$, target gate $U_0$
+  \State \textbf{Input:} Time-evolved gate $U$, target gate $U_0$
   \State Compute initial fidelity 
     \[
       F = \texttt{average\_fidelity}(U,\,U_0)
@@ -64,9 +64,9 @@ The structure of the phase-correction procedure is as follows:
     \[
       M = U_{0}^{\dagger}\,U
     \]
-  \State Extract phase‐correction angles 
+  \State Extract phase-correction angles 
     \[
-      (a_1,a_2,a_3) = \texttt{phase\_corr\_angles}(M)
+      (a_1,a_2,a_3) = \texttt{phase\_corr\_angles}(U)
     \]
   \State Initialize $(\theta_1,\theta_2) \leftarrow (a_2,a_3)$
   \State Define objective
@@ -79,8 +79,8 @@ The structure of the phase-correction procedure is as follows:
       (\theta_1^*,\theta_2^*)
       = \arg\min_{\theta_1,\theta_2} f(\theta_1,\theta_2)
     \]
-    using SciPy’s \texttt{minimize}
-  \State Construct corrected gate 
+    using SciPy's \texttt{minimize}
+  \State Construct phase-corrected gate
     \[
       U' = P(\theta_1^*,\theta_2^*) \, U
     \]

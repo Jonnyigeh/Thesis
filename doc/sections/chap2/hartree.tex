@@ -40,8 +40,8 @@
 
 %%% HARTREE METHOD
 \section{Hartree method}\label{sec:Hartree_method}
-As presented in section \ref{sec:hartree_theory}, the Hartree method is a self-consistent field method (SCF), where we solve the coupled eigenvalue equations for the two subsystems (particles) iteratively. The method is very similar to the Hartree-Fock method, and the main difference is that we do not include an exchange term and the wavefunction itself a single hartree product state. The general method is as follows:
-\begin{algorithm}[ht]
+As presented in section \ref{sec:hartree_theory}, the Hartree method is a self-consistent field method (SCF), where we solve the coupled eigenvalue equations for the two subsystems (particles) iteratively. The method is very similar to the Hartree-Fock method, and the main difference is that we do not include an exchange term and the wavefunction itself a single hartree product state. The general method is as follows, in \ref{alg:Hartree}:
+\begin{algorithm}[h!]
 \caption{Self-Consistent Hartree Procedure}
 \medskip
 \noindent\textbf{1. Initial guess:}\\
@@ -59,7 +59,7 @@ As presented in section \ref{sec:hartree_theory}, the Hartree method is a self-c
 \quad Using the converged orbitals, calculate the final total energy, and any other desired observables.\label{alg:Hartree}
 \end{algorithm}
 
-We make an initial ansatz for the single-particle orbitals by constructing the Hartree matrix as in \eqref{eq:hartree_matrix}, and diagonalize the matrix to obtain the new set of orbitals, one set for each subsystem. The initial Hartree matrix is thus constructed as
+We make an initial ansatz for the single-particle orbitals by constructing the Hartree matrix as in \eqref{eq:hartree_operator}, and diagonalize the matrix to obtain the new set of orbitals, one set for each subsystem. The initial Hartree matrix is thus constructed as
 \begin{align*}
     f_{\alpha\beta}^{M(0)} = h_{\alpha\beta}^M
 \end{align*}
@@ -67,7 +67,7 @@ where $M$ is the subsystem index, and $\alpha, \beta$ are the basis functions. T
 \begin{align*}
     f_{\alpha\beta}^{M(i)} = h_{\alpha\beta}^M + \sum_{i}^{N} u_{\alpha\gamma\beta\delta}^{M} \rho_{\gamma\delta}^{M},
 \end{align*}
-where the density matrix $\rho_{\gamma\delta}^{M}$ is constructed from the previous set of orbitals, and used to calculate the interaction term \emph{for subsystem $M$ specifically}. This differs from Hartree-Fock where the interaction term is calculated from the total density matrix ($\rho^A\otimes\rho^B$). In the following code snippet the density matrix is not used directly, but an equivalent einstein summation is performed, following the equations \eqref{eq:bipartite_hartree} in section \ref{sec:bipartite_H}.
+where the density matrix $\rho_{\gamma\delta}^{M}$ is constructed from the previous set of orbitals, and used to calculate the interaction term \emph{for subsystem $M$ specifically}. This differs from Hartree-Fock where the interaction term is calculated from the total density matrix ($\rho^A\otimes\rho^B$). In the following code snippet the density matrix is not used directly, but an equivalent einstein summation is performed, following the equations \eqref{eq:bipartite_hartree}.
 \begin{lstlisting}[language=Python]
 def construct_hartree_matrices(self, h_l, h_r, u_lr, c_l, c_r):
     return (
@@ -94,7 +94,7 @@ In practice, to perform the CI procedure, we build a linear map $P$ that project
 \begin{align*}
     \ket{\phi_i, \phi_j} = \frac{1}{\sqrt{2}}(\ket{\phi_i}\otimes\ket{\phi_j} - \ket{\phi_j}\otimes\ket{\phi_i}).
 \end{align*}
-This flattened representation of the anti-symmetric basis state will build the columns of the projection matrix $P$, which ensures $P^\dagger P = \mathcal{I}$, where $\mathcal{I}$ is the identity matrix. 
+This flattened representation of the anti-symmetric basis state will build the columns of the projection matrix $P$, which ensures $P^\dagger P = \mathbb{I}$, where $\mathbb{I}$ is the identity matrix. 
 
 Once $P$ is constructed, we can project the full two-particle Hamiltonian $H$ onto the anti-symmetric subspace by
 \begin{align*}

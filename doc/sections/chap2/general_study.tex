@@ -7,7 +7,7 @@ In this secton we will outline the methods used to study our system in general. 
     \item At what well separation is our approximation of the two particles being distinguishable valid (to a certain degree)?
     \item What parameters do we need to set in order to achieve our desired configurations I and II?
     \item Will our choice of basis functions be sufficient to descibe our system?
-    \item How do we ensure that our system is stable, and well-defined - and also physically meaningful?
+    \item How do we ensure that our system is stable, and well-defined—while also physically meaningful?
 \end{itemize}
 %% Distinguishability of the particles
 \subsection{Assessing validity of product state approximation}\label{sec:distinguishability} %% Should we instead call 'Asses validity of product state approximation'?
@@ -19,13 +19,13 @@ reduces to a simple product state $\phi_L(x_1)\phi_R(x_2)$, and the electrons be
 
 In this analysis we aim to quantify the degree of distinguishability between the two particles in our system, and determine the conditions under which we can treat them as distinguishable and identify the inter-well separation limit where our product state approach is valid. Concretely, for each inter-well separation $d$, we compute
 \begin{itemize}
-    \item \textbf{The product state energy}
+    \item \textbf{The product state energy:}
     We form the separable product state wavefunction
     \begin{align*}
         \Psi(x_1, x_2) = \phi_L(x_1)\phi_R(x_2),
     \end{align*}
     and assemble the Hamiltonian matrix for this product state system $H$ = $H_L\otimes I + I \otimes H_R + V_{LR}$, where $H_L$ and $H_R$ are the single-particle Hamiltonians for the left and right wells, respectively, and $V_{LR}$ is the inter-well coupling potential. We diagonalize this Hamiltonian to obtain the product state energy $E_{prod}(d)$.
-    \item \textbf{The anti-symmetric (CI) energy}
+    \item \textbf{The anti-symmetric (CI) energy:}
     We construct the anti-symmetric wavefunction $\Psi_A$ as a sum of product state and solve the full two-body Configuration Interaction (Section \ref{sec:CI_method}) to find $E_{anti}(d)$. 
 \end{itemize}
 We then examine the energy difference between the two states to quantify the exchange interaction
@@ -37,13 +37,13 @@ which should tend to zero as the inter-well separation $d$ increases, indicating
 
 %% Optimization of the potential parameters
 \subsection{Parameter optimization}\label{sec:optimization_procedure}
-As our goal is to realize single-qubit gates and the two-qubit iSwap gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we've discussed in earlier sections the two configurations we are looking for are:
+As our goal is to realize single-qubit gates and the two-qubit iSwap gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we have discussed in earlier sections the two configurations we are looking for are:
 \begin{itemize}
     \item \textbf{Config I}: The measurement configuration, where all energy levels are distinct and there are minimal correlations between the two subsystems (particles). This corresponds to keeping all Von Neumann entropies in our system as close to zero as possible. With this, we know that our two-body energy eigenstates will have a product state structure, and maximal overlap with the Hartree product states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$.
     \item \textbf{Config II}: The entangled configuration, where we have a degeneracy in the energy levels of our system. This degeneracy will give rise to an avoided crossings in the energy spectrum for the first and second energy eigenstates. In this configuration, the 1st and 2nd energy eigenstates are maximally entangled, while the other energy eigenstates are kept as pure as possible (product states). This corresponds to an entropy equal to 1 for $\ket{\phi_1}$ and $\ket{\phi_2}$, and 0 for $\ket{\phi_0}$ and $\ket{\phi_4}$. 
 \end{itemize}
-As an initial search, we make a grid search over the potential parameters, mostly to map out the landscape of the potential and find regions where we expect to find the desired configuations. Our grid search will be over the following parameters:
-\begin{table}
+As an initial search, we make a grid search over the potential parameters, mostly to map out the landscape of the potential and find regions where we expect to find the desired configuations. Our grid search will be over the parameters presented in table \ref{tab:parameter_search}, 
+\begin{table}[h!]
     \centering
     \begin{tabular}{|c|c|c|}
         \hline
@@ -55,12 +55,13 @@ As an initial search, we make a grid search over the potential parameters, mostl
         \hline
     \end{tabular}
     \caption{The parameters we will search over in our grid search}
+    \label{tab:parameter_search}
 \end{table}
-with the constraint that $2D / \sqrt{k} < l$ where $l$ are the number of basis functions allocated to each well, as we've discussed earlier. This is to ensure that the basis functions are well within the potential well, and that we do not have any basis functions that are cut off by the potential. This then becomes a \emph{constrained optimization problem}. To perform our optimization we will use the \texttt{scipy.optimize} package, and the \texttt{minimize} function. We will use the \texttt{COBYQA} method, which is a derivative-free optimization method that is well suited for constrained optimization problems. This method is built on the concept of \emph{sequential quadratic programming}, that solves constrained, non-linear problems. For more details on the method, see \cite{razh_cobyqa}. The optimization will be done as follows:
-\begin{algorithm}[ht]
-\caption{Paramter optimization procedure: High-level overview}
-\textbf{Input:}{Parameter ranges \(\mathcal{R}\), \(\epsilon_{\text{coarse}}\), \(\epsilon_{\text{fine}}\)}
-\,\,\,\,\textbf{Output:}{Final refined parameter sets}
+with the constraint that $2D / \sqrt{k} < l$ where $l$ are the number of basis functions allocated to each well, as we have discussed earlier. This is to ensure that the basis functions are well within the potential well, and that we do not have any basis functions that are cut off by the potential. This then becomes a \emph{constrained optimization problem}. To perform our optimization we will use the \texttt{scipy.optimize} package, and the \texttt{minimize} function. We will use the \texttt{COBYQA} method, which is a derivative-free optimization method that is well suited for constrained optimization problems. This method is built on the concept of \emph{sequential quadratic programming}, that solves constrained, non-linear problems. For more details on the method, see \cite{razh_cobyqa}. The optimization procedure is outlined in \ref{alg:parameter_optimization}:
+\begin{algorithm}[h!]
+\caption{Parameter optimization procedure: High-level overview}
+\textbf{Input: }{Parameter ranges \(\mathcal{R}\), \(\epsilon_{\text{coarse}}\), \(\epsilon_{\text{fine}}\)}
+\,\,\,\,\textbf{Output: }{Final refined parameter sets}
 
 \textbf{1. Initialization}\\
 Generate a collection of random parameter configurations within \(\mathcal{R}\).
@@ -75,18 +76,19 @@ For each configuration in the collection:
 \textbf{3. Fine Optimization}\\
 For each candidate parameter set:
 \begin{itemize}
-  \item Re‐run the optimizer with tighter tolerance \(\epsilon_{\text{fine}}\).
+  \item Re-run the optimizer with tighter tolerance \(\epsilon_{\text{fine}}\).
   \item Add the refined output to the final results.
 \end{itemize}
 
 \textbf{4. Return} the final set of optimized parameters.
+\label{alg:parameter_optimization}
 \end{algorithm}
 
 \subsubsection{Objective function}
 An objective function is constructed for the optimizer, which is the object to be minimized by our optimization algorithm. We will have two separate objective functions, one for each configuration we are looking for. Across both configurations, we want to minimize the $\zeta$-parameter, which directly controls the stability of time-evolution through the Hamiltonian matrix. The parameters is defined as 
-\begin{equation*}
-    \zeta = E_4 - E_1 - E_2 + E_0,
-\end{equation*}
+\begin{equation}
+    \zeta = E_4 - E_1 - E_2 + E_0,\label{eq:zeta}
+\end{equation}
 and we can identify this as the \emph{accumulated phase} of the rotated time-evolution operator $U = e^{-iHt}$, expressed in terms of the energy eigenstates, $U = \sum_i^4 e^{-iE_it}\ket{\phi_i}\bra{\phi_i}$. We see that written in matrix form in the logical state basis $\{\ket{ij}\}$, this propagator is (where $\ket{11}$ is the 4th energy eigenstate)
 \begin{align*}
     U = \begin{pmatrix}
@@ -103,7 +105,7 @@ The energy eigenstates themselves are not unique, because we are free to apply a
 means that the excitation energy from the 0th state $\ket{00}\to\ket{11}$ equals the sum of excitations $\ket{00}\to\ket{10}$ and $\ket{00}\to\ket{01}$, which aids in ensuring phase stability in our iSwap-like two-qubit gate operation \cite{ku2020suppression}. 
 \\
 
-Configuration I, as we've mentioned, should have all energy levels distinct. This introduces penalties in our objective function corresponding to the overlap between energy eigenvalues and we want to Von Neumann entropies to be as close to zero as possible. In python we realise this in the following way
+Configuration I, as we have mentioned, should have all energy levels distinct. This introduces penalties in our objective function corresponding to the overlap between energy eigenvalues and we want to Von Neumann entropies to be as close to zero as possible. In python we realise this in the following way
 \begin{lstlisting}[language=Python]
 target_entropy = np.zeros(4)
 detuning_penalty = -min(0.5, np.abs(e_L - e_R))

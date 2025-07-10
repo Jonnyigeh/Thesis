@@ -13,13 +13,13 @@ The simulation pipeline in this thesis follows a logical sequence, designed arou
     In our Sinc-DVR basis, we compute all one-body (kinetic + potential) and two-body (Coulomb) integrals to set up our full two-particle Hamiltonian matrix (Section \ref{sec:sinc_dvr_validation}). We then construct the Hartree matrices for the two subsystems, which are used to diagonalize the system and project the full Hamiltonian onto a smaller subspace that accurately captures the essential dynamics of our system.
 
     \item \textbf{System preparation} \\
-    A separate optimization routine searches for two target configurations - $C_I$, in which the wells have well-separated, non-degenerate transition energies, and $C_{II}$, where the first excited states of the two subsystems are nearly degenerate. Once the optimal parameters are found, we rebuild the Hartree basis at $C_I$ and use this basis throughout the evolution for consistent overlap calculations.
+    A separate optimization routine searches for two target configurations: $C_I$, in which the wells have well-separated, non-degenerate transition energies, and $C_{II}$, where the first excited states of the two subsystems are nearly degenerate. Once the optimal parameters are found, we rebuild the Hartree basis at $C_I$ and use this basis throughout the evolution for consistent overlap calculations.
 
     \item \textbf{Time discretization and ramp protocol} \\
     We lay down a uniform time grid with step size $\Delta t$ over a total time $T$. On that grid we specify a ramping protocol that linearly interpolates the potential parameters from $C_I$ to $C_{II}$ and back at a chosen speed, staying entirely within the initial Hartree basis. 
 
     \item \textbf{Time-propagation} \\
-    We then evolve the quantum state using one of two interchangable propagators - either direct matrix exponentition of the Hamiltonian, or the implicit Crank-Nicolson time integrator. Choice of method depends on the specific requirements of the simulation.
+    We then evolve the quantum state using one of two interchangable propagators: either direct matrix exponentition of the Hamiltonian, or the implicit Crank-Nicolson time integrator. Choice of method depends on the specific requirements of the simulation.
 
     \item \textbf{Post-processing and analysis} \\
     After time evolution, we overlaps and state populations, von Neumann entropies, and other physical observables of interest. We also compute the unitary matrix $U$ that represents the time-evolved gate operation, and apply phase correction single-qubit rotations before computing gate fidelity measures to assess the performance of our quantum gate. 

@@ -3,7 +3,7 @@
 \section{System initialization and setup}\label{sec:system_init}
 In this section, we outline the steps taken to initialize the system Hamiltonian on the Sinc-DVR basis grid.
 
-To numerically implement the Morse potential as presented in Section \ref{sec:morse_potential}, and obtain separate single-particle hamiltonians for each subsystem, we need to 'split' the potential into two parts, one for each subsystem. This is easily done by dividing the spatial grid, $x\in(-L, L)$, on which the double-well potential is defined on, into two halves, left $x_L\in(-L, 0)$ and right $x_R\in(0, L)$. and computing the kinetic and potential integrals for each subsystem separately, using the analytical expressions in \eqref{eq:sinc_dvr_kinetic} and \eqref{eq:morse_double_well} respectively. This gives thee single-particle Hamiltonians 
+To numerically implement the Morse potential as presented in Section \ref{sec:morse_potential}, and obtain separate single-particle hamiltonians for each subsystem, we need to 'split' the potential into two parts, one for each subsystem. This is easily done by dividing the spatial grid, $x\in(-L, L)$, on which the double-well potential is defined on, into two halves, left $x_L\in(-L, 0)$ and right $x_R\in(0, L)$. and computing the kinetic and potential integrals for each subsystem separately, using the analytical expressions in \eqref{eq:sinc_dvr_kinetic} and \eqref{eq:double_well_morse_potential} respectively. This gives the single-particle Hamiltonians 
 \begin{align*}
     H_L &= T + V_L \\
     H_R &= T + V_R,
