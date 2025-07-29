@@ -1,4 +1,4 @@
-\documentclass[UKenglish]{uiomasterthesis}
+\documentclass[UKenglish, twoside, openright]{uiomasterthesis}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,graphicx, braket}
 \usepackage{babel, csquotes, textcomp, uiomasterfp, varioref}
@@ -7,9 +7,10 @@
 \usepackage{listings}
 \usepackage{subfiles}
 \usepackage{geometry}
+\usepackage{emptypage}
 \geometry{a4paper, margin=1in}
 \usepackage{color, xcolor}
-\usepackage[style=numeric-comp, backend=biber]{biblatex}
+\usepackage[style=numeric-comp, sorting=none, backend=biber]{biblatex}
 \usepackage{fancyhdr}
 \usepackage{booktabs}
 \pagestyle{fancy}
@@ -109,7 +110,7 @@
 \title{Electrostatic control of two-electron quantum dot qubits in a Morse double-well potential}
 \subtitle{Engineering degeneracy and entanglement for high-fidelity quantum gate protocols}
 \author{Jonny Aarstad Igeh}
-\addbibresource{ref.bib}
+\addbibresource{cleaned_ref.bib}
 
 
 \begin{document}
@@ -120,7 +121,6 @@
     long,
     color=gray,
     date={Spring 2025},
-    image={figs/quntum_lol.jpg}
 ]
 \frontmatter{}
 \subfile{sections/abstract}

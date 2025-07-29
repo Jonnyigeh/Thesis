@@ -2,46 +2,45 @@
 \begin{document}
 %% lina
 \section{Linear Algebra}
-Before we dig in to our main course, quantum mechanics, an appetizer is in order. We should revisit some basic linear algebra to set the tone of what we will see further on in this section.
-In short terms, quantum mechanics is built upon the physics of waves and linear algebra, and a strong fundation in these will let us gain a deeper understanding of the intricacies within quantum mechanics.
-In this thesis, we will be dealing with n-dimensional complex vector spaces, expressed in Dirac notation, which is a compact and powerful notation for linear algebra in quantum mechanics.
+Before we tackle quantum mechanics itself, we first review the key linear-algebra tools that underpin it. Quantum mechanics is founded on the physics of waves and the language of linear operators, and a solid grasp of these topics will greatly aid our exploration of its more intricate features.
+In this thesis, we will be dealing with $n$-dimensional complex vector spaces, expressed in Dirac notation, which is a compact and powerful notation for linear algebra in quantum mechanics.
 %% hey paul
 \subsection{Dirac notation}
-Introduced and named by the famous physicist Paul Dirac in his paper 'A new notation for quantum mechanics' \cite{dirac_1939}, this notation allows for linear algebra in quantum mechanics to be performed in a neat and compact way. Any $n$-dimensional complex vector in the vector space $V$ is represented as a ket, $\ket{\psi}$, and its dual-vector as a bra, $\bra{\psi}$. The inner of two vectors is then defined as:
+Introduced and named by the famous physicist Paul Dirac in his paper 'A new notation for quantum mechanics' \cite{dirac_1939}, this notation allows for linear algebra in quantum mechanics to be performed in a neat and compact way. Any $n$-dimensional complex vector in the vector space $V$ is represented as a ket, $\ket{\psi}$, and its dual-vector as a bra, $\bra{\psi}$. The inner product of two vectors is then defined as:
 \begin{align*}
-        \braket{\psi|\phi} = \int \psi^*(x)\phi(x) dx
+        \braket{\psi|\phi} = \int \psi^*(x)\phi(x) dx,
 \end{align*} 
-and any generic vector $\ket{i}$ can be written in terms of a basis set $\{\ket{i}\}$ as:
+and any generic vector $\ket{c}$ can be expressed in a basis set $\{\ket{i}\}$ as:
 \begin{align}
-    \ket{c} = \sum_i c_i \ket{i} = \sum_i \ket{i}\braket{i|c} 
+    \ket{c} = \sum_i c_i \ket{i} = \sum_i \ket{i}\braket{i|c}, 
 \end{align}
-where $c_i$ are the coefficients of the expansion. This naturally introduces the completeness relation, where the following holds:
+where $c_i$ are the coefficients of the expansion. This naturally introduces the \emph{completeness relation}, where the following holds:
 \begin{equation}
-    I = \sum_i \ket{i}\bra{i}
+    I = \sum_i \ket{i}\bra{i}\label{eq:completeness_relation},
 \end{equation}
 where $I$ is the identity operator. This relation guarantees that the basis set $\{\ket{i}\}$ spans the entire vector space $V$.
 
 %% Ops
 \subsection{Operators}
-An operator is a mathematical object that maps elements from one vector space $V$ to itself (or, for some operators to a new vector space $W$)\cite{berera2021quantum}. Meaning it is a mapping $\hat O: V \rightarrow V$. In this work, and quantum mechanics in general, we focus on \emph{linear operators}. We require these operators to map onto itself, and have the following linearity properties:
+An operator is a mathematical object that maps elements from one vector space $V$ to itself (or, more generally, to a new vector space $W$)\cite{berera2021quantum}. In this work, we focus on \emph{linear operators}, i.e mappings $\hat O: V \rightarrow V$ that satisfy the following linearity properties:
 \begin{align*}
-    \hat O(\alpha \mathbf{x} + \beta\mathbf{y}) = \alpha \hat O\mathbf{x} + \beta \hat O\mathbf{y}
+    \hat O(\alpha \mathbf{x} + \beta\mathbf{y}) = \alpha \hat O\mathbf{x} + \beta \hat O\mathbf{y},
 \end{align*}
 for any $\mathbf{x}$, $\mathbf{y}$ in $V$ and $\alpha, \beta\in \mathbb{C}$. In the dirac notation then, we can write the following to show how an operator $\hat O$ acts on kets $\ket{i}$ in our space
 \begin{align*}
-    \hat O\ket{i} = \alpha \ket{j}
+    \hat O\ket{i} = \alpha \ket{i}.
 \end{align*}
 We can also define the adjoint of this operator, $\hat O^\dagger$, which acts on the dual-vectors, the bras, in the same space
 \begin{align*}
-    \bra{i}\hat O^\dagger = \alpha^* \bra{j}
+    \bra{i}\hat O^\dagger = \alpha^* \bra{i}.
 \end{align*}
 One of the most useful properties of linear operators, is that given a basis $\{\ket{i}\}$, we can express the operators as matrices, where the matrix elements are as follows
 \begin{align*}
-    O_{ij} = \bra{i}\hat O\ket{j} = \sum_k\braket{i|k}O_{kj}
+    O_{ij} = \bra{i}\hat O\ket{j} = \sum_k\braket{i|k}O_{kj},
 \end{align*}
 and we can identify the action of the operator on the vector in this basis, as a matrix-vector product
 \begin{align*}
-    \hat O\ket{i} = \sum_j \ket{j}O_{ji}
+    \hat O\ket{i} = \sum_j \ket{j}O_{ji}.
 \end{align*}
 In quantum mechanics, certain operators play a fundamental role due to their specific mathematical properties \cite{griffiths2018introduction, berera2021quantum}. These operators represent key physical observables and transformations, which we will explore in detail in the quantum mechanics section. However, some of their defining mathematical characteristics are crucial to emphasize:
 \begin{itemize}
@@ -54,32 +53,32 @@ The concept of a Hilbert space is fundamental to quantum mechanics, as it provid
 \begin{itemize}
     \item \textbf{Completeness:} Every Cauchy sequence $\{x_n\}$ in the space $V$ converges to a limit in the space. Specifically, $V$ is complete if:
     \begin{equation}
-        \forall \epsilon > 0,\quad \exists N \in \mathbb{N} : |x_n - x_m| < \epsilon, \quad \forall n,m > N
+        \forall \epsilon > 0,\quad \exists N \in \mathbb{N} : |x_n - x_m| < \epsilon, \quad \forall n,m > N.
     \end{equation}
     \item \textbf{Positivity:} The inner product of a vector with itself is always positive, and zero if and only if the vector is the zero vector. That is:
     \begin{equation}
-        \braket{\phi|\psi}\geq 0, \quad \text{and} \braket{\phi|\phi} = 0 \iff \ket{\phi} = \ket{0} 
+        \braket{\phi|\psi}\geq 0, \quad \text{and} \braket{\phi|\phi} = 0 \iff \ket{\phi} = \ket{0}. 
     \end{equation}
     \item \textbf{Multiplicativity:} The inner product is linear in the second argument and conjugate linear in the first argument, meaning:
     \begin{equation}
-        \braket{\beta\phi|\alpha_1\psi_1 + \alpha_2\psi_2} = \alpha_1\beta^*\braket{\phi|\psi_1} + \alpha_2\beta^*\braket{\phi|\psi_2} 
+        \braket{\beta\phi|\alpha_1\psi_1 + \alpha_2\psi_2} = \alpha_1\beta^*\braket{\phi|\psi_1} + \alpha_2\beta^*\braket{\phi|\psi_2}. 
     \end{equation}
 \end{itemize}
 The choice for conjugate linearity in the first agrument is by convention in many physics textbooks. Vectors living in Hilbert space is in quantum mechanics often coined state-vectors. \\ As we mentioned, a Hilbert space is an inner product space, and we define the inner product on the space $V$ as
 \begin{align*}
-    \braket{\phi|\psi} = \int \phi^* \psi dx
+    \braket{\phi|\psi} = \int \phi^* \psi dx,
 \end{align*}
 for the complex-valued, continuous, state vectors $\ket{\phi}, \ket{\psi} \in V$. \\ We can use this inner product to define \emph{orthogonality} in the Hilbert space
 \begin{align*}
-    \braket{\psi_i|\psi_j} = \delta_{ij}
+    \braket{\psi_i|\psi_j} = \delta_{ij},
 \end{align*}
 where $\delta_{ij}$ is the Kronecker delta. This orthogonality relation is crucial in quantum mechanics, as it allows us to define a basis set of vectors that are orthogonal to each other. As elegant as this framework may be, the challenge of quantum many-body systems lies in the exponential scaling of the Hilbert space with the number of particles and degrees of freedom. For a system of $N$ particles, with $d$ degrees of freedom, the dimension of the Hilbert space is $d^N$, which quickly becomes intractable for classical computers. This rapid growth makes exact solutions for interacting many-body systems computationally infeasible, even in low-dimensional systems \cite{helgaker2013molecular, szabo1996modern}.
 
 %% BASIS SETS
 \subsection{State representation}\label{sec:state_representation}
-The representation of state-vectors in a Hilbert space is not unique, and we are free to choose basis sets to express the vectors that spans our Hilbert space (or any space for that matter), as long as the basis of choice spans the Hilbert space \cite{griffiths2018introduction, berera2021quantum}. This is a powerful tool in quantum mechanics, as it allows us to choose the basis that best suits the problem at hand, and clever choices can simplify problems significantly. The flexibility in choosing a basis set is central to both theoretical insights and computational efficiency when solving quantum mechanical problems \cite{helgaker2013molecular, szabo1996modern}. \\
+The representation of state-vectors in a Hilbert space is not unique, and we are free to choose basis sets to express the vectors that span our Hilbert space (or any space for that matter), as long as the basis of choice spans the Hilbert space \cite{griffiths2018introduction, berera2021quantum}. This is a powerful tool, as it allows us to choose the basis that best suits the problem at hand, and clever choices can simplify problems significantly. The flexibility in choosing a basis set is central to both theoretical insights and computational efficiency when solving quantum mechanical problems \cite{helgaker2013molecular, szabo1996modern}. \\
 
-Many modern many-body methods are built upon this principle, where the choice of basis set can make the difference between a computationally infeasible problem and a tractable one. For example, by exploting symmetry, localization, or energy scales, we can often reduce the dimensionality of the problem and focus on the most relevant degrees of freedom. The choice of basis is not just a mathematical convenience, it can also yield physical insights into the systems behaviour. For instance, in quantum chemistry, the choice of basis set can reflect the underlying symmetries of the molecular structure (such as the Born-Oppenheimer approximation) \cite{szabo1996modern}, leading to a more efficient representation of the wavefunction and its properties. Similarly, in condensed matter physics, the choice of basis can be guided by the crystal structure or electronic correlations present in the material \cite{baroni2001phonons, kittel2018introduction}. \\
+Many modern many-body methods are built upon this principle, where the choice of basis set can make the difference between a computationally infeasible problem and a tractable one. For example, by exploting symmetry, localization, or energy scales, we can often reduce the dimensionality of the problem and focus on the most relevant degrees of freedom. The choice of basis is not just a mathematical convenience, it can also yield physical insights into system's behaviour. For instance, in quantum chemistry, the choice of basis set can reflect the underlying symmetries of the molecular structure, leading to a more efficient representation of the wavefunction and its properties. Similarly, in condensed matter physics, the choice of basis can be guided by the crystal structure or electronic correlations present in the material \cite{baroni2001phonons, kittel2018introduction}. \\
 
 Furthermore, by finding a basis that diagonalizes the Hamiltonian matrix, we can directly solve for the energy eigenvalues and eigenstates. This principle underlies many techniques, such as using harmonic oscillator eigenfunctions for bound systems or plane waves for periodic potentials \cite{griffiths2018introduction, kittel2018introduction}. The search for an optimal basis is often guided by the specific features of the system under study, such as symmetry or localization, making it a central consideration in both theoretical and computational approaches to quantum mechanics. 
 
@@ -87,15 +86,15 @@ Because no single basis is optimal for every task at hand, we are often required
 
 The transformation between two basis sets $\{\ket{i}\}$ and $\{\ket{\alpha}\}$ is given by the unitary transformation matrix $U$:
 \begin{align*}
-    \ket{\alpha} = \sum_i U_{\alpha i}\ket{i}
+    \ket{\alpha} = \sum_i U_{\alpha i}\ket{i},
 \end{align*}
 where the matrix elements of $U$ are given by the inner product of the basis vectors:
 \begin{align*}
-    U_{\alpha i} = \braket{\alpha|i}
+    U_{\alpha i} = \braket{\alpha|i},
 \end{align*}
-here assuming the basis sets are complete, meaning they obey the \emph{completeness relation}:
+here assuming the basis sets are complete, meaning they obey the completeness relation \ref{eq:completeness_relation}:
 \begin{align*}
-    \sum_i \ket{i}\bra{i} = \sum_\alpha \ket{\alpha}\bra{\alpha} = I
+    \sum_i \ket{i}\bra{i} = \sum_\alpha \ket{\alpha}\bra{\alpha} = I.
 \end{align*}
 This relation allows the insertion of the identity operator in calculations, to expand state-vectors and operators in the basis of our choice. This underpins many mathematical tools in quantum mechanics, from the spectral decomposition of operators \footnote{See for example chapter 5.5 in \cite{strang2000linear}} to perturbation-theory expansions \cite{griffiths2018introduction, berera2021quantum, sakurai1986modern}. \\
 
@@ -103,25 +102,25 @@ This relation allows the insertion of the identity operator in calculations, to 
 We can also study how the matrix representation of an operator change under a basis transformation between complete orthonormal basis sets \cite{szabo1996modern}.
 Assume that $\hat O$ is an operator in the basis $\{\ket{i}\}$, and $\hat O'$ is the same operator expressed in the basis $\{\ket{\alpha}\}$, then the transformation between the two operators is given by:
 \begin{align*}
-    O'_{\alpha\beta} = \braket{\alpha|\hat O|\beta} = \sum_{ij}\braket{\alpha|i}\bra{i}\hat O\ket{j}\braket{j|\beta} = \sum_{ij}U_{\alpha i}O_{ij}U^\dagger_{j\beta}
+    O'_{\alpha\beta} = \braket{\alpha|\hat O|\beta} = \sum_{ij}\braket{\alpha|i}\bra{i}\hat O\ket{j}\braket{j|\beta} = \sum_{ij}U_{\alpha i}O_{ij}U^\dagger_{j\beta}.
 \end{align*}
-And thus, we have the following transformation rule for operators under a basis transformation:
+We have the following transformation rule for operators under a basis transformation:
 \begin{align*}
-    \hat O' &= U\hat OU^\dagger \\
-    \hat O &= U^\dagger\hat O'U
+    \hat O' &= U\hat OU^\dagger, \\
+    \hat O &= U^\dagger\hat O'U,
 \end{align*}
-which allow us to freely move between coordinate, momentum, energy or grid-based representations as needed.
+which allows us to freely move between coordinate, momentum, energy or grid-based representations as needed.
 \subsection{Basis sets}\label{sec:basis_set}
-As we have mentioned, the choice of basis set is crucial in quantum mechanics, and somewhat arbitrary. Any complete set of orthonormal vectors can be used to express our state-vectors, and there are numerous choices available, each with its own advantages and disadvantages. The choice can greatly affect computational efficiency, numerical stability and the physical insights gained from the calculations. We will briefly outline some of the most common families of basis sets, and their usages before we present our choice made in this thesis:
+As we have mentioned, the choice of basis is essential for controlling error, even though there is no uniquely 'correct' basis and one must often settle on a convenient or computationally efficient option. Any complete set of orthonormal vectors can be used to express our state-vectors, and there are numerous choices available, each with its own advantages and disadvantages. The choice can greatly affect computational efficiency, numerical stability and the physical insights gained from the calculations. We will briefly outline some of the most common families of basis sets, and their usages before we present our choice in this thesis:
 \begin{itemize}
     \item \textbf{Discrete Variable Representation (DVR):} A grid-based approach that discretizes the continuous space into a finite set of points, with one basis function peaked at each grid point. This method makes coordinate operators diagonal in the basis, retaining analytical expressions for the kinetic energy operator making it both efficient and accurate for smooth potentials \cite{light1985generalized}. 
     \item \textbf{Harmonic oscillator basis:} A set of orthonormal functions that are solutions to the quantum harmonic oscillator (QHO) problem. As such, these are useful for bound systems exhibiting oscillatory behaviour, such as vibrational modes of molecules and quantum dot systems \cite{helgaker2013molecular}.
-    \item \textbf{Plane wave basis:} The natural choice for repersenting periodic systems, such as cystals, and is often employed in condensed matter physics. Their diagonalization of kinetic energy operators makes them particularly useful for systems with translational symmetry, such as electrons in a crystal lattice \cite{kittel2018introduction}.
+    \item \textbf{Plane wave basis:} The natural choice for representing periodic systems, such as crystals, and is often employed in condensed matter physics. Their diagonalization of the kinetic energy operators makes them particularly useful for systems with translational symmetry, such as electrons in a crystal lattice \cite{kittel2018introduction}.
     \item \textbf{Gaussian-type orbitals (GTOs):} Common choice for initial approximations in quantum chemistry, particularly in the Hartree-Fock method. GTOs are computationally efficient, and reflect the atomic symmetries of atoms, making them suitable for molecular systems \cite{szabo1996modern}.
     \item \textbf{Energy eigenfunctions:} The eigenfunctions of a chosen reference Hamiltonian (such as the QHO)form an orthonormal set that diagonalizes the Hamiltonian operator. For example, the static or unperturbed system Hamiltonian can be used to construct a basis set of energy eigenfunctions, and using these states makes unperturbed time-evolution trivial, as the time-evolution operator is diagonal in this basis. This is a common approach in quantum chemistry and condensed matter physics. The downside is that for many-body systems, the number of states required to accurately express the wavefunction grow exponentially, and computing the eigenstates of the Hamiltonian becomes intractable \cite{helgaker2013molecular, szabo1996modern}.
 \end{itemize}
 
-We focus on the Sinc-DVR basis \cite{colbert1992novel} for the analysis done in our thesis work, due to its simple structure and wide applicability to problems with smooth, localized potentials. The Sinc-DVR basis functions forms an orthonormal set on a uniformly spaced spatial grid, and exhibit Kronecker delta-like behaviour at the grid points, making them especially suited for representing localized states and sparse Hamiltonians, such as our bounded Morse double well system. For some analyses we will also use the energy eigenfunctions of the unperturbed system Hamiltonian, mostly to validate and compare results obtained in the Sinc-DVR basis.
+We focus on the Sinc-DVR basis \cite{colbert1992novel} for the analysis done in our thesis work, due to its simple structure and wide applicability to problems with smooth, localized potentials. The Sinc-DVR basis functions form an orthonormal set on a uniformly spaced spatial grid, and exhibit Kronecker delta-like behaviour at the grid points, making them especially suited for representing localized states and sparse Hamiltonians, such as our bounded Morse double well system. For some analyses we will also use the energy eigenfunctions of the unperturbed system Hamiltonian, mostly to validate and compare results obtained in the Sinc-DVR basis.
 \\ The Sinc-DVR basis funtions are mathematically defined as
 \begin{align}
     \phi_n(x) = \frac{1}{\sqrt{N}} \text{sinc}\left(\frac{x - x_n}{\Delta x}\right),\label{eq:sinc_dvr}
@@ -129,9 +128,9 @@ We focus on the Sinc-DVR basis \cite{colbert1992novel} for the analysis done in 
 where $N$ is the number of grid points, $x_n$ is the $n$th grid point, and $\Delta x$ is the grid spacing. The Sinc function is defined as
 \begin{align*}
     \text{sinc}(x) = \begin{cases}
-        \frac{\sin(\pi x)}{\pi x} & \text{if } x \neq 0 \\
-        1 & \text{if } x = 0
-    \end{cases}.
+        \frac{\sin(\pi x)}{\pi x} & \text{if } x \neq 0, \\
+        1 & \text{if } x = 0.
+    \end{cases}
 \end{align*}
 These basis functions are orthonormal, meaning that they satisfy the following relation:
 \begin{align*}
@@ -150,15 +149,15 @@ and the Sinc-DVR function defined on a uniform grid as in \eqref{eq:sinc_dvr}. T
 Using the known analytical solution of these integrals with the sinc function properties (see for example Appendix A in \cite{colbert1992novel}), these matrix elements take the form 
 \begin{align}
     T_{nm} = \begin{cases}
-        -\frac{\pi^2}{6\Delta x^2} & \text{if } n = m \\
-        \frac{(-1)^(n-m)}{\Delta x^2(n - m)^2} & \text{if } n \neq m.
+        -\frac{\pi^2}{6\Delta x^2} & \text{if } n = m, \\
+        \frac{(-1)^{(n-m)}}{\Delta x^2(n - m)^2} & \text{if } n \neq m.
     \end{cases}\label{eq:sinc_dvr_kinetic}
 \end{align}
 This provides us with a simple matrix expression for the Sinc-DVR Hamiltonian that is easily implemented numerically, as it removes the need for numerical differentiation. 
 
 To compute the Coulomb interaction matrix elements in the Sinc-DVR basis, we start from the general form of the Coulomb interaction between two particles with the shielded Coulomb potential:
 \begin{align*}
-    V_{nmpq} = \int \int \frac{\phi_n(x_1)\phi_m(x_2)}{\frac{\alpha}{|x_1 - x_2| + a^2}}\phi_p^*(x_1)\phi_q^*(x_2) dx_1 dx_2,
+    V_{nmpq} = \int \int \phi_n(x_1)\phi_m(x_2){\frac{\alpha}{|x_1 - x_2| + a^2}}\phi_p^*(x_1)\phi_q^*(x_2) dx_1 dx_2,
 \end{align*}
 where $\alpha$ is the Coulomb constant, and $a$ is a small shielding parameter to avoid singularities when the particles are very close together. In the DVR basis, this integral becomes a double sum over the grid points with weight $\Delta x^2$. Since each basis function is peaked at a grid point, it satisfies the delta-like property
 \begin{align*}
@@ -168,7 +167,7 @@ Inserting this property into the 4-index two-body integral all four indices coll
 \begin{align*}
     V_{nmpq} = \sum_{i,j}\frac{1}{\Delta x^2}\delta_{n,i}\delta_{m,j}\frac{\alpha}{|x_i - x_j| + a^2}\delta_{p,i}\delta_{q,j} \Delta x^2.
 \end{align*}
-where we have assumed a uniform grid spacing $\Delta x_1 = \Delta x_2 = \Delta x$. This gives us the final $N\times N$ interaction matrix
+where we have assumed a uniform grid spacing $\Delta x_1 = \Delta x_2 = \Delta x$. This gives us the final $N\times N$ interaction matrix elements
 \begin{equation}
     V_{nm} = \frac{\alpha}{|x_n - x_m| + a^2}\label{eq:sinc_dvr_coulomb}
 \end{equation}

@@ -3,11 +3,12 @@
 \section{System initialization and setup}\label{sec:system_init}
 In this section, we outline the steps taken to initialize the system Hamiltonian on the Sinc-DVR basis grid.
 
-To numerically implement the Morse potential as presented in Section \ref{sec:morse_potential}, and obtain separate single-particle hamiltonians for each subsystem, we need to 'split' the potential into two parts, one for each subsystem. This is easily done by dividing the spatial grid, $x\in(-L, L)$, on which the double-well potential is defined on, into two halves, left $x_L\in(-L, 0)$ and right $x_R\in(0, L)$. and computing the kinetic and potential integrals for each subsystem separately, using the analytical expressions in \eqref{eq:sinc_dvr_kinetic} and \eqref{eq:double_well_morse_potential} respectively. This gives the single-particle Hamiltonians 
+To numerically implement the Morse potential as presented in Section \ref{sec:morse_potential}, and obtain separate single-particle hamiltonians for each subsystem, we need to 'split' the potential into two parts, one for each subsystem. This is easily done by dividing the spatial grid, $x\in[-L, L]$, on which the double-well potential is defined on, into two halves, left $x_L\in[-L, 0]$ and right $x_R\in[0, L]$. and computing the kinetic and potential integrals for each subsystem separately, using the analytical expressions in \eqref{eq:sinc_dvr_kinetic} and \eqref{eq:double_well_morse_potential} respectively. This gives the single-particle Hamiltonians 
 \begin{align*}
     H_L &= T + V_L \\
     H_R &= T + V_R,
 \end{align*}
+with $T$ being the kinetic energy operator, and $V_L$ and $V_R$ being the potential energy operators for the left and right subsystems respectively. 
 
 Similarly, to compute the interaction integrals, we want to compute the Coulomb interaction between the two subsystems. This is done by computing the shielded Coulomb interaction for each grid point in subsystem $L$ with each grid point in subsystem $R$. The following snippet illustrates how this is done in practice:
 \begin{lstlisting}[language=Python]
@@ -23,13 +24,13 @@ for i in range(N_L):
         r = np.sqrt((x_L - x_R)**2 + a**2)
         coulomb[i, j] = alpha / r
 \end{lstlisting}
-This code computes the shielded Coulomb interaction between each grid point in the left subsystem and each grid point in the right subsystem, resulting in a $N_L \times N_R$ interaction matrix. The parameter $a$ is the shielding length that ensures the interaction is well-defined even when particles are very close together, avoiding singularities.
+This code computes the shielded Coulomb interaction between each grid point in the left subsystem and each grid point in the right subsystem, resulting in an $N_L \times N_R$ interaction matrix. The parameter $a$ is the shielding length that ensures the interaction is well-defined even when particles are very close together, avoiding singularities.
 
-This interaction matrix is then added to the single-particle hamiltonians, constructing the full two-particle Hamiltonian matrix as
+This interaction matrix is then added to the single-particle Hamiltonians, constructing the full two-particle Hamiltonian matrix as
 \begin{equation}
     H = H_L \otimes \mathbb{I}_R + \mathbb{I}_L \otimes H_R + V_{LR},\label{eq:two_particle_hamiltonian}
 \end{equation}
-where $H_L$ and $H_R$ are the single-particle Hamiltonians for the left and right subsystems, respectively, and $V_{LR}$ is the interaction matrix between the two subsystems. This Hamiltonian is built upon our assumption that the two subsystems are separable, and the particles strictly localized in their respective wells.
+where $H_L$ and $H_R$ are the single-particle Hamiltonians for the left and right subsystems, respectively, and $V_{LR}$ is the interaction matrix between the two subsystems. This Hamiltonian is built upon our assumption that the two subsystems are separable, meaning that the particles are strictly localized in their respective wells.
 
 With this in hand, we can construct the reduced Hartree basis through the Hartree method (Section \ref{sec:Hartree_method}).
 

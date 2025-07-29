@@ -7,7 +7,7 @@ Having now introduced the theoretical background and numerical strategies used t
 The simulation pipeline in this thesis follows a logical sequence, designed around the Morse double-well potential system for two interacting particles. The key stages of the implementation are as follows:
 \begin{enumerate}
     \item \textbf{Construct the Morse double-well potential} \\
-    The first step is to implement a flexible and numerically stable representation of the Morse potential \eqref with a double-well structure. This involves defining the functional form of the potential, setting physical parameters (well separation, depth, width), and discretizing the spatial domain to represent the wavefunctions and operators. 
+    The first step is to implement a flexible and numerically stable representation of the Morse potential \eqref{eq:double_well_morse_potential} with a double-well structure. This involves defining the functional form of the potential, setting physical parameters (well separation, depth, width), and discretizing the spatial domain to represent the wavefunctions and operators. 
 
     \item \textbf{Setup of the Hamiltonian matrix} \\
     In our Sinc-DVR basis, we compute all one-body (kinetic + potential) and two-body (Coulomb) integrals to set up our full two-particle Hamiltonian matrix (Section \ref{sec:sinc_dvr_validation}). We then construct the Hartree matrices for the two subsystems, which are used to diagonalize the system and project the full Hamiltonian onto a smaller subspace that accurately captures the essential dynamics of our system.
@@ -36,7 +36,7 @@ The overall workflow — from system definition to result analysis — closely m
     \item Extract and analyze physical quantities of interest.
 \end{enumerate}
 
-This structure provides a coherent and extensible framework for studying both fundamental quantum dynamics and more complex qubit-like behavior in the coupled double-well Morse potential system.
+This structure provides a coherent and extendable framework for studying both fundamental quantum dynamics and more complex qubit-like behavior in the coupled double-well Morse potential system.
 
 \begin{figure}[h!]
     \centering

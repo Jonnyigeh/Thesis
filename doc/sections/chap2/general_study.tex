@@ -11,9 +11,9 @@ In this secton we will outline the methods used to study our system in general. 
 \end{itemize}
 %% Distinguishability of the particles
 \subsection{Assessing validity of product state approximation}\label{sec:distinguishability} %% Should we instead call 'Asses validity of product state approximation'?
-One of the core featues of our qubit design is that each electron is tightly confined in its own well of the Morse double-well potential, so that their spatial wavefunctions have minimal overlap. Strictly speaking, electrons are indistinguishable fermions and their total two-particle wavefunction must be anti-symmetric under particle exchange to adhere to the Pauli exclusion principle \cite{berera2021quantum, griffiths2018introduction}. However, when the spatial overlap between localized orbitals $\braket{\phi_L|\phi_R}$  becomes vanishingly small (for large separations $d$ and/or very deep, narrow wells), the exchange integral tends to zero. In that limit, the anti-symmetric wavefunction
+One of the core features of our qubit design is that each electron is tightly confined in its own well of the Morse double-well potential, so that their spatial wavefunctions have minimal overlap. Strictly speaking, electrons are indistinguishable fermions and their total two-particle wavefunction must be anti-symmetric under particle exchange to adhere to the Pauli exclusion principle \cite{berera2021quantum, griffiths2018introduction}. However, when the spatial overlap between localized orbitals $\braket{\phi_L|\phi_R}$  becomes vanishingly small (for large separations $d$ and/or very deep, narrow wells), the exchange integral tends to zero. In that limit, the anti-symmetric wavefunction
 \begin{align*}
-    \Psi_A(x_1, x_2) = \frac{1}{\sqrt{2}} \bigg[\phi_L(x_1)\phi_R(x_2) - \phi_L(x_2)\phi_R(x_1)\bigg]
+    \Psi_A(x_1, x_2) = \frac{1}{\sqrt{2}} \bigg[\phi_L(x_1)\phi_R(x_2) - \phi_L(x_2)\phi_R(x_1)\bigg],
 \end{align*}
 reduces to a simple product state $\phi_L(x_1)\phi_R(x_2)$, and the electrons behave as effectively \emph{distinguishable} particles. 
 
@@ -37,12 +37,12 @@ which should tend to zero as the inter-well separation $d$ increases, indicating
 
 %% Optimization of the potential parameters
 \subsection{Parameter optimization}\label{sec:optimization_procedure}
-As our goal is to realize single-qubit gates and the two-qubit iSwap gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we have discussed in earlier sections the two configurations we are looking for are:
+As our goal is to realize single-qubit gates and the two-qubit SWAP-gate, we need to find suitable configurations of our potential where we achieve the desired degeneracy in energy levels and also our desired level of entanglement between the two particles. As we have discussed in earlier sections the two configurations we are looking for are:
 \begin{itemize}
     \item \textbf{Config I}: The measurement configuration, where all energy levels are distinct and there are minimal correlations between the two subsystems (particles). This corresponds to keeping all Von Neumann entropies in our system as close to zero as possible. With this, we know that our two-body energy eigenstates will have a product state structure, and maximal overlap with the Hartree product states $\ket{00}, \ket{01}, \ket{10}, \ket{11}$.
     \item \textbf{Config II}: The entangled configuration, where we have a degeneracy in the energy levels of our system. This degeneracy will give rise to an avoided crossings in the energy spectrum for the first and second energy eigenstates. In this configuration, the 1st and 2nd energy eigenstates are maximally entangled, while the other energy eigenstates are kept as pure as possible (product states). This corresponds to an entropy equal to 1 for $\ket{\phi_1}$ and $\ket{\phi_2}$, and 0 for $\ket{\phi_0}$ and $\ket{\phi_4}$. 
 \end{itemize}
-As an initial search, we make a grid search over the potential parameters, mostly to map out the landscape of the potential and find regions where we expect to find the desired configuations. Our grid search will be over the parameters presented in table \ref{tab:parameter_search}, 
+As an initial search, we make a grid search over the potential parameters, mostly to map out the landscape of the parameterspace and find regions where we expect to find the desired configurations. Our grid search will be over the parameters presented in table \ref{tab:parameter_search}, 
 \begin{table}[h!]
     \centering
     \begin{tabular}{|c|c|c|}
@@ -57,7 +57,7 @@ As an initial search, we make a grid search over the potential parameters, mostl
     \caption{The parameters we will search over in our grid search}
     \label{tab:parameter_search}
 \end{table}
-with the constraint that $2D / \sqrt{k} < l$ where $l$ are the number of basis functions allocated to each well, as we have discussed earlier. This is to ensure that the basis functions are well within the potential well, and that we do not have any basis functions that are cut off by the potential. This then becomes a \emph{constrained optimization problem}. To perform our optimization we will use the \texttt{scipy.optimize} package, and the \texttt{minimize} function. We will use the \texttt{COBYQA} method, which is a derivative-free optimization method that is well suited for constrained optimization problems. This method is built on the concept of \emph{sequential quadratic programming}, that solves constrained, non-linear problems. For more details on the method, see \cite{razh_cobyqa}. The optimization procedure is outlined in \ref{alg:parameter_optimization}:
+with the constraint that $2D / \sqrt{k} < l$ where $l$ are the number of basis functions allocated to each well, as we have discussed earlier. This is to ensure that the basis functions are within the potential well, and that we do not have any basis functions that are cut off by the potential. This then becomes a \emph{constrained optimization problem}. To perform our optimization we will use the \texttt{scipy.optimize} package, and the \texttt{minimize} function. We will use the \texttt{COBYQA} method, which is a derivative-free optimization method that is well suited for constrained optimization problems. This method is built on the concept of \emph{sequential quadratic programming}, that solves constrained, non-linear problems. For more details on the method, see \cite{razh_cobyqa}. The optimization procedure is outlined in \ref{alg:parameter_optimization}:
 \begin{algorithm}[h!]
 \caption{Parameter optimization procedure: High-level overview}
 \textbf{Input: }{Parameter ranges \(\mathcal{R}\), \(\epsilon_{\text{coarse}}\), \(\epsilon_{\text{fine}}\)}
@@ -98,14 +98,14 @@ and we can identify this as the \emph{accumulated phase} of the rotated time-evo
         0 & 0 & 0 & e^{-iE_{11}t}
     \end{pmatrix}.
 \end{align*}
-The energy eigenstates themselves are not unique, because we are free to apply arbitrary single-qubit phase rotations to shift their individual phases without affecting populations (as they are cancelled in any innerproduct). By performing local Z-rotations on qubit A and B, we can absorb the phases on the first three states ($\ket{00}$, $\ket{10}$, $\ket{01}$) into $\ket{11}$. In other words, invoking a single global phase, we use single-qubit rotations on each qubit to collect the relative phases onto $\ket{11}$. After the rotations, the condition
+The energy eigenstates themselves are not unique, because we are free to apply arbitrary single-qubit phase rotations to shift their individual phases without affecting populations (as they are cancelled in any innerproduct). By performing local $Z$-rotations \eqref{eq:z_rotation_gate} on qubit A and B, we can absorb the phases on the first three states ($\ket{00}$, $\ket{10}$, $\ket{01}$) into $\ket{11}$ \cite{nielsen2010quantum}. In other words, invoking a single global phase, we use single-qubit rotations on each qubit to collect the relative phases onto $\ket{11}$. After the rotations, the condition
 \begin{align*}
     E_{11} = E_{10} + E_{01} - E_{00}
 \end{align*}
-means that the excitation energy from the 0th state $\ket{00}\to\ket{11}$ equals the sum of excitations $\ket{00}\to\ket{10}$ and $\ket{00}\to\ket{01}$, which aids in ensuring phase stability in our iSwap-like two-qubit gate operation \cite{ku2020suppression}. 
+means that the excitation energy from the 0th state $\ket{00}\to\ket{11}$ equals the sum of excitations $\ket{00}\to\ket{10}$ and $\ket{00}\to\ket{01}$, which aids in ensuring phase stability in our SWAP-like two-qubit gate operation \cite{ku2020suppression}. 
 \\
 
-Configuration I, as we have mentioned, should have all energy levels distinct. This introduces penalties in our objective function corresponding to the overlap between energy eigenvalues and we want to Von Neumann entropies to be as close to zero as possible. In python we realise this in the following way
+Configuration I, as we have mentioned, should have all energy levels distinct. This introduces penalties in our objective function corresponding to the overlap between energy eigenvalues and we want the Von Neumann entropies to be as close to zero as possible. We realise this in the following way
 \begin{lstlisting}[language=Python]
 target_entropy = np.zeros(4)
 detuning_penalty = -min(0.5, np.abs(e_L - e_R))
@@ -128,14 +128,15 @@ J_deltaE_penalty = - np.abs(J_12 / deltaE_12 + 1e-12)
 
 %%% DVR basis
 \subsection{Sinc-Discrete Variable Representation}\label{sec:sinc_dvr_validation}
-We implement the Sinc-Discrete Variable Representation (Sinc-DVR) basis in Python to discretize our one-dimensional quantum problem on a uniform grid. Sinc-DVRs delta-like basis functions render the kinetic operator analytic and collapse multi-dimensional integrals (Section \ref{sec:basis_set}), making it both efficient and accurate for smooth, localized potentials. Its effectiveness depends however, on the ability to accurately represent the relevant physical states of the system at hand.  \\
+We implement the Sinc Discrete Variable Representation (Sinc-DVR) basis in Python to discretize our one-dimensional quantum problem on a uniform grid. The delta-like basis functions of the Sinc-DVR allow an analytic representation of the kinetic operator and simplify multi-dimensional integrals (Section \ref{sec:basis_set}), making this method efficient and accurate for smooth, localized potentials. However, its effectiveness relies on the accurate representation of the physically relevant states of the specific system under study. \\
 
-As a test case, we consider a single particle trapped in a Morse potential\eqref{eq:morse_potential}, which models an anharmonic bounded oscillator potential with well-known analytical and numerical solutions. A brief reminder, the Morse potential is given by
+As a test case, we consider a single particle trapped in a Morse potential \eqref{eq:morse_potential}, which models an anharmonic bounded oscillator potential with well-known analytical and numerical solutions. As a brief reminder, the Morse potential is given by
 \begin{align*}
     V(x) = D \left(1 - e^{-a(x - x_0)}\right)^2,
 \end{align*}
-where $D$ is the depth of the potential well, $a$ is the width of the potential, and $x_0$ is the equilibrium position of the potential. This potential is well-suited for benchmarking, as it is smooth and localised, and also well represents the more complex double-well potential we are later interested in. The exact eigenstates and eigenvalues are computed analytically, using the expressions in \eqref{eq:morse_eigenstates} and \eqref{eq:morse_eigenvalues}, which are derived from the Schrödinger equation for the Morse potential
-The procedure to compute, and compare, the energy spectrum and eigenstates of the Morse potential using the Sinc-DVR basis and the exact energy eigenstates is as follows:
+where $D$ is the depth of the potential well, $a$ is the width of the potential, and $x_0$ is the equilibrium position of the potential. This potential is well-suited for benchmarking, as it is smooth and localised, and also well represents the more complex double-well potential we are later interested in. The exact eigenstates and eigenvalues are computed analytically, using the expressions in \eqref{eq:morse_eigenstates} and \eqref{eq:morse_energy_levels}, which are derived from the Schrödinger equation for the Morse potential.
+
+The procedure to compute and compare the energy spectrum and eigenstates of the Morse potential using the Sinc-DVR basis and the exact energy eigenstates is as follows:
 \begin{itemize}
     \item Set up the potential using a set of parameters $D$, $a$, and $x_0$.
     \item Construct the Sinc-DVR basis functions $\phi_n(x)$ over a uniform grid of points $x_i$.
@@ -171,7 +172,6 @@ def compute_eigenenergies(c, D, l):
     return E_n
 
 def morse_potential(x, D, a, x0):
-    
     return D * (1 - np.exp(-a * (x - x0)))**2 - D
 
 V_matrix = np.diag(morse_potential(x, D, a, x0))
@@ -189,7 +189,7 @@ E_dvr, psi_dvr = np.linalg.eigh(H_dvr)
 E_exact = compute_eigenenergies(c, D, N)
 psi_exact = morse_function(x, np.arange(N), lmbda, 0, c)
 \end{lstlisting}
-To then actually assess the performance of the Sinc-DVRs ability to reproduce the energy eigenvalues, we compute the absolute deviance
+To assess the performance of the Sinc-DVRs ability to reproduce the energy eigenvalues, we compute the absolute deviance
 \begin{align*}
     \Delta E_n = |E_n^{\text{DVR}} - E_n^{\text{exact}}|,
 \end{align*}
