@@ -9,6 +9,9 @@ The program is built upon the potential functions and quantum dot functions loca
 
 The two major scripts that perform the optimization and time-evolution of the Morse double-well system introduced in the thesis are found at src/sinc_optimization.py and src/sinc_time_evolution.py, with running examples in the if_name blocks. It should be intuitive to testrun the scripts after reading chapter 3 in the thesis. Intermediate results throughout the thesis have been achieved with the supplementary scripts also found in the same folder. We believe the file-names should clearly indicate what they do for the educated reader (after reading the thesis).
 
+The src/data folder contains _some_ of the data used throughout, but due to GitHub storage restriction not all data is available. It can be easily produced by the user after installing the code framework.
+
+
 ### Prerequisites
 
 - Python 3.x
